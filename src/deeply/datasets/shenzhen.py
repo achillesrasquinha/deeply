@@ -1,3 +1,6 @@
+import os.path as osp
+
+import tensorflow as tf
 from tensorflow_datasets.core import (
     Version,
     GeneratorBasedBuilder,
@@ -5,14 +8,24 @@ from tensorflow_datasets.core import (
 )
 from tensorflow_datasets.core.features import (
     FeaturesDict,
-    Image
+    Image as ImageF,
+    Text,
+    Tensor,
+    # ClassLabel,
 )
+from PIL import Image
 
-_DATASET_URL = "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip"
-_DATASET_HOMEPAGE = """
+from deeply.util.string import strip, safe_decode
+from deeply.util.system import makedirs
+
+_DATASET_URL         = "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip"
+_DATASET_HOMEPAGE    = "https://lhncbc.nlm.nih.gov/LHC-publications/pubs/TuberculosisChestXrayImageDataSets.html"
+_DATASET_DESCRIPTION = """
 
 """
+_DATASET_CITATION    = """
 
+"""
 
 class Shezhen(GeneratorBasedBuilder):
     """
@@ -26,14 +39,64 @@ class Shezhen(GeneratorBasedBuilder):
 
     def _info(self):
         return DatasetInfo(
-            builder  = self,
-            features = FeaturesDict({
-                
-            })
+            builder     = self,
+            description = _DATASET_DESCRIPTION,
+            features    = FeaturesDict({
+                "image": ImageF(),
+                #  "mask": ImageF(),
+                #   "sex": Text(),
+                #   "age": Text(),
+                # "label": Text(),
+            }),
+            homepage    = _DATASET_HOMEPAGE,
+            citation    = _DATASET_CITATION
         )
 
     def _split_generators(self, dl_manager):
         path_extracted = dl_manager.download_and_extract(_DATASET_URL)
-
+        # return {
+        #     "train": self._generate_examples(path = path_extracted / "MontgomerySet")
+        # }
+        
     def _generate_examples(self, path):
-        pass
+        # path_images = path / "CXR_png"
+        # path_data   = path / "ClinicalReadings"
+        # path_masks  = path / "ManualMask"
+        # path_masks_merged = path_masks / "merged"
+
+        # makedirs(path_masks_merged, exist_ok = True)
+
+        # for path_img in path_images.glob("*.png"):
+        #     fname  = osp.basename(osp.normpath(path_img))
+        #     prefix = str(fname).split(".png")[0]
+
+        #     path_txt  = osp.join(path_data, "%s.txt" % prefix)
+
+        #     path_mask = osp.join(path_masks_merged, "%s.png" % prefix)
+
+        #     if not osp.exists(path_mask):
+        #         path_mask_left  = osp.join(path_masks, "leftMask",  "%s.png" % prefix)
+        #         path_mask_right = osp.join(path_masks, "rightMask", "%s.png" % prefix)
+
+        #         img_mask_left   = img_mask_open(path_mask_left)
+        #         img_mask_right  = img_mask_open(path_mask_right)
+
+        #         img_mask = Image.blend(img_mask_left, img_mask_right, 0.5)
+        #         img_mask = img_mask.convert("1")
+        #         img_mask.save(path_mask)
+
+        #     with open(path_txt) as f:
+        #         content = f.readlines()
+        #         lines   = list(filter(bool, [strip(line) for line in content]))
+
+        #         sex     = safe_decode(strip(lines[0].split(": ")[1]))
+        #         age     = safe_decode(strip(lines[1].split(": ")[1].split("Y")[0]))
+        #         label   = safe_decode(strip(lines[2]))
+
+        #         yield path_img.name, {
+        #             "image": path_img,
+        #              "mask": path_mask,
+        #               "sex": sex,
+        #               "age": age,
+        #             "label": label
+        #         }

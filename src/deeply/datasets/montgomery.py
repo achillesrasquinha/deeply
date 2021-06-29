@@ -59,14 +59,14 @@ class Montgomery(GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         path_extracted = dl_manager.download_and_extract(_DATASET_URL)
         return {
-            "train": self._generate_examples(path = path_extracted / "MontgomerySet")
+            "train": self._generate_examples(path = osp.join(path_extracted, "MontgomerySet"))
         }
         
     def _generate_examples(self, path):
-        path_images = path / "CXR_png"
-        path_data   = path / "ClinicalReadings"
-        path_masks  = path / "ManualMask"
-        path_masks_merged = path_masks / "merged"
+        path_images = osp.join(path, "CXR_png")
+        path_data   = osp.join(path, "ClinicalReadings")
+        path_masks  = osp.join(path, "ManualMask")
+        path_masks_merged = osp.join(path_masks, "merged")
 
         makedirs(path_masks_merged, exist_ok = True)
 
