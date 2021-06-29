@@ -59,6 +59,7 @@ class Shezhen(GeneratorBasedBuilder):
         # }
         
     def _generate_examples(self, path):
+        pass
         # path_images = path / "CXR_png"
         # path_data   = path / "ClinicalReadings"
         # path_masks  = path / "ManualMask"
