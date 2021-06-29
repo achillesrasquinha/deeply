@@ -14,6 +14,9 @@ class BaseModel(Model):
     #     self.super = super(BaseModel, self)
     #     self.super.__init__(*args, **kwargs)
 
+    def compile(self, *args, **kwargs):
+        return self._super.compile(*args, **kwargs)
+
     def plot(self, *args, **kwargs):
         return plot_model(self, *args, **kwargs)
 
