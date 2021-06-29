@@ -1,0 +1,9 @@
+sphinx
+recommonmark
+ipykernel
+nbsphinx
+matplotlib
+pydot
+pydotplus
+pydot-ng
+graphviz
