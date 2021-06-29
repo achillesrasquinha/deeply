@@ -28,11 +28,3 @@ Release v\ |version|. (:ref:`Installation <installation>`)
     :target: https://paypal.me/achillesrasquinha
 
 A Deep Learning library
-
-The API Guide
--------------
-
-.. toctree::
-   :maxdepth: 2
-
-   notebooks/unet
