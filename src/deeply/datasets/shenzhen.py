@@ -1,4 +1,4 @@
-import os.path as osp
+import os, os.path as osp
 import glob
 
 import tensorflow as tf
@@ -73,9 +73,9 @@ class Shenzhen(GeneratorBasedBuilder):
         path_images = osp.join(images_path, "CXR_png")
         path_data   = osp.join(images_path, "Clinicagit lReadings")
 
-        for path_img in glob.glob(path_images, "*.png"):
-            fname  = osp.basename(osp.normpath(path_img))
-            prefix = str(fname).split(".png")[0]
+        for path_img in os.listdir(path_images):
+            prefix   = str(path_img).split(".png")[0]
+            path_img = osp.join(path_images, path_img)
 
             path_mask = osp.join(masks_path, "%s.png" % prefix)
 
