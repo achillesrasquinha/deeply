@@ -170,14 +170,13 @@ ifneq (${VERBOSE},true)
 endif
 
 	
-	$(call log,INFO,Building Notebooks)
-	@find $(DOCSDIR)/source/notebooks -type f -name '*.ipynb' -not -path "*/.ipynb_checkpoints/*" | \
-		xargs $(JUPYTER) nbconvert \
-			--to notebook 		\
-			--inplace 			\
-			--execute 			\
-			--ExecutePreprocessor.timeout=300
-	
+	# $(call log,INFO,Building Notebooks)
+	# @find $(DOCSDIR)/source/notebooks -type f -name '*.ipynb' -not -path "*/.ipynb_checkpoints/*" | \
+	# 	xargs $(JUPYTER) nbconvert \
+	# 		--to notebook 		\
+	# 		--inplace 			\
+	# 		--execute 			\
+	# 		--ExecutePreprocessor.timeout=300
 
 	$(call log,INFO,Building Documentation)
 	$(SPHINXBUILD) $(DOCSDIR)/source $(DOCSDIR)/build $(OUT)
