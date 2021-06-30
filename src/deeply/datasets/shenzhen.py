@@ -80,7 +80,7 @@ class Shenzhen(GeneratorBasedBuilder):
             prefix   = str(path_img).split(".png")[0]
             path_img = osp.join(path_images, path_img)
 
-            path_mask = osp.join(masks_path, "%s.png" % prefix)
+            path_mask = osp.join(masks_path, "%s_mask.png" % prefix)
             print(path_mask)
 
             if not osp.exists(path_mask):
