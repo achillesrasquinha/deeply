@@ -68,7 +68,7 @@ class Shenzhen(GeneratorBasedBuilder):
         return {
             "train": self._generate_examples(
                 images_path = osp.join(path_extracted_images, "ChinaSet_AllFiles"),
-                masks_path  = osp.join(path_extracted_masks,  "masks")
+                masks_path  = osp.join(path_extracted_masks,  "mask")
             )
         }
         
