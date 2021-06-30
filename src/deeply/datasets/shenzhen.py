@@ -55,9 +55,9 @@ class Shenzhen(GeneratorBasedBuilder):
             features    = FeaturesDict({
                 "image": ImageF(),
                  "mask": ImageF(),
-                  "sex": Text(),
-                  "age": Text(),
-                "label": Text(),
+                #   "sex": Text(),
+                #   "age": Text(),
+                # "label": Text(),
             }),
             homepage    = _DATASET_HOMEPAGE,
             citation    = _DATASET_CITATION
@@ -93,18 +93,18 @@ class Shenzhen(GeneratorBasedBuilder):
                 content = f.readlines()
                 lines   = list(filter(bool, [strip(line) for line in content]))
 
-                sex, age  = list(map(lambda x: safe_decode(strip(x)), lines[0].split(" ")))
-                age       = "".join((i for i in age if i.isdigit()))
+                # sex       = list(map(lambda x: safe_decode(strip(x)), lines[0].split(" ")))
+                # age       = "".join((i for i in age if i.isdigit()))
 
-                if len(lines) != 1:
-                    label = safe_decode(strip(lines[1]))
-                else:
-                    label = ""
+                # if len(lines) != 1:
+                #     label = safe_decode(strip(lines[1]))
+                # else:
+                #     label = ""
 
                 yield prefix, {
                     "image": path_img,
                      "mask": path_mask,
-                      "sex": sex,
-                      "age": age,
-                    "label": label
+                    #   "sex": sex,
+                    #   "age": age,
+                    # "label": label
                 }
