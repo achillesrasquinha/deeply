@@ -94,7 +94,7 @@ class Shenzhen(GeneratorBasedBuilder):
                 lines   = list(filter(bool, [strip(line) for line in content]))
 
                 sex, age  = list(map(lambda x: safe_decode(strip(x)), lines[0].split(" ")))
-                age       = int("".join((i for i in age if i.isdigit())))
+                age       = "".join((i for i in age if i.isdigit()))
 
                 if len(lines) != 1:
                     label = safe_decode(strip(lines[1]))
