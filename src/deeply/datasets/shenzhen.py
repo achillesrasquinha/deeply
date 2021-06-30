@@ -81,7 +81,6 @@ class Shenzhen(GeneratorBasedBuilder):
             path_img = osp.join(path_images, path_img)
 
             path_mask = osp.join(masks_path, "%s_mask.png" % prefix)
-            print(path_mask)
 
             if not osp.exists(path_mask):
                 logger.warn("Unable to find mask for image: %s" % prefix)
