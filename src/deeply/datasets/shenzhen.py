@@ -50,10 +50,10 @@ class Shenzhen(GeneratorBasedBuilder):
             description = _DATASET_DESCRIPTION,
             features    = FeaturesDict({
                 "image": ImageF(),
-                #  "mask": ImageF(),
-                #   "sex": Text(),
-                #   "age": Text(),
-                # "label": Text(),
+                 "mask": ImageF(),
+                  "sex": Text(),
+                  "age": Text(),
+                "label": Text(),
             }),
             homepage    = _DATASET_HOMEPAGE,
             citation    = _DATASET_CITATION
@@ -63,7 +63,7 @@ class Shenzhen(GeneratorBasedBuilder):
         path_extracted_images, path_extracted_masks = dl_manager.download_and_extract(_DATASET_URLS)
         return {
             "train": self._generate_examples(
-                path_images = osp.join(path_extracted_images, "ChinaSet_AllFiles"),
+                images_path = osp.join(path_extracted_images, "ChinaSet_AllFiles"),
                 masks_path  = osp.join(path_extracted_masks,  "masks")
             )
         }
@@ -72,42 +72,28 @@ class Shenzhen(GeneratorBasedBuilder):
         path_images = osp.join(images_path, "CXR_png")
         path_data   = osp.join(images_path, "ClinicalReadings")
 
-        # path_masks  = osp.join(masks_path, "ManualMask")
-        # path_masks_merged = osp.join(path_masks, "merged")
-
-        # makedirs(path_masks_merged, exist_ok = True)
-
         for path_img in path_images.glob("*.png"):
             fname  = osp.basename(osp.normpath(path_img))
             prefix = str(fname).split(".png")[0]
 
-            path_txt = osp.join(path_data, "%s.txt" % prefix)
+            path_mask = osp.join(masks_path, "%s.png" % prefix)
 
-            # path_mask = osp.join(path_masks_merged, "%s.png" % prefix)
-
-            # if not osp.exists(path_mask):
-                # path_mask_left  = osp.join(path_masks, "leftMask",  "%s.png" % prefix)
-                # path_mask_right = osp.join(path_masks, "rightMask", "%s.png" % prefix)
-
-                # img_mask_left   = img_mask_open(path_mask_left)
-                # img_mask_right  = img_mask_open(path_mask_right)
-
-                # img_mask = Image.blend(img_mask_left, img_mask_right, 0.5)
-                # img_mask = img_mask.convert("1")
-                # img_mask.save(path_mask)
+            path_txt  = osp.join(path_data, "%s.txt" % prefix)
 
             with open(path_txt) as f:
                 content = f.readlines()
                 lines   = list(filter(bool, [strip(line) for line in content]))
 
-                # sex     = safe_decode(strip(lines[0].split(": ")[1]))
-                # age     = safe_decode(strip(lines[1].split(": ")[1].split("Y")[0]))
-                # label   = safe_decode(strip(lines[2]))
+                sex, age  = list(map(lambda x: safe_decode(strip(x)), lines[0].split(" ")))
+                age       = int("".join((i for i in age if i.isdigit())))
+
+                if len(lines) != 1:
+                    label = safe_decode(strip(lines[1]))
 
                 yield path_img.name, {
                     "image": path_img,
-                    #  "mask": path_mask,
-                    #   "sex": sex,
-                    #   "age": age,
-                    # "label": label
+                     "mask": path_mask if osp.exists(path_mask) else None,
+                      "sex": sex,
+                      "age": age,
+                    "label": label if label else None
                 }
