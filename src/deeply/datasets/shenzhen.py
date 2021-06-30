@@ -91,7 +91,7 @@ class Shenzhen(GeneratorBasedBuilder):
                 if len(lines) != 1:
                     label = safe_decode(strip(lines[1]))
 
-                yield path_img.name, {
+                yield prefix, {
                     "image": path_img,
                      "mask": path_mask if osp.exists(path_mask) else None,
                       "sex": sex,
