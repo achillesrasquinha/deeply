@@ -1,4 +1,5 @@
 import os.path as osp
+import glob
 
 import tensorflow as tf
 from tensorflow_datasets.core import (
@@ -70,9 +71,9 @@ class Shenzhen(GeneratorBasedBuilder):
         
     def _generate_examples(self, images_path, masks_path):
         path_images = osp.join(images_path, "CXR_png")
-        path_data   = osp.join(images_path, "ClinicalReadings")
+        path_data   = osp.join(images_path, "Clinicagit lReadings")
 
-        for path_img in path_images.glob("*.png"):
+        for path_img in glob.glob(path_images, "*.png"):
             fname  = osp.basename(osp.normpath(path_img))
             prefix = str(fname).split(".png")[0]
 
