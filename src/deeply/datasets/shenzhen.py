@@ -18,6 +18,9 @@ from PIL import Image
 
 from deeply.util.string import strip, safe_decode
 from deeply.util.system import makedirs
+from deeply.log import get_logger
+
+logger = get_logger()
 
 _DATASET_URLS        = [
     "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip",
@@ -79,6 +82,10 @@ class Shenzhen(GeneratorBasedBuilder):
 
             path_mask = osp.join(masks_path, "%s.png" % prefix)
 
+            if not osp.exists(path_mask):
+                logger.warn("Unable to find mask for image: %s" % prefix)
+                continue
+
             path_txt  = osp.join(path_data, "%s.txt" % prefix)
 
             with open(path_txt) as f:
@@ -90,11 +97,13 @@ class Shenzhen(GeneratorBasedBuilder):
 
                 if len(lines) != 1:
                     label = safe_decode(strip(lines[1]))
+                else:
+                    label = ""
 
                 yield prefix, {
                     "image": path_img,
-                     "mask": path_mask if osp.exists(path_mask) else None,
+                     "mask": path_mask,
                       "sex": sex,
                       "age": age,
-                    "label": label if label else None
+                    "label": label
                 }
