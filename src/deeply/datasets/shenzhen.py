@@ -71,7 +71,7 @@ class Shenzhen(GeneratorBasedBuilder):
         
     def _generate_examples(self, images_path, masks_path):
         path_images = osp.join(images_path, "CXR_png")
-        path_data   = osp.join(images_path, "Clinicagit lReadings")
+        path_data   = osp.join(images_path, "ClinicalReadings")
 
         for path_img in os.listdir(path_images):
             prefix   = str(path_img).split(".png")[0]
