@@ -1,4 +1,5 @@
-import os, os.path as osp
+import os.path as osp
+import glob
 
 import tensorflow as tf
 from tensorflow_datasets.core import (
@@ -24,7 +25,6 @@ _DATASET_DESCRIPTION = """
 
 """
 _DATASET_CITATION    = """
-
 """
 
 def img_mask_open(img):
@@ -71,9 +71,9 @@ class Montgomery(GeneratorBasedBuilder):
 
         makedirs(path_masks_merged, exist_ok = True)
 
-        for path_img in os.listdir(path_images):
-            prefix   = str(path_img).split(".png")[0]
-            path_img = osp.join(path_images, path_img)
+        for path_img in glob.glob(osp.join(path_images, "*.png")):
+            fname  = osp.basename(osp.normpath(path_img))
+            prefix = str(fname).split(".png")[0]
 
             path_txt  = osp.join(path_data, "%s.txt" % prefix)
 
@@ -98,7 +98,7 @@ class Montgomery(GeneratorBasedBuilder):
                 age     = safe_decode(strip(lines[1].split(": ")[1].split("Y")[0]))
                 label   = safe_decode(strip(lines[2]))
 
-                yield prefix, {
+                yield path_img.name, {
                     "image": path_img,
                      "mask": path_mask,
                       "sex": sex,
