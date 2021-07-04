@@ -1,7 +1,7 @@
 <div align="center">
   <img src=".github/assets/logo.png" height="128">
   <h1>
-      deeply
+    deeply
   </h1>
   <h4>A Deep Learning library</h4>
 </div>
@@ -39,7 +39,7 @@
 #### Installation
 
 ```shell
-$ pip install deeply
+$ pip install git+https://github.com/achillesrasquinha/deeply.git
 ```
 
 #### Usage
@@ -49,7 +49,6 @@ $ pip install deeply
 ```python
 >>> import deeply
 ```
-
 
 ##### Command-Line Interface
 
@@ -67,7 +66,6 @@ Commands:
   help     Show this message and exit.
   version  Show version and exit.
 ```
-
 
 #### License
 

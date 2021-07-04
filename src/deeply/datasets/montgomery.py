@@ -1,4 +1,4 @@
-import os.path as osp
+import os, os.path as osp
 
 import tensorflow as tf
 from tensorflow_datasets.core import (
@@ -24,6 +24,7 @@ _DATASET_DESCRIPTION = """
 
 """
 _DATASET_CITATION    = """
+
 """
 
 def img_mask_open(img):
@@ -70,9 +71,9 @@ class Montgomery(GeneratorBasedBuilder):
 
         makedirs(path_masks_merged, exist_ok = True)
 
-        for path_img in path_images.glob("*.png"):
-            fname  = osp.basename(osp.normpath(path_img))
-            prefix = str(fname).split(".png")[0]
+        for path_img in os.listdir(path_images):
+            prefix   = str(path_img).split(".png")[0]
+            path_img = osp.join(path_images, path_img)
 
             path_txt  = osp.join(path_data, "%s.txt" % prefix)
 

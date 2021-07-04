@@ -10,7 +10,7 @@ from tensorflow_datasets.core.features import (
     Image
 )
 
-_DATASET_URL = "https://github.com/v7labs/covid-19-xray-dataset/blob/master/annotations/all-images.zip?raw=true"
+_DATASET_URL         = "https://github.com/v7labs/covid-19-xray-dataset/blob/master/annotations/all-images.zip?raw=true"
 _DATASET_DESCRIPTION = """
 
 """
