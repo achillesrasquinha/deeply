@@ -98,7 +98,7 @@ class Montgomery(GeneratorBasedBuilder):
                 age     = safe_decode(strip(lines[1].split(": ")[1].split("Y")[0]))
                 label   = safe_decode(strip(lines[2]))
 
-                yield path_img.name, {
+                yield prefix, {
                     "image": path_img,
                      "mask": path_mask,
                       "sex": sex,
