@@ -19,7 +19,6 @@ from   tqdm import tqdm
 
 from deeply.datasets.montgomery import merge_images
 from deeply.util.system import makedirs
-from deeply._compat     import iterkeys, iteritems
 from deeply.log         import get_logger
 
 logger = get_logger()

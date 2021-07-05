@@ -27,7 +27,7 @@ _DATASET_HOMEPAGE    = "https://lhncbc.nlm.nih.gov/LHC-publications/pubs/Tubercu
 _DATASET_DESCRIPTION = """
 The MC set has been collected in collaboration with the Department of Health and Human Services, Montgomery County, Maryland, USA. The set contains 138 frontal chest X-rays from Montgomery County’s Tuberculosis screening program, of which 80 are normal cases and 58 are cases with manifestations of TB. The X-rays were captured with a Eureka stationary X-ray machine (CR), and are provided in Portable Network Graphics (PNG) format as 12-bit gray level images. They can also be made available in DICOM format upon request. The size of the X-rays is either 4,020×4,892 or 4,892×4,020 pixels.
 """
-_DATASET_CITATION    = """
+_DATASET_CITATION    = """\
 @article{jaeger_two_2014,
 	title       = {Two public chest {X}-ray datasets for computer-aided screening of pulmonary diseases},
 	volume      = {4},
@@ -107,6 +107,7 @@ class Montgomery(GeneratorBasedBuilder):
                   "age": Tensor(shape = (), dtype = tf.uint8),
                 "label": Text(),
             }),
+            supervised_keys = ("image", "mask"),
             homepage    = _DATASET_HOMEPAGE,
             citation    = _DATASET_CITATION
         )
