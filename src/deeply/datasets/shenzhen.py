@@ -13,7 +13,6 @@ from tensorflow_datasets.core.features import (
     Tensor,
     Text
 )
-
 from deeply.datasets.montgomery import (
     _DATASET_CITATION,
     _str_to_int,
@@ -49,7 +48,7 @@ class Shenzhen(GeneratorBasedBuilder):
                 "image": ImageF(),
                  "mask": ImageF(),
                 #   "sex": Text(),
-                  "age": Tensor(shape = (), dtype = tf.uint8),
+                #   "age": Tensor(shape = (), dtype = tf.uint8),
                 "label": Text(),
             }),
             supervised_keys = ("image", "mask"),
@@ -89,7 +88,7 @@ class Shenzhen(GeneratorBasedBuilder):
                 lines   = sanitize_lines(content)
                 
                 # sex       = list(map(lambda x: safe_decode(strip(x)), lines[0].split(" ")))
-                age       = _str_to_int(safe_decode(strip(lines[0].split(" ")[1])))
+                # age       = _str_to_int(safe_decode(strip(lines[0].split(" ")[1])))
 
                 if len(lines) != 1:
                     label = safe_decode(strip(lines[1]))
@@ -100,6 +99,6 @@ class Shenzhen(GeneratorBasedBuilder):
                     "image": path_img,
                      "mask": path_mask,
                     #   "sex": sex,
-                      "age": age,
+                    #   "age": age,
                     "label": label
                 }
