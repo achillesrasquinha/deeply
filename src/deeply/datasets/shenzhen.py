@@ -16,6 +16,7 @@ from tensorflow_datasets.core.features import (
 )
 from PIL import Image
 
+from deeply.datasets.montgomery import _DATASET_CITATION
 from deeply.util.string import strip, safe_decode
 from deeply.util.system import makedirs
 from deeply.log import get_logger
@@ -28,9 +29,7 @@ _DATASET_URLS        = [
 ]
 _DATASET_HOMEPAGE    = "https://lhncbc.nlm.nih.gov/LHC-publications/pubs/TuberculosisChestXrayImageDataSets.html"
 _DATASET_DESCRIPTION = """
-
-"""
-_DATASET_CITATION    = """
+The Shenzhen dataset was collected in collaboration with Shenzhen No.3 People’s Hospital, Guangdong Medical College, Shenzhen, China. The chest X-rays are from outpatient clinics and were captured as part of the daily hospital routine within a 1-month period, mostly in September 2012, using a Philips DR Digital Diagnost system. The set contains 662 frontal chest X-rays, of which 326 are normal cases and 336 are cases with manifestations of TB, including pediatric X-rays (AP). The X-rays are provided in PNG format. Their size can vary but is approximately 3K × 3K pixels.
 """
 
 def img_mask_open(img):

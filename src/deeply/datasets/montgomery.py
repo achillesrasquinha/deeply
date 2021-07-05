@@ -70,6 +70,22 @@ def _str_to_int(o):
     
     return int(stripped)
 
+def merge_images(*args, **kwargs):
+    assert len(args) >= 2
+
+    arr = imageio.imread(args[0])
+
+    for path in args:
+        a   = imageio.imread(path)
+        arr = np.add(arr, a)
+
+    output = kwargs.get("output")
+
+    if output:
+        img = Image.fromarray(arr)
+        img.save(output)
+
+    return arr
 class Montgomery(GeneratorBasedBuilder):
     """
     Montgomery County Chest X-ray Dataset.
@@ -121,12 +137,7 @@ class Montgomery(GeneratorBasedBuilder):
                 path_mask_left  = osp.join(path_masks, "leftMask",  "%s.png" % prefix)
                 path_mask_right = osp.join(path_masks, "rightMask", "%s.png" % prefix)
 
-                img_mask_left   = imageio.imread(path_mask_left)
-                img_mask_right  = imageio.imread(path_mask_right)
-
-                img_mask = np.add(img_mask_left, img_mask_right)
-                img = Image.fromarray(img_mask)
-                img.save(path_mask)
+                merge_images(path_mask_left, path_mask_right, output = path_mask)
                 
             with open(path_txt) as f:
                 content = f.readlines()
