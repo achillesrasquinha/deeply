@@ -23,9 +23,7 @@ from deeply.log import get_logger
 
 logger = get_logger()
 
-_DATASET_URLS        = [
-    "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip"
-]
+_DATASET_URL         = "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip"
 _DATASET_KAGGLE      = "yoctoman/shcxr-lung-mask"
 _DATASET_HOMEPAGE    = "https://lhncbc.nlm.nih.gov/LHC-publications/pubs/TuberculosisChestXrayImageDataSets.html"
 _DATASET_DESCRIPTION = """
@@ -64,7 +62,7 @@ class Shenzhen(GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        path_extracted_images = dl_manager.download_and_extract(_DATASET_URLS)
+        path_extracted_images = dl_manager.download_and_extract(_DATASET_URL)
         path_masks = dl_manager.download_kaggle_data(_DATASET_KAGGLE)
 
         return {
