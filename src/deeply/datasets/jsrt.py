@@ -15,7 +15,7 @@ import imageio
 from   tqdm import tqdm
 
 from deeply.datasets.montgomery import merge_images
-from deeply.util.system import makedirs
+from deeply.util.system import makedirs, read, write
 from deeply.log         import get_logger
 
 logger = get_logger()
@@ -102,6 +102,7 @@ class JSRT(GeneratorBasedBuilder):
     def _generate_examples(self, images_path, masks_path):
         path_images_png   = osp.join(images_path, "png")
         path_masks_merged = osp.join(masks_path, "merged")
+        path_masks_list   = osp.join(masks_path, "masks.txt")
 
         makedirs(path_images_png,   exist_ok = True)
         makedirs(path_masks_merged, exist_ok = True)
@@ -120,14 +121,16 @@ class JSRT(GeneratorBasedBuilder):
             fname  = osp.basename(osp.normpath(path_img))
             prefix = str(fname).split(".IMG")[0]
 
-            with open(path_img, mode = "rb") as f:
-                arr = np.fromfile(f, dtype = np.dtype(">u2"))
-                arr = arr.reshape(_IMAGE_SIZE)
-                path_img = osp.join(path_images_png, "%s.png" % prefix)
+            path_img_png = osp.join(path_images_png, "%s.png" % prefix)
 
-                imageio.imwrite(path_img, arr)
+            if not osp.exists(path_img_png):
+                with open(path_img, mode = "rb") as f:
+                    arr = np.fromfile(f, dtype = np.dtype(">u2"))
+                    arr = arr.reshape(_IMAGE_SIZE)
 
-            path_mask = osp.join(path_masks_merged, "%s.png" % prefix)
+                    imageio.imwrite(path_img_png, arr)
+
+            path_mask  = osp.join(path_masks_merged, "%s.png" % prefix)
 
             if not osp.exists(path_mask):
                 folder = get_mask_folder(prefix)
@@ -142,6 +145,6 @@ class JSRT(GeneratorBasedBuilder):
                 merge_images(path_mask_left, path_mask_right, output = path_mask)
 
             yield prefix, {
-                "image": path_img,
+                "image": path_img_png,
                  "mask": path_mask
             }
