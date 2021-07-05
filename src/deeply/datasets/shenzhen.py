@@ -24,9 +24,9 @@ from deeply.log import get_logger
 logger = get_logger()
 
 _DATASET_URLS        = [
-    "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip",
-    # "https://drive.google.com/uc?export=download&id=1KN3y7g3OiMsEy-JHqJcIqgpNla7PxnAt"
+    "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip"
 ]
+_DATASET_KAGGLE      = "yoctoman/shcxr-lung-mask"
 _DATASET_HOMEPAGE    = "https://lhncbc.nlm.nih.gov/LHC-publications/pubs/TuberculosisChestXrayImageDataSets.html"
 _DATASET_DESCRIPTION = """
 The Shenzhen dataset was collected in collaboration with Shenzhen No.3 People’s Hospital, Guangdong Medical College, Shenzhen, China. The chest X-rays are from outpatient clinics and were captured as part of the daily hospital routine within a 1-month period, mostly in September 2012, using a Philips DR Digital Diagnost system. The set contains 662 frontal chest X-rays, of which 326 are normal cases and 336 are cases with manifestations of TB, including pediatric X-rays (AP). The X-rays are provided in PNG format. Their size can vary but is approximately 3K × 3K pixels.
@@ -39,7 +39,7 @@ def img_mask_open(img):
 
 class Shenzhen(GeneratorBasedBuilder):
     """
-    Shenzhen Dataset.
+    Shenzhen Hospital Chest X-ray Dataset.
     """
 
     VERSION = Version("1.0.0")
@@ -58,18 +58,23 @@ class Shenzhen(GeneratorBasedBuilder):
                 #   "age": Text(),
                 # "label": Text(),
             }),
+            supervised_keys = ("image", "mask"),
             homepage    = _DATASET_HOMEPAGE,
             citation    = _DATASET_CITATION
         )
 
     def _split_generators(self, dl_manager):
-        path_extracted_images, path_extracted_masks = dl_manager.download_and_extract(_DATASET_URLS)
-        return {
-            "train": self._generate_examples(
-                images_path = osp.join(path_extracted_images, "ChinaSet_AllFiles"),
-                masks_path  = osp.join(path_extracted_masks,  "mask")
-            )
-        }
+        path_extracted_images = dl_manager.download_and_extract(_DATASET_URLS)
+        path_masks = dl_manager.download_kaggle_data(_DATASET_KAGGLE)
+
+        print(path_masks)
+
+        # return {
+        #     "data": self._generate_examples(
+        #         images_path = osp.join(path_extracted_images, "ChinaSet_AllFiles"),
+        #         masks_path  = osp.join(path_extracted_masks,  "mask")
+        #     )
+        # }
         
     def _generate_examples(self, images_path, masks_path):
         path_images = osp.join(images_path, "CXR_png")
@@ -85,7 +90,7 @@ class Shenzhen(GeneratorBasedBuilder):
                 logger.warn("Unable to find mask for image: %s" % prefix)
                 continue
 
-            path_txt  = osp.join(path_data, "%s.txt" % prefix)
+            path_txt = osp.join(path_data, "%s.txt" % prefix)
 
             with open(path_txt) as f:
                 content = f.readlines()
