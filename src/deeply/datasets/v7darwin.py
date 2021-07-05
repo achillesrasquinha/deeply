@@ -3,6 +3,8 @@ import json
 from   glob import glob
 
 import requests as req
+from   PIL import Image, ImageDraw
+import imageio
 
 import numpy as np
 import tensorflow as tf
@@ -38,7 +40,20 @@ _DATASET_CITATION    = """
 
 def build_mask(data, path_image, path_mask):
     img_arr  = imageio.imread(path_image)
-    mask_arr = np.zeros(shape = img_arr.shape, dtype = np.uint8) 
+
+    shape = img_arr.shape
+    h, w  = shape[0], shape[1]
+    mask  = Image.new("L", (w, h), 0)
+
+    drawer = ImageDraw.Draw(mask)
+
+    for annotation in data["annotations"]:
+        if "polygon" in annotation:
+            polygon = annotation["polygon"]["path"]
+            polygon = [(p["x"], p["y"]) for p in polygon]
+            drawer.polygon(polygon, outline = 0, fill = 255)
+
+    mask.save(path_mask)
 
 class V7Darwin(GeneratorBasedBuilder):
     """
@@ -56,10 +71,7 @@ class V7Darwin(GeneratorBasedBuilder):
             description = _DATASET_DESCRIPTION,
             features    = FeaturesDict({
                 "image": ImageF(),
-                 "mask": ImageF(),
-                #   "sex": Text(),
-                #   "age": Tensor(shape = (), dtype = tf.uint8),
-                # "label": Text(),
+                 "mask": ImageF()
             }),
             supervised_keys = ("image", "mask"),
             homepage    = _DATASET_HOMEPAGE,
@@ -71,7 +83,7 @@ class V7Darwin(GeneratorBasedBuilder):
 
         return {
             "data": self._generate_examples(
-                path = osp.join(path_extracted, "all-images")
+                path = path_extracted
             )
         }
         
@@ -79,8 +91,8 @@ class V7Darwin(GeneratorBasedBuilder):
         path_images = osp.join(path, "images")
         path_masks  = osp.join(path, "masks")
 
-        makedirs(path_images, exists_ok = True)
-        makedirs(path_masks,  exists_ok = True)
+        makedirs(path_images, exist_ok = True)
+        makedirs(path_masks,  exist_ok = True)
 
         for path_json in tqdm(glob(osp.join(path, "*.json"))):
             with open(path_json) as f:
@@ -94,7 +106,7 @@ class V7Darwin(GeneratorBasedBuilder):
                 response = req.get(data["image"]["url"], stream = True)
                 response.raise_for_status()
 
-                with open(path_image) as f:
+                with open(path_image, "wb") as f:
                     for content in response.iter_content(chunk_size = 1024):
                         f.write(content)
 
@@ -102,34 +114,8 @@ class V7Darwin(GeneratorBasedBuilder):
 
             if not osp.exists(path_mask):
                 build_mask(data, path_image, path_mask)
-            
-            # fname  = osp.basename(osp.normpath(path_img))
-            # prefix = str(fname).split(".png")[0]
 
-            # path_mask = osp.join(masks_path, "%s_mask.png" % prefix)
-
-            # if not osp.exists(path_mask):
-            #     logger.warn("Unable to find mask for image: %s" % prefix)
-            #     continue
-
-            # path_txt = osp.join(path_data, "%s.txt" % prefix)
-
-            # with open(path_txt) as f:
-            #     content = f.readlines()
-            #     lines   = sanitize_lines(content)
-                
-            #     # sex       = list(map(lambda x: safe_decode(strip(x)), lines[0].split(" ")))
-            #     # age       = _str_to_int(safe_decode(strip(lines[0].split(" ")[1])))
-
-            #     if len(lines) != 1:
-            #         label = safe_decode(strip(lines[1]))
-            #     else:
-            #         label = ""
-
-            #     yield prefix, {
-            #         "image": path_img,
-            #          "mask": path_mask,
-            #         #   "sex": sex,
-            #         #   "age": age,
-            #         "label": label
-            #     }
+            yield path_image, {
+                "image": path_image,
+                 "mask": path_mask
+            }

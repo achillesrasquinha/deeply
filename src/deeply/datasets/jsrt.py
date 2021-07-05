@@ -102,7 +102,6 @@ class JSRT(GeneratorBasedBuilder):
     def _generate_examples(self, images_path, masks_path):
         path_images_png   = osp.join(images_path, "png")
         path_masks_merged = osp.join(masks_path, "merged")
-        path_masks_list   = osp.join(masks_path, "masks.txt")
 
         makedirs(path_images_png,   exist_ok = True)
         makedirs(path_masks_merged, exist_ok = True)
