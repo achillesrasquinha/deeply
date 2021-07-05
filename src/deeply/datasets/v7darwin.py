@@ -34,6 +34,7 @@ class V7Darwin(GeneratorBasedBuilder):
             description = _DATASET_DESCRIPTION,
             features    = FeaturesDict({
                 "image": Image(),
+                 "mask": Image(),
             }),
             homepage    = "",
             citation    = _DATASET_CITATION

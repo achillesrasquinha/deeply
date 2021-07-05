@@ -103,7 +103,7 @@ class JSRT(GeneratorBasedBuilder):
         path_images_png   = osp.join(images_path, "png")
         path_masks_merged = osp.join(masks_path, "merged")
 
-        makedirs(path_images_png, exist_ok = True)
+        makedirs(path_images_png,   exist_ok = True)
         makedirs(path_masks_merged, exist_ok = True)
 
         def get_mask_folder(prefix):

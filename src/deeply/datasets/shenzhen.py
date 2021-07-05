@@ -1,5 +1,5 @@
 import os, os.path as osp
-import glob
+from glob import glob
 
 import tensorflow as tf
 from tensorflow_datasets.core import (
@@ -67,22 +67,20 @@ class Shenzhen(GeneratorBasedBuilder):
         path_extracted_images = dl_manager.download_and_extract(_DATASET_URLS)
         path_masks = dl_manager.download_kaggle_data(_DATASET_KAGGLE)
 
-        print(path_masks)
-
-        # return {
-        #     "data": self._generate_examples(
-        #         images_path = osp.join(path_extracted_images, "ChinaSet_AllFiles"),
-        #         masks_path  = osp.join(path_extracted_masks,  "mask")
-        #     )
-        # }
+        return {
+            "data": self._generate_examples(
+                images_path = osp.join(path_extracted_images, "ChinaSet_AllFiles"),
+                masks_path  = osp.join(path_masks, "mask")
+            )
+        }
         
     def _generate_examples(self, images_path, masks_path):
         path_images = osp.join(images_path, "CXR_png")
         path_data   = osp.join(images_path, "ClinicalReadings")
 
-        for path_img in os.listdir(path_images):
-            prefix   = str(path_img).split(".png")[0]
-            path_img = osp.join(path_images, path_img)
+        for path_img in glob(osp.join(path_images, "*.png")):
+            fname  = osp.basename(osp.normpath(path_img))
+            prefix = str(fname).split(".png")[0]
 
             path_mask = osp.join(masks_path, "%s_mask.png" % prefix)
 
@@ -95,6 +93,8 @@ class Shenzhen(GeneratorBasedBuilder):
             with open(path_txt) as f:
                 content = f.readlines()
                 lines   = list(filter(bool, [strip(line) for line in content]))
+
+                print(lines)
 
                 # sex       = list(map(lambda x: safe_decode(strip(x)), lines[0].split(" ")))
                 # age       = "".join((i for i in age if i.isdigit()))
