@@ -1,8 +1,6 @@
-from genericpath import exists
 import os.path as osp
 from glob import glob
 
-import tensorflow as tf
 from tensorflow_datasets.core import (
     Version,
     GeneratorBasedBuilder,
