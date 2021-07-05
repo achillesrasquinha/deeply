@@ -14,7 +14,6 @@ from tensorflow_datasets.core.features import (
 )
 import numpy as np
 import imageio
-from   skimage import img_as_ubyte
 from   tqdm import tqdm
 
 from deeply.datasets.montgomery import merge_images
