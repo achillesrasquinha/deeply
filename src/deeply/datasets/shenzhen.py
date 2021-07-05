@@ -25,7 +25,7 @@ logger = get_logger()
 
 _DATASET_URLS        = [
     "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip",
-    "https://drive.google.com/uc?export=download&id=1KN3y7g3OiMsEy-JHqJcIqgpNla7PxnAt"
+    # "https://drive.google.com/uc?export=download&id=1KN3y7g3OiMsEy-JHqJcIqgpNla7PxnAt"
 ]
 _DATASET_HOMEPAGE    = "https://lhncbc.nlm.nih.gov/LHC-publications/pubs/TuberculosisChestXrayImageDataSets.html"
 _DATASET_DESCRIPTION = """

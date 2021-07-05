@@ -126,7 +126,7 @@ class JSRT(GeneratorBasedBuilder):
             with open(path_img, mode = "rb") as f:
                 arr = np.fromfile(f, dtype = np.dtype(">u2"))
                 arr = arr.reshape(_IMAGE_SIZE)
-                imageio.imwrite(osp.join(path_images_png, "%s.png" % prefix), img_as_ubyte(arr))
+                imageio.imwrite(osp.join(path_images_png, "%s.png" % prefix), arr)
 
             path_mask = osp.join(path_masks_merged, "%s.png" % prefix)
 
