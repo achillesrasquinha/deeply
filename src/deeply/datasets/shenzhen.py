@@ -10,15 +10,16 @@ from tensorflow_datasets.core import (
 from tensorflow_datasets.core.features import (
     FeaturesDict,
     Image as ImageF,
-    Text,
     Tensor,
-    # ClassLabel,
+    Text
 )
-from PIL import Image
 
-from deeply.datasets.montgomery import _DATASET_CITATION
+from deeply.datasets.montgomery import (
+    _DATASET_CITATION,
+    _str_to_int,
+    sanitize_lines
+)
 from deeply.util.string import strip, safe_decode
-from deeply.util.system import makedirs
 from deeply.log import get_logger
 
 logger = get_logger()
@@ -29,11 +30,6 @@ _DATASET_HOMEPAGE    = "https://lhncbc.nlm.nih.gov/LHC-publications/pubs/Tubercu
 _DATASET_DESCRIPTION = """
 The Shenzhen dataset was collected in collaboration with Shenzhen No.3 People’s Hospital, Guangdong Medical College, Shenzhen, China. The chest X-rays are from outpatient clinics and were captured as part of the daily hospital routine within a 1-month period, mostly in September 2012, using a Philips DR Digital Diagnost system. The set contains 662 frontal chest X-rays, of which 326 are normal cases and 336 are cases with manifestations of TB, including pediatric X-rays (AP). The X-rays are provided in PNG format. Their size can vary but is approximately 3K × 3K pixels.
 """
-
-def img_mask_open(img):
-    i = Image.open(img)
-    i = i.convert("L")
-    return i
 
 class Shenzhen(GeneratorBasedBuilder):
     """
@@ -53,8 +49,8 @@ class Shenzhen(GeneratorBasedBuilder):
                 "image": ImageF(),
                  "mask": ImageF(),
                 #   "sex": Text(),
-                #   "age": Text(),
-                # "label": Text(),
+                  "age": Tensor(shape = (), dtype = tf.uint8),
+                "label": Text(),
             }),
             supervised_keys = ("image", "mask"),
             homepage    = _DATASET_HOMEPAGE,
@@ -90,22 +86,20 @@ class Shenzhen(GeneratorBasedBuilder):
 
             with open(path_txt) as f:
                 content = f.readlines()
-                lines   = list(filter(bool, [strip(line) for line in content]))
-
-                print(lines)
-
+                lines   = sanitize_lines(content)
+                
                 # sex       = list(map(lambda x: safe_decode(strip(x)), lines[0].split(" ")))
-                # age       = "".join((i for i in age if i.isdigit()))
+                age       = _str_to_int(safe_decode(strip(lines[0].split(" ")[1])))
 
-                # if len(lines) != 1:
-                #     label = safe_decode(strip(lines[1]))
-                # else:
-                #     label = ""
+                if len(lines) != 1:
+                    label = safe_decode(strip(lines[1]))
+                else:
+                    label = ""
 
                 yield prefix, {
                     "image": path_img,
                      "mask": path_mask,
                     #   "sex": sex,
-                    #   "age": age,
-                    # "label": label
+                      "age": age,
+                    "label": label
                 }

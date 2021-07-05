@@ -64,6 +64,9 @@ def _sanitize_label(type_, label):
 
     return label
 
+def sanitize_lines(lines):
+    return list(filter(bool, [strip(line) for line in lines]))
+
 def _str_to_int(o):
     stripped = "".join((s for s in o if s.isdigit()))
     stripped = stripped.lstrip("0")
@@ -142,7 +145,7 @@ class Montgomery(GeneratorBasedBuilder):
                 
             with open(path_txt) as f:
                 content = f.readlines()
-                lines   = list(filter(bool, [strip(line) for line in content]))
+                lines   = sanitize_lines(content)
 
                 sex     = _sanitize_label("sex", safe_decode(strip(lines[0].split(": ")[1])))
                 age     = _str_to_int(safe_decode(strip(lines[1].split(": ")[1])))
