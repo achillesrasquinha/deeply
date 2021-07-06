@@ -129,7 +129,7 @@ class JSRT(GeneratorBasedBuilder):
 
                     imageio.imwrite(path_img_png, arr)
 
-            path_mask  = osp.join(path_masks_merged, "%s.png" % prefix)
+            path_mask = osp.join(path_masks_merged, "%s.png" % prefix)
 
             if not osp.exists(path_mask):
                 folder = get_mask_folder(prefix)

@@ -15,6 +15,7 @@ from tensorflow.keras.layers import (
     Concatenate,
     Add,
     Multiply,
+    BatchNormalization
 )
 
 from deeply.model.base import BaseModel
@@ -25,7 +26,7 @@ def kernel_initializer(shape, dtype = None):
     return tf.random.normal(shape, stddev = stddev, dtype = dtype)
 
 class ConvBlock(Layer):
-    def __init__(self, filters, kernel_size = 3, activation = "relu", width = 2, 
+    def __init__(self, filters, kernel_size = 3, activation = "relu", width = 2, batch_norm = True,
         dropout_rate = 0.2, kernel_initializer = kernel_initializer, padding = "valid", *args, **kwargs):
         self._super = super(ConvBlock, self)
         self._super.__init__(*args, **kwargs)
@@ -33,6 +34,7 @@ class ConvBlock(Layer):
         self.dropout_rate = dropout_rate
 
         self.convs        = [ ]
+        self.batch_norms  = [ ]
         self.activations  = [ ]
         self.dropouts     = [ ]
 
@@ -40,6 +42,11 @@ class ConvBlock(Layer):
             conv = Conv2D(filters = filters, kernel_size = kernel_size,
                 kernel_initializer = kernel_initializer, padding = padding)
             self.convs.append(conv)
+
+            # https://stackoverflow.com/a/40295999
+            if batch_norm:
+                bn = BatchNormalization()
+                self.batch_norms.append(bn)
 
             activation = Activation(activation = activation)
             self.activations.append(activation)
@@ -58,6 +65,10 @@ class ConvBlock(Layer):
 
         for i in range(self.width):
             x = self.convs[i](x)
+
+            if training and self.batch_norms:
+                x = self.batch_norms[i](x)
+
             x = self.activations[i](x)
 
             if training and self.dropouts:
@@ -118,6 +129,7 @@ def UNet(
     filter_growth_rate = 2,
     activation   = "relu",
     padding      = "valid",
+    batch_norm   = True,
     dropout_rate = 0.2,
     pool_size    = 2,
     mp_strides   = 2,
@@ -141,6 +153,7 @@ def UNet(
     :param init_filters: Number of filters in initial convolution.
     :param filter_growth_rate: Growth rate of filter over convolutions.
     :param activation: Activation function after each convolution.
+    :param batch_norm: Batch Normalization after each convolution.
     :param dropout_rate: Dropout rate after each convolution.
     :param pool_size: Size of max pooling layer.
     :param mp_strides: Size of strides of max pooling layer.
@@ -167,7 +180,7 @@ def UNet(
     filters = init_filters
     conv_block_args = dict(kernel_size = kernel_size,
         activation = activation, dropout_rate = dropout_rate, width = n_conv,
-        kernel_initializer = kernel_initializer, padding = padding)
+        kernel_initializer = kernel_initializer, padding = padding, batch_norm = batch_norm)
 
     contracting_layers = [ ]
 
@@ -227,12 +240,30 @@ def AttentionUNet(*args, **kwargs):
     >>> from deeply.model.unet import AttentionUNet
     >>> model = AttentionUNet()
     """
+    _attention_gate = kwargs.pop("attention_gate", attention_gate)
+
     unet = UNet(
         name = "attention-unet",
-        attention_gate = attention_gate
+        attention_gate = _attention_gate,
+        **kwargs
     )
 
     return unet
+
+def UnetPlusPlus(*args, **kwargs):
+    """
+    Constructs a U-Net++.
+
+    >>> from deeply.model.unet import UnetPlusPlus
+    >>> model = UnetPlusPlus()
+    """
+    # unet = UnetPlusPlus(
+    #     name = "unet++",
+    #     **kwargs
+    # )
+
+    # return unet
+    pass
 
 def generate_toy(x = 32, y = None, n_samples = 100,
     r_min_f = 1, r_max_f = 10, seg_min_f = 1, seg_max_f = 5):

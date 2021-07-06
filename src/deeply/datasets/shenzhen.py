@@ -61,7 +61,7 @@ class Shenzhen(GeneratorBasedBuilder):
         path_masks = dl_manager.download_kaggle_data(_DATASET_KAGGLE)
 
         return {
-            "data": self._generate_examples(
+            "train": self._generate_examples(
                 images_path = osp.join(path_extracted_images, "ChinaSet_AllFiles"),
                 masks_path  = osp.join(path_masks, "mask")
             )

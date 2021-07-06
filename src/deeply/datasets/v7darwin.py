@@ -6,8 +6,6 @@ import requests as req
 from   PIL import Image, ImageDraw
 import imageio
 
-import numpy as np
-import tensorflow as tf
 from tensorflow_datasets.core import (
     Version,
     GeneratorBasedBuilder,
@@ -15,17 +13,10 @@ from tensorflow_datasets.core import (
 )
 from tensorflow_datasets.core.features import (
     FeaturesDict,
-    Image as ImageF,
-    Tensor,
-    Text
+    Image as ImageF
 )
 from tqdm import tqdm
-from deeply.datasets.montgomery import (
-    _str_to_int,
-    sanitize_lines
-)
 from deeply.util.system import makedirs
-from deeply.util.string import strip, safe_decode
 from deeply.log import get_logger
 
 logger = get_logger()
@@ -93,6 +84,8 @@ class V7Darwin(GeneratorBasedBuilder):
 
         makedirs(path_images, exist_ok = True)
         makedirs(path_masks,  exist_ok = True)
+
+        logger.info("Processing images and masks.")
 
         for path_json in tqdm(glob(osp.join(path, "*.json"))):
             with open(path_json) as f:
