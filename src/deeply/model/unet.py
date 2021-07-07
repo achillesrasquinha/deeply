@@ -131,9 +131,10 @@ class UNetModel(BaseModel):
         
         filepath   = "%s-%s.hdf5" % (self.name or "model", get_timestamp_str())
         checkpoint = ModelCheckpoint(
-            filepath       = filepath,
-            monitor        = "loss",
-            save_best_only = True
+            filepath          = filepath,
+            monitor           = "loss",
+            save_best_only    = True,
+            save_weights_only = True
         )
 
         callbacks.append(checkpoint)
