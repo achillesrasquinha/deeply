@@ -121,9 +121,8 @@ class UNetModel(BaseModel):
         metrics             = kwargs.get("metrics", [])
         if kwargs["loss"] == "categorical_crossentropy" and not metrics:
             metrics.append("categorical_accuracy")
-
-        if dice_coefficient not in metrics:
-            metrics.append(dice_coefficient)
+            
+        metrics.append(dice_coefficient)
 
         kwargs["metrics"]   = metrics
 
