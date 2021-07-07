@@ -1,6 +1,7 @@
 import numpy as np
 
 import tensorflow as tf
+from tensorflow.data  import Dataset
 from tensorflow.keras import Input
 from tensorflow.keras.backend import int_shape
 from tensorflow.keras.layers import (
@@ -10,7 +11,6 @@ from tensorflow.keras.layers import (
     Activation,
     Cropping2D,
     Conv2DTranspose,
-    UpSampling2D,
     Dropout,
     Concatenate,
     Add,
@@ -18,7 +18,10 @@ from tensorflow.keras.layers import (
     BatchNormalization
 )
 
+import imgaug.augmenters as iaa
+
 from deeply.model.base import BaseModel
+from deeply.util.array import squash
 
 def kernel_initializer(shape, dtype = None):
     n = np.prod(shape[:3])
@@ -112,9 +115,19 @@ class UNetModel(BaseModel):
         kwargs["optimizer"] = kwargs.get("optimizer", "sgd")
         kwargs["loss"]      = kwargs.get("loss", "categorical_crossentropy")
 
+        metrics             = kwargs.get("metrics", [])
+        if kwargs["loss"] == "categorical_crossentropy" and not metrics:
+            metrics.append("categorical_accuracy")
+
+        kwargs["metrics"]   = metrics
+
         return self._super.compile(*args, **kwargs)
 
+    # def fit(self, *args, **kwargs):
+    #     return self._super.fit(*args, **kwargs)
+
     def plot(self, *args, **kwargs):
+        kwargs["show_shapes"] = kwargs.get("show_shapes", True)
         return self._super.plot(*args, **kwargs)
 
 def UNet(
@@ -129,7 +142,7 @@ def UNet(
     filter_growth_rate = 2,
     activation   = "relu",
     padding      = "valid",
-    batch_norm   = True,
+    batch_norm   = False,
     dropout_rate = 0.2,
     pool_size    = 2,
     mp_strides   = 2,
@@ -185,7 +198,7 @@ def UNet(
     contracting_layers = [ ]
 
     # contracting path
-    for depth in range(layer_depth):
+    for _ in range(layer_depth):
         m = ConvBlock(filters = filters, **conv_block_args)(m)
         contracting_layers.append(m)
         filters = filters * filter_growth_rate
@@ -250,38 +263,104 @@ def AttentionUNet(*args, **kwargs):
 
     return unet
 
-def UnetPlusPlus(*args, **kwargs):
+def UnetPP(*args, **kwargs):
     """
     Constructs a U-Net++.
 
-    >>> from deeply.model.unet import UnetPlusPlus
-    >>> model = UnetPlusPlus()
+    >>> from deeply.model.unet import UnetPP
+    >>> model = UnetPP()
     """
-    # unet = UnetPlusPlus(
-    #     name = "unet++",
-    #     **kwargs
-    # )
+    layer_depth = kwargs.get("layer_depth", 4)
+    unets = [ ]
 
-    # return unet
-    pass
+    for i in range(layer_depth):
+        unet = UNet(
+            name = "unet++-%s" % i,
+            layer_depth = i,
+            **kwargs
+        )
+        unets.append(unet)
 
-def generate_toy(x = 32, y = None, n_samples = 100,
+    unetpp = None
+
+    return unetpp
+
+def _center_crop(arr, shape):
+    # arr_shape = arr.shape
+
+    # diff_x = (arr_shape[0] - shape[0])
+    # diff_y = (arr_shape[1] - shape[1])
+
+    # assert diff_x >= 0
+    # assert diff_y >= 0
+
+    # if diff_x == 0 and diff_y == 0:
+    #     return arr
+
+    # off_lx  = diff_x // 2
+    # off_ly  = diff_y // 2
+    # off_rx  = diff_x - off_lx
+    # off_ry  = diff_y - off_ly
+
+    # cropped = arr[ off_lx : -off_ly, off_rx : -off_ry ]
+
+    # return cropped
+
+    augmentor = iaa.Sequential([
+        iaa.CenterCropToFixedSize(
+            width  = shape[0],
+            height = shape[1]
+        )
+    ])
+
+    from_, to = (0, 1, 2), (1, 0, 2)
+
+    arr = arr.numpy()
+    arr = np.moveaxis(arr, from_, to)
+    aug = augmentor(images = [arr])
+    aug = squash(aug)
+
+    aug = np.moveaxis(aug, to, from_)
+
+    return aug
+
+def _crop(shape):
+    def crop(x, y):
+        dtype = y.dtype
+        label = tf.py_function(_center_crop, [y, shape], dtype)
+        return x, label
+    return crop
+
+def _format_dataset(ds, mapper = None, target_shape = None, batch_size = 1, **kwargs):
+    if mapper:
+        ds = ds.map(mapper)
+
+    if target_shape:
+        ds = ds.map(_crop(target_shape))
+
+    return ds.batch(batch_size)
+class Trainer:
+    def fit(self, model, train, val = None, batch_size = 32, **kwargs):
+        target_shape = model.output_shape[1:]
+
+        mapper = kwargs.pop("mapper", None)
+
+        format_args = dict(target_shape = target_shape, mapper = mapper,
+            batch_size = batch_size)
+
+        train = _format_dataset(train, **format_args)
+        if val:
+            val = _format_dataset(val, **format_args)
+
+        return model.fit(train, validation_data = val, **kwargs)
+
+def _generate_samples(x = 200, y = None, channels = 1, n_samples = 100,
     r_min_f = 1, r_max_f = 10, seg_min_f = 1, seg_max_f = 5):
-    """
-    Create a toy dataset for U-Net Image Segmentation.
-
-    :param x: Width of image.
-    :param y: Height of image.
-    :param channels: Number of channels in image.
-    :param n_samples: Number of samples to generate.
-    """
     if not y:
         y = x
 
-    channels = 1
-
-    features, labels = np.zeros((n_samples, y, x, channels), dtype = np.uint8), \
-        np.zeros((n_samples, y, x), dtype = np.bool)
+    features, labels = np.empty((n_samples, y, x, channels)), \
+        np.empty((n_samples, y, x))
     
     size = min(x, y)
     compute_factor = lambda f: (f / 100) * size
@@ -293,9 +372,9 @@ def generate_toy(x = 32, y = None, n_samples = 100,
 
     for i in range(n_samples):
         feature = np.ones((y, x, channels))
-        n_segs  = np.random.randint(min_segs, max_segs)
-
         mask    = np.zeros((y, x), dtype = np.bool)
+
+        n_segs  = np.random.randint(min_segs, max_segs)
 
         for _ in range(n_segs):
             from_       = np.random.randint(0, x)
@@ -312,7 +391,27 @@ def generate_toy(x = 32, y = None, n_samples = 100,
             
             feature[circle] = color
 
+        # noise
+        feature += np.random.normal(size = feature.shape)
+        feature -= np.amin(feature)
+        feature /= np.amax(feature)
+
         features[i] = feature
         labels[i]   = mask
 
     return features, labels
+
+def generate_toy(splits = (.6, .2, .2), n_samples = 100, **kwargs):
+    """
+    Create a toy dataset for U-Net Image Segmentation.
+
+    :param x: Width of image.
+    :param y: Height of image.
+    :param channels: Number of channels in image.
+    :param n_samples: Number of samples to generate.
+    :param splits: Number of dataset splits.
+    """
+    return [
+        Dataset.from_tensor_slices(_generate_samples(n_samples = int(split * n_samples), **kwargs))
+            for split in splits
+    ]
