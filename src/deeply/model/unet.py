@@ -23,7 +23,7 @@ import imgaug.augmenters as iaa
 
 from deeply.model.base      import BaseModel
 from deeply.metrics         import dice_coefficient
-from deeply.util.array      import squash
+from deeply.util.array      import sequencify, squash
 from deeply.util.datetime   import get_timestamp_str
 
 def kernel_initializer(shape, dtype = None):
@@ -118,7 +118,7 @@ class UNetModel(BaseModel):
         kwargs["optimizer"] = kwargs.get("optimizer", "sgd")
         kwargs["loss"]      = kwargs.get("loss", "categorical_crossentropy")
 
-        metrics             = kwargs.get("metrics", [])
+        metrics             = sequencify(kwargs.get("metrics", []))
         if kwargs["loss"] == "categorical_crossentropy" and not metrics:
             metrics.append("categorical_accuracy")
             
@@ -126,7 +126,7 @@ class UNetModel(BaseModel):
 
         kwargs["metrics"]   = metrics
 
-        callbacks           = kwargs.get("callbacks", [])
+        callbacks           = sequencify(kwargs.get("callbacks", []))
         
         filepath   = "%s-%s.hdf5" % (self.name or "model", get_timestamp_str())
         checkpoint = ModelCheckpoint(
