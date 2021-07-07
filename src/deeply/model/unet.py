@@ -148,7 +148,7 @@ def UNet(
     activation   = "relu",
     padding      = "valid",
     batch_norm   = False, # recommendation, don't use batch norm and dropout at the same time.
-    dropout_rate = 0.2,
+    dropout_rate = 0,
     pool_size    = 2,
     mp_strides   = 2,
     up_conv_size = 2,
