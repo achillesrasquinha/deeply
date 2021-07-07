@@ -363,7 +363,7 @@ class Trainer:
 
         callbacks  = sequencify(kwargs.get("callbacks", []))
         
-        filepath   = "%s-%s.hdf5" % (self.name or "model", get_timestamp_str())
+        filepath   = "%s-%s.hdf5" % (model.name or "model", get_timestamp_str())
         checkpoint = ModelCheckpoint(
             filepath          = filepath,
             monitor           = "loss",
