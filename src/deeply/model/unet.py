@@ -227,8 +227,8 @@ def UNet(
     m = Conv2D(filters = n_classes, kernel_size = final_conv_size, padding = padding,
                 kernel_initializer = kernel_initializer)(m)
 
-    if batch_norm:
-        m = BatchNormalization()(m)
+    # if batch_norm:
+    #     m = BatchNormalization()(m)
 
     m = Activation(activation = activation)(m)
 
