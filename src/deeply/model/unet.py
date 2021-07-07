@@ -49,13 +49,12 @@ class ConvBlock(Layer):
                 kernel_initializer = kernel_initializer, padding = padding)
             self.convs.append(conv)
 
-            # https://stackoverflow.com/a/40295999
+            activation = Activation(activation = activation)
+            self.activations.append(activation)
+            
             if batch_norm:
                 bn = BatchNormalization()
                 self.batch_norms.append(bn)
-
-            activation = Activation(activation = activation)
-            self.activations.append(activation)
 
             # https://stats.stackexchange.com/a/317313
             if dropout_rate:
@@ -72,10 +71,10 @@ class ConvBlock(Layer):
         for i in range(self.width):
             x = self.convs[i](x)
 
+            x = self.activations[i](x)
+            
             if training and self.batch_norms:
                 x = self.batch_norms[i](x)
-
-            x = self.activations[i](x)
 
             if training and self.dropouts:
                 x = self.dropouts[i](x)
@@ -147,7 +146,7 @@ def UNet(
     filter_growth_rate = 2,
     activation   = "relu",
     padding      = "valid",
-    batch_norm   = False, # recommendation, don't use batch norm and dropout at the same time.
+    batch_norm   = True, # recommendation, don't use batch norm and dropout at the same time.
     dropout_rate = 0,
     pool_size    = 2,
     mp_strides   = 2,
@@ -227,10 +226,10 @@ def UNet(
     m = Conv2D(filters = n_classes, kernel_size = final_conv_size, padding = padding,
                 kernel_initializer = kernel_initializer)(m)
 
-    # if batch_norm:
-    #     m = BatchNormalization()(m)
-
     m = Activation(activation = activation)(m)
+    
+    if batch_norm:
+        m = BatchNormalization()(m)
 
     output_layer = Activation(activation = final_activation, name = "outputs")(m)
 
