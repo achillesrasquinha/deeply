@@ -6,8 +6,11 @@ def dice_coefficient(y_true, y_pred, smooth = 1):
 
     y_true    = K.cast(y_true, dtype)
 
-    axis      = (1, 2, 3)
-    intersect = K.sum(y_true * y_pred, axis = axis)
-    union     = K.sum(y_true, axis = axis) + K.sum(y_pred, axis = axis)
+    # axis      = (1, 2, 3)
+    y_true      = K.flatten(y_true)
+    y_pred      = K.flatten(y_pred)
 
-    return K.mean((2.0 * intersect + smooth) / (union + smooth), axis = 0)
+    intersect = K.sum(y_true * y_pred)
+    union     = K.sum(y_true) + K.sum(y_pred)
+
+    return (2.0 * intersect + smooth) / (union + smooth)
