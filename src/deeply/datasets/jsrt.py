@@ -143,6 +143,8 @@ class JSRT(GeneratorBasedBuilder):
 
                 merge_images(path_mask_left, path_mask_right, output = path_mask)
 
+            print(path_img_png, path_mask)
+
             yield prefix, {
                 "image": path_img_png,
                  "mask": path_mask
