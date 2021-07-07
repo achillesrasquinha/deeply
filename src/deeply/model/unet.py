@@ -17,11 +17,14 @@ from tensorflow.keras.layers import (
     Multiply,
     BatchNormalization
 )
+from tensorflow.keras.callbacks import ModelCheckpoint
 
 import imgaug.augmenters as iaa
 
-from deeply.model.base import BaseModel
-from deeply.util.array import squash
+from deeply.model.base      import BaseModel
+from deeply.metrics         import dice_coefficient
+from deeply.util.array      import squash
+from deeply.util.datetime   import get_timestamp_str
 
 def kernel_initializer(shape, dtype = None):
     n = np.prod(shape[:3])
@@ -119,7 +122,23 @@ class UNetModel(BaseModel):
         if kwargs["loss"] == "categorical_crossentropy" and not metrics:
             metrics.append("categorical_accuracy")
 
+        if dice_coefficient not in metrics:
+            metrics.append(dice_coefficient)
+
         kwargs["metrics"]   = metrics
+
+        callbacks           = kwargs.get("callbacks", [])
+        
+        filepath   = "%s-%s.hdf5" % (self.name or "model", get_timestamp_str())
+        checkpoint = ModelCheckpoint(
+            filepath       = filepath,
+            monitor        = "loss",
+            save_best_only = True
+        )
+
+        callbacks.append(checkpoint)
+
+        kwargs["callbacks"] = callbacks
 
         return self._super.compile(*args, **kwargs)
 
@@ -142,8 +161,8 @@ def UNet(
     filter_growth_rate = 2,
     activation   = "relu",
     padding      = "valid",
-    batch_norm   = False,
-    dropout_rate = 0.2,
+    batch_norm   = True, # recommendation, don't use batch norm and dropout at the same time.
+    dropout_rate = 0,
     pool_size    = 2,
     mp_strides   = 2,
     up_conv_size = 2,
@@ -221,6 +240,10 @@ def UNet(
     
     m = Conv2D(filters = n_classes, kernel_size = final_conv_size, padding = padding,
                 kernel_initializer = kernel_initializer)(m)
+
+    if batch_norm:
+        m = BatchNormalization()(m)
+
     m = Activation(activation = activation)(m)
 
     output_layer = Activation(activation = final_activation, name = "outputs")(m)

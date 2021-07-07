@@ -1,11 +1,13 @@
 import tensorflow.keras.backend as K
 
+# https://github.com/keras-team/keras/issues/3611#issuecomment-243108708
 def dice_coefficient(y_true, y_pred, smooth = 1):
     dtype     = y_pred.dtype
 
-    y_true_f  = K.flatten(K.cast(y_true, dtype))
-    y_pred_f  = K.flatten(y_pred)
+    y_true    = K.cast(y_true, dtype)
 
-    intersect = K.sum(y_true_f * y_pred_f)
+    axis      = (1, 2, 3)
+    intersect = K.sum(y_true * y_pred, axis = axis)
+    union     = K.sum(y_true, axis = axis) + K.sum(y_pred, axis = axis)
 
-    return (2.0 * intersect + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+    return K.mean((2.0 * intersect + smooth) / (union + smooth), axis = 0)
