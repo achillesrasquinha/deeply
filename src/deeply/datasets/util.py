@@ -2,6 +2,8 @@ import numpy as np
 
 from tensorflow.data.experimental import cardinality
 
+from deeply.util.array import sequencify
+
 def split(ds, splits = (.6, .2, .2)):
     """
     Split a TensorFlow Dataset into splits.
@@ -18,3 +20,18 @@ def split(ds, splits = (.6, .2, .2)):
         yield split_ds
         
         curr_ds  = curr_ds.skip(size)
+
+def concat(datasets, mapper = None):
+    datasets = sequencify(datasets)
+    curr_ds  = next(datasets)
+
+    if mapper:
+        curr_ds = curr_ds.map(mapper)
+
+    for dataset in datasets:
+        if mapper:
+            dataset = dataset.map(mapper)
+
+        curr_ds = curr_ds.concatenate(dataset)
+
+    return curr_ds
