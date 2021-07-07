@@ -126,20 +126,6 @@ class UNetModel(BaseModel):
 
         kwargs["metrics"]   = metrics
 
-        callbacks           = sequencify(kwargs.get("callbacks", []))
-        
-        filepath   = "%s-%s.hdf5" % (self.name or "model", get_timestamp_str())
-        checkpoint = ModelCheckpoint(
-            filepath          = filepath,
-            monitor           = "loss",
-            save_best_only    = True,
-            save_weights_only = True
-        )
-
-        callbacks.append(checkpoint)
-
-        kwargs["callbacks"] = callbacks
-
         return self._super.compile(*args, **kwargs)
 
     # def fit(self, *args, **kwargs):
@@ -374,6 +360,20 @@ class Trainer:
         train = _format_dataset(train, **format_args)
         if val:
             val = _format_dataset(val, **format_args)
+
+        callbacks  = sequencify(kwargs.get("callbacks", []))
+        
+        filepath   = "%s-%s.hdf5" % (self.name or "model", get_timestamp_str())
+        checkpoint = ModelCheckpoint(
+            filepath          = filepath,
+            monitor           = "loss",
+            save_best_only    = True,
+            save_weights_only = True
+        )
+
+        callbacks.append(checkpoint)
+
+        kwargs["callbacks"] = callbacks
 
         return model.fit(train, validation_data = val, **kwargs)
 
