@@ -22,7 +22,7 @@ def split(ds, splits = (.6, .2, .2)):
         curr_ds  = curr_ds.skip(size)
 
 def concat(datasets, mapper = None):
-    datasets = sequencify(datasets)
+    datasets = iter(sequencify(datasets))
     curr_ds  = next(datasets)
 
     if mapper:
