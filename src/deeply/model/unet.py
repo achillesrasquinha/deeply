@@ -23,7 +23,7 @@ import imgaug.augmenters as iaa
 
 from deeply.model.base      import BaseModel
 from deeply.generators      import BaseDataGenerator
-from deeply.metrics         import dice_coefficient
+from deeply.metrics         import jaccard_index, dice_coefficient
 from deeply.util.array      import sequencify, squash
 from deeply.util.datetime   import get_timestamp_str
 
@@ -122,6 +122,7 @@ class UNetModel(BaseModel):
         if kwargs["loss"] == "categorical_crossentropy" and not metrics:
             metrics.append("categorical_accuracy")
             
+        metrics.append(jaccard_index)
         metrics.append(dice_coefficient)
 
         kwargs["metrics"]   = metrics
@@ -371,7 +372,7 @@ class Trainer:
 
         callbacks  = sequencify(kwargs.get("callbacks", []))
         
-        filepath   = "%s-%s.hdf5" % (model.name or "model", get_timestamp_str())
+        filepath   = "%s-%s.hdf5" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
         checkpoint = ModelCheckpoint(
             filepath          = filepath,
             monitor           = "loss",
