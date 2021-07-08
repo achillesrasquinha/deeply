@@ -374,9 +374,9 @@ class Trainer:
 
         callbacks  = sequencify(kwargs.get("callbacks", []))
         
-        prefix     = "%s%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
+        prefix     = "%s-%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
 
-        filepath   = "%s-%s.hdf5" % prefix
+        filepath   = "%s.hdf5" % prefix
         checkpoint = ModelCheckpoint(
             filepath          = filepath,
             monitor           = "loss",
