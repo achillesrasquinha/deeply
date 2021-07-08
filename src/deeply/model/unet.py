@@ -22,6 +22,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 import imgaug.augmenters as iaa
 
 from deeply.model.base      import BaseModel
+from deeply.generators      import BaseDataGenerator
 from deeply.metrics         import dice_coefficient
 from deeply.util.array      import sequencify, squash
 from deeply.util.datetime   import get_timestamp_str
@@ -225,7 +226,6 @@ def UNet(
     
     m = Conv2D(filters = n_classes, kernel_size = final_conv_size, padding = padding,
                 kernel_initializer = kernel_initializer)(m)
-
     m = Activation(activation = activation)(m)
     
     if batch_norm:
@@ -340,13 +340,16 @@ def _crop(shape):
     return crop
 
 def _format_dataset(ds, mapper = None, target_shape = None, batch_size = 1, **kwargs):
-    if mapper:
-        ds = ds.map(mapper)
+    if isinstance(ds, Dataset):
+        if mapper:
+            ds = ds.map(mapper)
 
-    if target_shape:
-        ds = ds.map(_crop(target_shape))
+        if target_shape:
+            ds = ds.map(_crop(target_shape))
 
-    return ds.batch(batch_size)
+        ds = ds.batch(batch_size)
+
+    return ds
 class Trainer:
     def fit(self, model, train, val = None, batch_size = 32, **kwargs):
         target_shape = model.output_shape[1:]
@@ -359,6 +362,12 @@ class Trainer:
         train = _format_dataset(train, **format_args)
         if val:
             val = _format_dataset(val, **format_args)
+
+        if isinstance(train, BaseDataGenerator):
+            kwargs["steps_per_epoch"]  = train.n_samples
+
+        if isinstance(val, BaseDataGenerator):
+            kwargs["validation_steps"] = val.n_samples
 
         callbacks  = sequencify(kwargs.get("callbacks", []))
         

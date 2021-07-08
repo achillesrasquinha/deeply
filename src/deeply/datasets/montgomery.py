@@ -80,7 +80,7 @@ def merge_images(*args, **kwargs):
 
     for path in args:
         a   = imageio.imread(path)
-        arr = np.add(arr, a)
+        arr = np.maximum(arr, a)
 
     output = kwargs.get("output")
 

@@ -1,93 +1,114 @@
 import os, os.path as osp
-import itertools
 
 import numpy as np
 from tensorflow.keras.utils import Sequence
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing.image import (
+    load_img,
+    img_to_array
+)
 
 from deeply.const import DEFAULT
-from deeply.util._dict  import merge_dict
-from deeply.util.system import pardir
+from deeply.util.system import get_basename
 
 IMAGE_MASK_GENERATOR_SIZE = (256, 256)
 
 class BaseDataGenerator(Sequence):
     def __init__(self,
         X = None,
-        batch_size = DEFAULT["batch_size"]
+        batch_size = DEFAULT["batch_size"],
+        shuffle = False
     ):
-        self.batch_size = batch_size
-        self.n_samples  = len(X or [])
+        self.batch_size  = batch_size
+        self._n_samples  = len(X or [])
+        self._shuffle    = shuffle
+
+    @property
+    def n_samples(self):
+        return getattr(self, "_n_samples", 0)
 
     def __len__(self):
         return int(np.floor(self.n_samples) / self.batch_size)
 
-# class ImageMaskGenerator(BaseDataGenerator):
-#     def __init__(self,
-#         dir_images,
-#         dir_masks,
-#         *args, **kwargs
-#     ):
-#         self.super = super(ImageMaskGenerator, self)
+def _get_file_generator(dir_path):
+    dir_path = osp.abspath(dir_path)
+    files    = os.listdir(dir_path)
+    for file in files:
+        yield osp.join(dir_path, file)
 
-#         self.dir_images = dir_images
-#         self.dir_masks  = dir_masks
+def _load_img_arr(*args, **kwargs):
+    return img_to_array(load_img(*args, **kwargs))
 
-#         self.super.__init__(*args, **kwargs)
+class ImageMaskGenerator(BaseDataGenerator):
+    """
+    Image Mask Data Generator
+    """
+    def __init__(self,
+        dir_images,
+        dir_masks,
+        color_mode = "rgb",
+        image_size = IMAGE_MASK_GENERATOR_SIZE,
+        mask_size  = IMAGE_MASK_GENERATOR_SIZE,
+        *args, **kwargs
+    ):
+        self.super = super(ImageMaskGenerator, self)
+        self.super.__init__(*args, **kwargs)
 
-#     def __len__(self):
-#         self.n_samples = len(os.listdir(self.dir_images))
-#         return self.super.__len__()
+        self.dir_images = osp.abspath(dir_images)
+        self.dir_masks  = osp.abspath(dir_masks)
 
-#     def __getitem__(self, key):
-#         datagen_o_image = ImageDataGenerator()
-#         datagen_o_mask  = ImageDataGenerator()
+        self.image_size    = image_size
+        self.mask_size     = mask_size
 
-#         datagen_image   = datagen_o_image.flow_from_directory(self.dir_images)
-#         datagen_mask    = datagen_o_mask.flow_from_directory(self.dir_masks)
+        self.color_mode    = color_mode
 
-#         for (image, mask) in zip(datagen_image, datagen_mask):
-#             image = image / 255
-#             mask  = mask  / 255
+        self.on_epoch_end()
 
-#             mask[mask >  0.5] = 1
-#             mask[mask <= 0.5] = 0
+    @property
+    def image_files(self):
+        return _get_file_generator(self.dir_images)
 
-#             yield (image, mask)
+    @property
+    def mask_files(self):
+        return _get_file_generator(self.dir_masks)
 
-def get_basename(path):
-    return osp.basename(osp.normpath(path))
+    @property
+    def n_samples(self):
+        return len(list(self.image_files))
 
-def ImageMaskGenerator(dir_images, dir_masks, **kwargs):
-    datagen_o_image = ImageDataGenerator()
-    datagen_o_mask  = ImageDataGenerator()
+    def __getitem__(self, index):
+        batch_size = self.batch_size
+        color_mode = self.color_mode
 
-    seed = kwargs.get("seed", 1)
-    mode = kwargs.get("mode", "rgb")
-    batch_size = kwargs.get("batch_size", 32)
-    size_image = kwargs.get("image_size", IMAGE_MASK_GENERATOR_SIZE)
-    size_mask  = kwargs.get("mask_size",  IMAGE_MASK_GENERATOR_SIZE)
+        from_, to  = index * batch_size, (index + 1) * batch_size
+        
+        filenames  = self.indexes[from_:to]
 
-    fn_args = dict(class_mode = None, color_mode = mode,
-        batch_size = batch_size, seed = seed)
+        n_channels = 1 if color_mode == "grayscale" else 3
 
-    dir_par     = osp.abspath(pardir(dir_images))
+        images = np.empty((batch_size, *self.image_size, n_channels))
+        masks  = np.empty((batch_size, *self.mask_size,  n_channels))
 
-    class_images = get_basename(dir_images)
-    class_masks  = get_basename(dir_masks)
+        for i, filename in enumerate(filenames):
+            image_path = osp.join(self.dir_images, filename)
+            mask_path  = osp.join(self.dir_masks,  filename)
+
+            image = _load_img_arr(path = image_path, color_mode = self.color_mode,
+                target_size = self.image_size)
+            mask  = _load_img_arr(path = mask_path,  color_mode = self.color_mode,
+                target_size = self.mask_size)
+            
+            image = image / 255
+            mask  = mask  / 255
+
+            mask[mask >  0.5] = 1
+            mask[mask <= 0.5] = 0
+
+            images[i] = image
+            masks[i]  = mask
+
+        return images, masks
     
-    datagen_image  = datagen_o_image.flow_from_directory(dir_par, **merge_dict(fn_args,
-        dict(target_size = size_image, classes = [class_images])))
-    datagen_mask    = datagen_o_mask.flow_from_directory(dir_par, **merge_dict(fn_args,
-        dict(target_size = size_mask,  classes = [class_masks])))
-
-    data_generator = zip(datagen_image, datagen_mask)
-
-    for (image, mask) in data_generator:
-        image = image / 255
-        mask  = mask  / 255
-
-        mask[mask >  0.5] = 1
-        mask[mask <= 0.5] = 0
-
-        yield (image, mask)
+    def on_epoch_end(self):
+        self.indexes = np.asarray([get_basename(o) for o in self.image_files])
+        if self._shuffle:
+            np.random.shuffle(self.indexes)

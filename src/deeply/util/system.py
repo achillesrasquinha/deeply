@@ -157,3 +157,6 @@ def check_gzip(f, raise_err = True):
                     raise ValueError("File %s is not a gzip file." % f)
 
     return False
+
+def get_basename(path):
+    return osp.basename(osp.normpath(path))

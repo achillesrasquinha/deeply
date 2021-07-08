@@ -1,4 +1,5 @@
 DEFAULT = \
 {
-    "batch_size": 32
+    "batch_size": 32,
+    "loss": "categorical_crossentropy"
 }
