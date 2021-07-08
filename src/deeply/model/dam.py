@@ -12,7 +12,7 @@ def DAM(models = None):
     """
     Deep AUC Maximzation
     """
-    models = models or [
+    models  = models or [
         DenseNet121(),
         DenseNet169(),
         DenseNet201(),

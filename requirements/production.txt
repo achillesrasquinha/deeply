@@ -1,3 +1,4 @@
 tensorflow-datasets
 imgaug
 pillow
+pydicom

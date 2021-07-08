@@ -23,3 +23,17 @@ def dice_coefficient(y_true, y_pred, smooth = 1):
     union     = K.sum(y_true, axis = axis) + K.sum(y_pred, axis = axis)
 
     return K.mean((2.0 * intersect + smooth) / (union + smooth), axis = 0)
+
+def tversky_index(y_true, y_pred, smooth = 1, alpha = 0.5, beta = 0.5):
+    axis = (1, 2, 3)
+    tp   = K.sum(y_true * y_pred, axis = axis)
+    fn   = K.sum(y_true * (1 - y_pred), axis = axis)
+    fp   = K.sum((1 - y_true) * y_pred, axis = axis)
+
+    return K.mean((tp + smooth) / (tp + alpha * fn + beta * fp + smooth), axis = 0)
+
+def focal_tversky_index(*args, **kwargs):
+    tversky = tversky_index(*args, **kwargs) 
+    gamma   = kwargs.get("gamma", 1)
+
+    return K.pow(1 - tversky, gamma)
