@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 
 import tensorflow as tf
@@ -372,7 +374,9 @@ class Trainer:
 
         callbacks  = sequencify(kwargs.get("callbacks", []))
         
-        filepath   = "%s-%s.hdf5" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
+        prefix     = "%s%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
+
+        filepath   = "%s-%s.hdf5" % prefix
         checkpoint = ModelCheckpoint(
             filepath          = filepath,
             monitor           = "loss",
@@ -384,7 +388,14 @@ class Trainer:
 
         kwargs["callbacks"] = callbacks
 
-        return model.fit(train, validation_data = val, **kwargs)
+        history  = model.fit(train, validation_data = val, **kwargs)
+
+        filepath = "%s.json" % prefix 
+
+        with open(filepath, mode = "w") as f:
+            json.dump(f, history.history)
+
+        return history
 
 def _generate_samples(x = 200, y = None, channels = 1, n_samples = 100,
     r_min_f = 1, r_max_f = 10, seg_min_f = 1, seg_max_f = 5):
