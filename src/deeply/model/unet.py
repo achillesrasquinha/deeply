@@ -124,8 +124,8 @@ class UNetModel(BaseModel):
         if kwargs["loss"] == "categorical_crossentropy" and not metrics:
             metrics.append("categorical_accuracy")
             
-        metrics.append(jaccard_index)
         metrics.append(dice_coefficient)
+        metrics.append(jaccard_index)
 
         kwargs["metrics"]   = metrics
 
@@ -222,7 +222,10 @@ def UNet(
             kernel_initializer = kernel_initializer)(m)
 
         if attention_gate:
-            skip_layer = attention_gate(input_ = skip_layer, gating_signal = m)
+            skip_layer = attention_gate(
+                batch_norm   = batch_norm,
+                dropout_rate = dropout_rate
+            )(input_ = skip_layer, gating_signal = m)
 
         m = copy_crop_concat_block(m, skip_layer)
         m = ConvBlock(filters = filters, **conv_block_args)(m)
@@ -235,19 +238,33 @@ def UNet(
 
     return model
 
-def attention_gate(input_, gating_signal):
-    t = Conv2D(filters = 1, kernel_size = (1, 1))(input_)
-    g = Conv2D(filters = 1, kernel_size = (1, 1))(gating_signal)
-    x = Add()([t, g])
-    
-    x = Activation("relu")(x)
-    
-    x = Conv2D(filters = 1, kernel_size = (1, 1))(x)
-    x = Activation("sigmoid")(x)
-    
-    x = Multiply()([input_, x])
+class AttentionGate(Layer):
+    def __init__(self, batch_norm = True, dropout_rate = 0, *args, **kwargs):
+        self.super       = super(AttentionGate, self)
+        self.super.__init__(*args, **kwargs)
 
-    return x
+        self.batch_norm  = batch_norm
+        self.droput_rate = dropout_rate
+
+    def call(self, input_, gating_signal, training = False):
+        t = Conv2D(filters = 1, kernel_size = (1, 1))(input_)
+        g = Conv2D(filters = 1, kernel_size = (1, 1))(gating_signal)
+        x = Add()([t, g])
+
+        if training and self.batch_norm:
+            x = BatchNormalization()(x)
+        
+        x = Activation("relu")(x)
+
+        if training and self.droput_rate:
+            x = Dropout(rate = self.droput_rate)
+        
+        x = Conv2D(filters = 1, kernel_size = (1, 1))(x)
+        x = Activation("sigmoid")(x)
+        
+        x = Multiply()([input_, x])
+
+        return x
 
 def AttentionUNet(*args, **kwargs):
     """
@@ -259,7 +276,7 @@ def AttentionUNet(*args, **kwargs):
     >>> from deeply.model.unet import AttentionUNet
     >>> model = AttentionUNet()
     """
-    _attention_gate = kwargs.pop("attention_gate", attention_gate)
+    _attention_gate = kwargs.pop("attention_gate", AttentionGate)
 
     unet = UNet(
         name = "attention-unet",

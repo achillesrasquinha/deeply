@@ -5,25 +5,25 @@ from   tensorflow.math import (
 )
 import tensorflow.keras.backend as K
 
+def y_cast(y_true, y_pred, dtype = K.floatx()):
+    y_true = K.cast(y_true, dtype)
+    y_pred = K.cast(y_pred, dtype)
+
+    return (y_true, y_pred)
+
 def jaccard_index(y_true, y_pred, smooth = 1):
-    dtype     = y_pred.dtype
-
-    y_true    = K.cast(y_true, dtype)
+    y_true, y_pred = y_cast(y_true, y_pred)
     
-    axis      = -1
-    intersect = K.sum(K.abs(y_true * y_pred), axis = axis)
-    sum_      = K.sum(K.abs(y_true), axis = axis) + K.sum(K.abs(y_pred), axis = axis)
+    intersect = reduce_sum(y_true * y_pred)
+    sum_      = reduce_sum(K.abs(y_true)) + reduce_sum(K.abs(y_pred))
 
-    jaccard   = (intersect + smooth) / (sum_ - intersect + smooth)
+    jaccard   = reduce_mean((intersect + smooth) / (sum_ - intersect + smooth))
 
-    return (1 - jaccard) * smooth
+    return jaccard
 
 def dice_coefficient(y_true, y_pred, smooth = 1):
-    dtype     = y_pred.dtype
+    y_true, y_pred = y_cast(y_true, y_pred)
 
-    y_true    = tf.cast(y_true, dtype)
-
-    axis      = (1, 2, 3)
     intersect = reduce_sum(y_true * y_pred)
     union     = reduce_sum(y_true) + reduce_sum(y_pred)
 
