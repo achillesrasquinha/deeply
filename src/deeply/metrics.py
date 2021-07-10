@@ -1,3 +1,8 @@
+import tensorflow as tf
+from   tensorflow.math import (
+    reduce_sum,
+    reduce_mean
+)
 import tensorflow.keras.backend as K
 
 def jaccard_index(y_true, y_pred, smooth = 1):
@@ -16,13 +21,13 @@ def jaccard_index(y_true, y_pred, smooth = 1):
 def dice_coefficient(y_true, y_pred, smooth = 1):
     dtype     = y_pred.dtype
 
-    y_true    = K.cast(y_true, dtype)
+    y_true    = tf.cast(y_true, dtype)
 
     axis      = (1, 2, 3)
-    intersect = K.sum(y_true * y_pred, axis = axis)
-    union     = K.sum(y_true, axis = axis) + K.sum(y_pred, axis = axis)
+    intersect = reduce_sum(y_true * y_pred)
+    union     = reduce_sum(y_true) + reduce_sum(y_pred)
 
-    return K.mean((2.0 * intersect + smooth) / (union + smooth), axis = 0)
+    return reduce_mean((2.0 * intersect + smooth) / (union + smooth))
 
 def tversky_index(y_true, y_pred, smooth = 1, alpha = 0.7):
     """
