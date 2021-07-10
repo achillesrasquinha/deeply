@@ -5,6 +5,14 @@ from tensorflow.keras.layers import (
 
 from deeply.model.base import BaseModel as Model
 
+class EnsembleBlock(Layer):
+    def __init__(self, layer, *args, **kwargs):
+        self.super = super(EnsembleBlock, self)
+        self.layer = layer
+
+    def call(self, x, training = False):
+        return self.layer(training = training)(x)
+
 def Stacking(models,
     name = "stacking"
 ):
@@ -13,7 +21,8 @@ def Stacking(models,
         for layer in model.layers:
             layer._name = "%s_%s_%s" % (name, model.name, layer.name)
 
-    inputs, outputs = list(zip(*[( model.input, model.output ) for model in models]))
+    inputs, outputs = list(zip(*[( EnsembleBlock(model.input), model.output ) for model in models]))
+
     output = Concatenate()(outputs)
     
     model  = Model(inputs = inputs, outputs = output, name = name)

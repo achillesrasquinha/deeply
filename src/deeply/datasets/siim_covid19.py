@@ -23,6 +23,7 @@ from tensorflow_datasets.core.features import (
 import numpy as np
 from PIL import Image
 import imageio
+import pydicom
 
 from deeply.util.string import strip, safe_decode
 from deeply.util.system import makedirs
@@ -93,13 +94,9 @@ class SIIMCOVID19(GeneratorBasedBuilder):
             builder     = self,
             description = _DATASET_DESCRIPTION,
             features    = FeaturesDict({
-                "image": ImageF(encoding_format = "png"),
-                 "mask": ImageF(encoding_format = "png"),
-                  "sex": ClassLabel(names = iterkeys(_SANITIZE_LABELS["sex"])),
-                  "age": Tensor(shape = (), dtype = tf.uint8),
-                "label": Text(),
+                "image": ImageF(encoding_format = "jpg")
             }),
-            supervised_keys = ("image", "mask"),
+            supervised_keys = ("image",),
             homepage    = _DATASET_HOMEPAGE,
             citation    = _DATASET_CITATION
         )
@@ -111,22 +108,35 @@ class SIIMCOVID19(GeneratorBasedBuilder):
             SplitGenerator(
                 name = tfds.Split.TRAIN,
                 gen_kwargs = {
-                    "csv_path": osp.join(path_extracted, "train_image_level.csv")
-                }
-            ),
-            SplitGenerator(
-                name = tfds.Split.TEST,
-                gen_kwargs = {
-                    "csv_path": osp.join(path_extracted, "test_image_level.csv")
+                    "path":  path_extracted,
+                    "type_": "train",
                 }
             )
         ]
         
-    def _generate_examples(self, csv_path):
+    def _generate_examples(self, path, type_):
+        csv_path   = osp.join(path, "train_images_extracted.csv")
+
+        dir_images = osp.join(path, "images", type_)
+        makedirs(dir_images, exist_ok = True)
+
         with GFile(csv_path) as f:
             reader = csv.DictReader(f)
             for row in reader:
-                
+                image_uid = row["id"].split("_image")[0]
+                study_instance_uid = row["StudyInstanceUID"]
+
+                prefix = "%s_%s" % (image_uid, study_instance_uid)
+                path_image = osp.join( dir_images, "%s.jpg" % prefix )
+
+                # if not osp.exists(path_image):
+                    # path_dicom = osp.join( path, type_, image_uid, study_instance_uid )
+                    # path_dicom = pydicom.dcmread(path_dicom)
+                    
+
+                yield prefix, {
+                    "image": path_image
+                }
 
         # path_images = osp.join(path, "CXR_png")
         # path_data   = osp.join(path, "ClinicalReadings")

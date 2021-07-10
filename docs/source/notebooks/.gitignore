@@ -1,2 +1,4 @@
 data
 Graph
+*.hdf5
+*.json

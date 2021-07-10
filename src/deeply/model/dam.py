@@ -14,6 +14,7 @@ def DAM(models = None):
     """
     models  = models or [
         DenseNet121(),
+        # DenseNet161(),
         DenseNet169(),
         DenseNet201(),
         InceptionResNetV2()

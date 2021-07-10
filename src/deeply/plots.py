@@ -13,7 +13,10 @@ def _matshow(axes, mat, title = None, axis = False, **kwargs):
     if not axis:
         axes.axis("off")
 
-def _plot_base(fig, axes, to_file = None):
+def _plot_base(fig, axes, super_title = None, to_file = None):
+    if super_title:
+        fig.suptitle(super_title)
+
     if to_file:
         fig.savefig(to_file)
 
