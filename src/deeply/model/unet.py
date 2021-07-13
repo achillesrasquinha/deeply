@@ -233,7 +233,7 @@ def UNet(
                 kernel_initializer = kernel_initializer)(m)
     output_layer = Activation(activation = final_activation, name = "outputs")(m)
 
-    model = UNetModel(inputs = input_, outputs = output_layer, name = name)
+    model = UNetModel(inputs = [input_], outputs = [output_layer], name = name)
 
     return model
 
