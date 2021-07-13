@@ -1,33 +1,15 @@
 import os, os.path as osp
 
 import numpy as np
-from tensorflow.keras.utils import Sequence
 from tensorflow.keras.preprocessing.image import (
     load_img,
     img_to_array
 )
 
-from deeply.const import DEFAULT
+from deeply.generators.base import BaseDataGenerator
 from deeply.util.system import get_basename
 
 IMAGE_MASK_GENERATOR_SIZE = (256, 256)
-
-class BaseDataGenerator(Sequence):
-    def __init__(self,
-        X = None,
-        batch_size = DEFAULT["batch_size"],
-        shuffle = False
-    ):
-        self.batch_size  = batch_size
-        self._n_samples  = len(X or [])
-        self._shuffle    = shuffle
-
-    @property
-    def n_samples(self):
-        return getattr(self, "_n_samples", 0)
-
-    def __len__(self):
-        return int(np.floor(self.n_samples) / self.batch_size)
 
 def _get_file_generator(dir_path):
     dir_path = osp.abspath(dir_path)

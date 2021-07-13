@@ -21,15 +21,15 @@ class BaseModel(Model):
         return plot_model(self, *args, **kwargs)
 
     # def fit(self, *args, **kwargs):
-    #     log_dir  = osp.join(PATH["CACHE"], "tensorboard-logs")
-    #     makedirs(log_dir, exist_ok = True)
-    #     log_path = osp.join(log_dir, get_random_str())
+        # log_dir  = osp.join(PATH["CACHE"], "tensorboard-logs")
+        # makedirs(log_dir, exist_ok = True)
+        # log_path = osp.join(log_dir, get_random_str())
 
-    #     tb_cb    = TensorBoard(log_dir = log_path)
+        # tb_cb    = TensorBoard(log_dir = log_path)
 
-    #     callbacks = list(kwargs.pop("callbacks", []))
-    #     callbacks.append(tb_cb)
+        # callbacks = list(kwargs.pop("callbacks", []))
+        # callbacks.append(tb_cb)
 
-    #     kwargs["callbacks"] = [tb_cb]
+        # kwargs["callbacks"] = [tb_cb]
 
-    #     return self.super.fit(*args, **kwargs)
+        # return self.super.fit(*args, **kwargs)

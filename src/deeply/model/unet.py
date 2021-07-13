@@ -159,7 +159,8 @@ def UNet(
     final_activation = "softmax",
     kernel_initializer = kernel_initializer,
     name = "unet",
-    attention_gate = None
+    attention_gate = None,
+    weights = None
 ):
     """
     Constructs a U-Net.
@@ -183,6 +184,7 @@ def UNet(
     :param final_conv_size: Kernel size of final convolution.
     :param kernel_initializer: Weight initializer for each convolution block.
     :param attention_gate: Use a custom attention gate.
+    :param
 
     References
         [1]. Ronneberger, Olaf, et al. “U-Net: Convolutional Networks for Biomedical Image Segmentation.” ArXiv:1505.04597 [Cs], May 2015. arXiv.org, http://arxiv.org/abs/1505.04597.
@@ -191,7 +193,7 @@ def UNet(
     >>> model = UNet()
     """
     if not y:
-        x = y
+        y = x
 
     input_shape = (x, y, channels)
     input_ = Input(shape = input_shape, name = "inputs")
@@ -209,8 +211,8 @@ def UNet(
     for _ in range(layer_depth):
         m = ConvBlock(filters = filters, **conv_block_args)(m)
         contracting_layers.append(m)
-        filters = filters * filter_growth_rate
         m = MaxPooling2D(pool_size = pool_size, strides = mp_strides)(m)
+        filters = filters * filter_growth_rate
 
     m = ConvBlock(filters = filters, **conv_block_args)(m)
 
@@ -222,10 +224,7 @@ def UNet(
             kernel_initializer = kernel_initializer)(m)
 
         if attention_gate:
-            skip_layer = attention_gate(
-                batch_norm   = batch_norm,
-                dropout_rate = dropout_rate
-            )(input_ = skip_layer, gating_signal = m)
+            skip_layer = attention_gate(skip_layer, m)
 
         m = copy_crop_concat_block(m, skip_layer)
         m = ConvBlock(filters = filters, **conv_block_args)(m)
@@ -257,7 +256,7 @@ class AttentionGate(Layer):
         x = Activation("relu")(x)
 
         if training and self.droput_rate:
-            x = Dropout(rate = self.droput_rate)
+            x = Dropout(rate = self.droput_rate)(x)
         
         x = Conv2D(filters = 1, kernel_size = (1, 1))(x)
         x = Activation("sigmoid")(x)
@@ -276,7 +275,11 @@ def AttentionUNet(*args, **kwargs):
     >>> from deeply.model.unet import AttentionUNet
     >>> model = AttentionUNet()
     """
-    _attention_gate = kwargs.pop("attention_gate", AttentionGate)
+    batch_norm   = kwargs.get("batch_norm", True)
+    dropout_rate = kwargs.get("dropout_rate", 0)
+
+    _attention_gate = kwargs.pop("attention_gate", AttentionGate(
+        batch_norm = batch_norm, dropout_rate = dropout_rate))
 
     unet = UNet(
         name = "attention-unet",

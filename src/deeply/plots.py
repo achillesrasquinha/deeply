@@ -13,7 +13,12 @@ def _matshow(axes, mat, title = None, axis = False, **kwargs):
     if not axis:
         axes.axis("off")
 
-def _plot_base(fig, axes, super_title = None, to_file = None):
+def _plot_base(fig, axes, super_title = None, to_file = None, figsize = None):
+    if figsize:
+        width, height = figsize
+        fig.set_figwidth(width)
+        fig.set_figheight(height)
+
     if super_title:
         fig.suptitle(super_title)
 
@@ -25,6 +30,10 @@ def _plot_base(fig, axes, super_title = None, to_file = None):
     return fig, axes
 
 def segplot(image, mask, predict = None, **kwargs):
+    """
+    Segmentation Plot
+    """
+    
     show_predict = predict is not None
     n_plots   = 3 if show_predict else 2
 
@@ -56,7 +65,7 @@ def history_plot(history, **kwargs):
         has_val = False
 
         if val_key in histories:
-            values = histories[type_]
+            values = histories[val_key]
             axes[i].plot(values)
 
             has_val = True
