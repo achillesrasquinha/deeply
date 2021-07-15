@@ -3,11 +3,9 @@ import os.path as osp
 
 from tensorflow.keras import Model
 from tensorflow.keras.utils import plot_model
-from tensorflow.keras.callbacks import TensorBoard
 
 from deeply.config import PATH
-from deeply.util.system import makedirs, popen
-from deeply.util.string import get_random_str
+from deeply.const  import DEFAULT
 
 class BaseModel(Model):
     # def __init__(self, *args, **kwargs):
@@ -15,6 +13,16 @@ class BaseModel(Model):
     #     self.super.__init__(*args, **kwargs)
 
     # def compile(self, *args, **kwargs):
+    #     kwargs["optimizer"] = kwargs.get("optimizer", DEFAULT["optimizer"])
+    #     kwargs["loss"]      = kwargs.get("loss",      DEFAULT["loss"])
+
+    #     metrics = kwargs.get("metrics",   [])
+
+    #     if "accuracy" not in metrics:
+    #         metrics.append("accuracy")
+
+    #     kwargs["metrics"]   = metrics
+    
     #     return self._super.compile(*args, **kwargs)
 
     def plot(self, *args, **kwargs):

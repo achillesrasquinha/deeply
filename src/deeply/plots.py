@@ -1,3 +1,5 @@
+import collections
+
 import matplotlib.pyplot as pplt
 
 from deeply._compat import iteritems, iterkeys
@@ -50,7 +52,10 @@ def segplot(image, mask, predict = None, **kwargs):
     return _plot_base(fig, axes, **kwargs)
 
 def history_plot(history, **kwargs):
-    histories = history.history
+    if isinstance(history, collections.Mapping):
+        histories = history
+    else:
+        histories = history.history
 
     metrics   = [m for m in iterkeys(histories) if not m.startswith("val_")]
     n_plots   = len(metrics)

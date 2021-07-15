@@ -25,6 +25,7 @@ import imgaug.augmenters as iaa
 
 from deeply.model.base      import BaseModel
 from deeply.generators      import BaseDataGenerator
+from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
 from deeply.metrics         import jaccard_index, dice_coefficient
 from deeply.util.array      import sequencify, squash
 from deeply.util.datetime   import get_timestamp_str
@@ -235,6 +236,9 @@ def UNet(
 
     model = UNetModel(inputs = [input_], outputs = [output_layer], name = name)
 
+    if weights:
+        model.load_weights(weights)
+
     return model
 
 class AttentionGate(Layer):
@@ -369,7 +373,7 @@ def _format_dataset(ds, mapper = None, target_shape = None, batch_size = 1, **kw
 
     return ds
 class Trainer:
-    def fit(self, model, train, val = None, batch_size = 32, **kwargs):
+    def fit(self, model, train, val = None, batch_size = 32, early_stopping = True, monitor = "loss", **kwargs):
         target_shape = model.output_shape[1:]
 
         mapper = kwargs.pop("mapper", None)
@@ -387,19 +391,30 @@ class Trainer:
         if isinstance(val, BaseDataGenerator):
             kwargs["validation_steps"] = val.n_samples
 
-        callbacks  = sequencify(kwargs.get("callbacks", []))
+        callbacks = sequencify(kwargs.get("callbacks", []))
         
-        prefix     = "%s-%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
+        prefix    = "%s-%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
+
+        if val:
+            monitor = "val_%s" % monitor
 
         filepath   = "%s.hdf5" % prefix
         checkpoint = ModelCheckpoint(
             filepath          = filepath,
-            monitor           = "loss",
+            monitor           = monitor,
             save_best_only    = True,
             save_weights_only = True
         )
 
         callbacks.append(checkpoint)
+
+        plothistory = PlotHistoryCallback()
+
+        callbacks.append(plothistory)
+
+        if early_stopping:
+            gen_early_stop = GeneralizedEarlyStopping(baseline = 0.05)
+            callbacks.append(gen_early_stop)
 
         kwargs["callbacks"] = callbacks
 
