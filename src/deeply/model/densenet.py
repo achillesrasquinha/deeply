@@ -12,12 +12,15 @@ from deeply.model.base import BaseModel
 from deeply.const import DEFAULT
 
 class DenseBlock(Layer):
-    pass
+    def __init__(self):
+        pass
 
 class DenseNetModel(BaseModel):
     pass
 
 def DenseNet(
+    blocks       = [],
+    growth_rate  = DEFAULT["densenet_growth_rate"],
     input_shape  = None,
     init_filters = DEFAULT["initial_filters"],
     batch_norm   = DEFAULT["batch_normalization"],
@@ -41,15 +44,20 @@ def DenseNet(
 
     x = MaxPooling2D(kernel_size = 3, strides = 2)(x)
 
-    # for block in blocks:
-    #     x = DenseBlock()(x)
+    for block in blocks:
+        x = DenseBlock()(x)
 
     output_layer = x
 
     return DenseNetModel(inputs = input_, outputs = output_layer, name = name)
 
-def DenseNet161(*args, **kwargs):
+def DenseNet161(**kwargs):
     """
     DenseNet-161
     """
-    return DenseNet(*args, **kwargs)
+    return DenseNet(
+        blocks          = (6, 12, 36, 24),
+        growth_rate     = 48,
+        init_features   = 96,
+        **kwargs
+    )

@@ -9,7 +9,7 @@ from tensorflow.keras.applications import (
 )
 
 from deeply.model.base import BaseModel
-# from deeply.model.densenet import DenseNet161
+from deeply.model.densenet import DenseNet161
 from deeply.ensemble import Stacking
 # from deeply.losses import auc_margin_loss
 

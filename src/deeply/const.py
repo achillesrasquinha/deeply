@@ -12,5 +12,7 @@ DEFAULT = \
 
     "auc_margin_loss_margin": 1.0,
     "auc_margin_loss_imratio": None,
-    "auc_margin_loss_alpha": 0
+    "auc_margin_loss_alpha": 0,
+
+    "densenet_growth_rate": 32
 }

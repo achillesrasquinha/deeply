@@ -49,7 +49,7 @@ def dicom_to_image_file(dicom, path_file):
     image = Image.fromarray(array)
     image.write(path_file)
 
-class SiimCovid(GeneratorBasedBuilder):
+class SiimCovid19(GeneratorBasedBuilder):
     """
     SIIM COVID-19 Chest X-ray Dataset.
     """
