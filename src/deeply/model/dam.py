@@ -32,7 +32,7 @@ def DAM(
     Deep AUC Maximzation
     """
     if not models:
-        nets   = [DenseNet121, DenseNet169, DenseNet201]#, InceptionResNetV2]
+        nets   = [DenseNet121, DenseNet169, DenseNet201, InceptionResNetV2]
         models = [x(input_shape = input_shape, weights = weights) for x in nets]
 
     stacked = Stacking(models)
