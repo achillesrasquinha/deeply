@@ -64,7 +64,7 @@ class SiimCovid19(GeneratorBasedBuilder):
             builder     = self,
             description = _DATASET_DESCRIPTION,
             features    = FeaturesDict({
-                "image": ImageF(encoding_format = "jpg")
+                "image": ImageF(encoding_format = "jpeg")
             }),
             supervised_keys = ("image",),
             homepage    = _DATASET_HOMEPAGE,
