@@ -64,9 +64,10 @@ class SiimCovid19(GeneratorBasedBuilder):
             builder     = self,
             description = _DATASET_DESCRIPTION,
             features    = FeaturesDict({
-                "image": ImageF(encoding_format = "jpeg")
+                "image": ImageF(encoding_format = "jpeg"),
+                "label": Text()
             }),
-            supervised_keys = ("image",),
+            supervised_keys = ("image", "label"),
             homepage    = _DATASET_HOMEPAGE,
             citation    = _DATASET_CITATION
         )
@@ -107,5 +108,6 @@ class SiimCovid19(GeneratorBasedBuilder):
                     dicom_to_image_file(dicom, path_image)
 
                 yield prefix, {
-                    "image": path_image
+                    "image": path_image,
+                    "label": ""
                 }
