@@ -1,5 +1,8 @@
 DEFAULT = \
 {
+    "batch_norm": True,
+    "dropout_rate": 0.2,
+
     "batch_size": 32,
     "loss": "categorical_crossentropy",
     "optimizer": "adam",
@@ -15,4 +18,8 @@ DEFAULT = \
     "auc_margin_loss_alpha": 0,
 
     "densenet_growth_rate": 32
+}
+
+CONST = {
+    "densenet_input_shape": (224, 224, 3)
 }
