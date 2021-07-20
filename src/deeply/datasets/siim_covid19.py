@@ -86,7 +86,7 @@ class SiimCovid19(GeneratorBasedBuilder):
         ]
         
     def _generate_examples(self, path, type_):
-        csv_path   = osp.join(path, "train_images_extracted.csv")
+        csv_path   = osp.join(path, "train_image_level.csv")
 
         dir_images = osp.join(path, "images", type_)
         makedirs(dir_images, exist_ok = True)
