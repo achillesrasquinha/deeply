@@ -103,7 +103,9 @@ class SiimCovid19(GeneratorBasedBuilder):
                 if not osp.exists(path_image):
                     path_dicom_dir = osp.join( path, type_, study_instance_uid )
                     path_hashes = os.listdir(path_dicom_dir)
-                    assert len(path_hashes) == 1
+                    # assert len(path_hashes) == 1
+                    if len(path_hashes) != 1:
+                        print(path_dicom_dir)
                     path_dicom  = osp.join( path_dicom_dir, path_hashes[0], "%s.dcm" % image_uid)
                     
                     dicom = pydicom.dcmread(path_dicom)
