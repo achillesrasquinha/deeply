@@ -47,7 +47,7 @@ def dicom_to_image_file(dicom, path_file):
 
     # shape = array.shape
     image = Image.fromarray(array)
-    image.write(path_file)
+    image.save(path_file)
 
 class SiimCovid19(GeneratorBasedBuilder):
     """
