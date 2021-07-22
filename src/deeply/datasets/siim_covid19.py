@@ -95,21 +95,21 @@ class SiimCovid19(GeneratorBasedBuilder):
             reader = csv.DictReader(f)
             for row in reader:
                 study_instance_uid = row["StudyInstanceUID"]
-                image_uid = row["id"].split("_image")[0]
+                image_uid  = row["id"].split("_image")[0]
 
                 prefix = "%s_%s" % (study_instance_uid, image_uid)
-                path_image = osp.join( dir_images, "%s.jpg" % prefix )
+                # path_image = osp.join( dir_images, "%s.jpg" % prefix )
 
                 if not osp.exists(path_image):
                     path_dicom_dir = osp.join( path, type_, study_instance_uid )
                     path_hashes = os.listdir(path_dicom_dir)
-                    # assert len(path_hashes) == 1
-                    if len(path_hashes) != 1:
-                        print(path_dicom_dir)
-                    path_dicom  = osp.join( path_dicom_dir, path_hashes[0], "%s.dcm" % image_uid)
+
+                    for i, path_hash in enumerate(path_hashes):
+                        path_dicom = osp.join( path_dicom_dir, path_hash, "%s.dcm" % image_uid )
+                        path_image = osp.join( dir_images, "%s_%s.jpg" % (prefix, i) )
                     
-                    dicom = pydicom.dcmread(path_dicom)
-                    dicom_to_image_file(dicom, path_image)
+                        dicom = pydicom.dcmread(path_dicom)
+                        dicom_to_image_file(dicom, path_image)
 
                 yield prefix, {
                     "image": path_image,
