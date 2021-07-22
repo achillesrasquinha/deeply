@@ -20,6 +20,8 @@ tensorflow-datasets
 imgaug
 pillow
 pydicom
+pylibjpeg
+pylibjpeg-libjpeg
 pipenv
 jedi<0.18
 ipython

@@ -2,3 +2,5 @@ tensorflow-datasets
 imgaug
 pillow
 pydicom
+pylibjpeg
+pylibjpeg-libjpeg
