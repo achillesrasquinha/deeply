@@ -57,7 +57,7 @@ def DAM(
     Deep AUC Maximzation
     """
     if not models:
-        nets   = [DenseNet121]#, DenseNet169, DenseNet201]#, InceptionResNetV2]
+        nets   = [DenseNet121, DenseNet169, DenseNet201]#, InceptionResNetV2]
         models = [ ]
 
         for net in nets:

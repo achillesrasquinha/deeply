@@ -4,3 +4,4 @@ pillow
 pydicom
 pylibjpeg
 pylibjpeg-libjpeg
+numpy>1.19
