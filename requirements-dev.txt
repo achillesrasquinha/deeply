@@ -22,6 +22,7 @@ pillow
 pydicom
 pylibjpeg
 pylibjpeg-libjpeg
+numpy>1.19
 pipenv
 jedi<0.18
 ipython

@@ -21,12 +21,16 @@ from deeply.model.base import BaseModel
 from deeply.model.densenet import DenseNet161
 from deeply.ensemble import Stacking
 
-def fully_connected_block(x, units = 256, depth = 2, growth_rate = 0.5, activation = "relu",
-    batch_norm = DEFAULT["batch_norm"], dropout_rate = DEFAULT["dropout_rate"]):
+def fully_connected_block(x, units = 256, depth = 3, growth_rate = 0.5, activation = "relu",
+    final_activation = "softmax", n_classes = 1, batch_norm = DEFAULT["batch_norm"],
+    dropout_rate = DEFAULT["dropout_rate"], kernel_initializer = None):
     x = Flatten()(x)
 
+    if batch_norm:
+        x = BatchNormalization()(x)
+
     for i in range(depth):
-        x = Dense(units)(x)
+        x = Dense(units, kernel_initializer = kernel_initializer)(x)
         
         if batch_norm:
             x = BatchNormalization()(x)
@@ -35,6 +39,11 @@ def fully_connected_block(x, units = 256, depth = 2, growth_rate = 0.5, activati
 
         if dropout_rate:
             x = Dropout(dropout_rate)(x)
+
+        units = int(units * growth_rate)
+
+    x = Dense(n_classes, activation = final_activation,
+            kernel_initializer = kernel_initializer)(x)
 
     return x
 
@@ -76,7 +85,7 @@ def DAM(
 
             output  = fully_connected_block(model, units = fc_units, depth = fc_depth, growth_rate = fc_growth_rate,
                         batch_norm = batch_norm, dropout_rate = dropout_rate,
-                        activation = fc_activation)
+                        activation = fc_activation, n_classes = n_classes)
 
             model   = BaseModel(inputs = input_, outputs = output)
 
