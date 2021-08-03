@@ -91,7 +91,7 @@ class StackingModel(BaseModel):
 
         for i, model in enumerate(self.models):
             with tf.GradientTape() as tape:
-                y_pred, loss = get_model_loss(model, data, training = True)
+                model, y_pred, loss = get_model_loss(model, data, training = True)
 
             trainable_vars = model.trainable_variables
             gradients      = tape.gradient(loss, trainable_vars)
