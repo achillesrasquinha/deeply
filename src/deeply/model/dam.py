@@ -79,7 +79,7 @@ def DAM(
                     layer.trainable = True
                 else:
                     layer.trainable = False
-            
+
             input_  = Input(shape = input_shape)
             model   = net(inputs = input_)
 

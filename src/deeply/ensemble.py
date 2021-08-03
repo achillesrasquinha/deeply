@@ -7,6 +7,10 @@ from tensorflow.keras.layers import (
 )
 from tensorflow.keras.callbacks import Callback
 
+from tqdm.keras import TqdmCallback
+
+import tqdm as tq
+
 from deeply.model.base     import BaseModel
 from deeply.model.logistic import LogisticRegression
 from deeply.util._dict     import merge_dict
@@ -15,12 +19,15 @@ def get_model_loss(model, data, training = False):
     X, y   = data
 
     y_pred = model(X, training = training)
+
     loss   = model.compiled_loss(y, y_pred,
         regularization_losses = model.losses
     )
 
-    return y_pred, loss
+    return model, y_pred, loss
 
+def _concat(x, y):
+    return tf.concat((x, y), 0) if x is not None else y
 class StackingModelCallback(Callback):
     def __init__(self, fit_args, mapper = None, epochs = 1, *args, **kwargs):
         self._super = super(StackingModelCallback, self)
@@ -31,10 +38,7 @@ class StackingModelCallback(Callback):
 
         self._epochs   = epochs
 
-    def on_batch_end(self, batch, logs = None):
-        print(logs)
-
-    def on_train_end(self, logs = None):
+    def on_train_batch_end(self, batch, logs = None):
         model   = self.model
 
         models  = model.models
@@ -50,9 +54,6 @@ class StackingModelCallback(Callback):
 
         epochs  = self._epochs
 
-        def concat(x, y):
-            return tf.concat((x, y), 0) if x is not None else y
-
         for m in models:
             for X, y in data:
                 y_pred = m.predict(X)
@@ -60,11 +61,10 @@ class StackingModelCallback(Callback):
                 if mapper:
                     y_pred, y = mapper(y_pred, y)
 
-                X_meta = concat(X_meta, y_pred)
-                y_meta = concat(y_meta, y)
+                X_meta = _concat(X_meta, y_pred)
+                y_meta = _concat(y_meta, y)
 
         meta_learner.fit(X_meta, y_meta, epochs = epochs, verbose = verbose)
-
 class StackingModel(BaseModel):
     def __init__(self, models = None, final_model = None, *args, **kwargs):
         self._super  = super(StackingModel, self)
@@ -89,33 +89,37 @@ class StackingModel(BaseModel):
     def train_step(self, data):
         X, y = data
 
-        # for model in self.models:
-        #     with tf.GradientTape() as tape:
-        #         y_pred, loss = get_model_loss(model, data, training = True)
+        for i, model in enumerate(self.models):
+            with tf.GradientTape() as tape:
+                y_pred, loss = get_model_loss(model, data, training = True)
 
-        #     trainable_vars = model.trainable_variables
-        #     gradients      = tape.gradient(loss, trainable_vars)
+            trainable_vars = model.trainable_variables
+            gradients      = tape.gradient(loss, trainable_vars)
 
-        #     model.optimizer.apply_gradients(zip(gradients, trainable_vars))
+            model.optimizer.apply_gradients(zip(gradients, trainable_vars))
 
-        #     model.compiled_metrics.update_state(y, y_pred)
+            model.compiled_metrics.update_state(y, y_pred)
+
+            self._models[i] = model
 
         return self._get_models_metrics()
 
     def test_step(self, data):
         X, y = data
 
-        for model in self.models:
-            y_pred, _ = get_model_loss(model, data, training = False)
+        for i, model in enumerate(self.models):
+            model, y_pred, _ = get_model_loss(model, data, training = False)
 
             model.compiled_metrics.update_state(y, y_pred)
+
+            self._models[i] = model
 
         return self._get_models_metrics()
 
     def _get_models_metrics(self):
         metrics = { }
 
-        for model in self._models:
+        for model in self.models:
             metrics = merge_dict(metrics, { "%s-%s" % (model.name, m.name): m.result() for m in model.metrics })
         
         return metrics
@@ -124,14 +128,14 @@ class StackingModel(BaseModel):
         meta_mapper = kwargs.pop("meta_mapper", None)
         meta_epochs = kwargs.pop("meta_epochs", 1)
 
-        # callbacks   = kwargs.pop("callbacks", [])
-        # callbacks.append(StackingModelCallback(
-        #     fit_args = { "args": args, "kwargs": kwargs },
-        #     mapper   = meta_mapper,
-        #     epochs   = meta_epochs
-        # ))
+        callbacks   = kwargs.pop("callbacks", [])
+        callbacks.append(StackingModelCallback(
+            fit_args = { "args": args, "kwargs": kwargs },
+            mapper   = meta_mapper,
+            epochs   = meta_epochs
+        ))
 
-        # kwargs["callbacks"] = callbacks
+        kwargs["callbacks"] = callbacks
 
         return self._super.fit(*args, **kwargs)
 

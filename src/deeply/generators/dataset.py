@@ -6,6 +6,7 @@ from tensorflow.data.experimental import (
 from deeply.const import DEFAULT
 
 def DatasetGenerator(ds,
+    cache      = True,
     shuffle    = True,
     batch_size = DEFAULT["batch_size"],
     mapper     = None
@@ -13,11 +14,12 @@ def DatasetGenerator(ds,
     if mapper:
         ds = ds.map(mapper, num_parallel_calls = AUTOTUNE)
 
-    if shuffle:
-        size = cardinality(ds).numpy()
-
+    if cache or shuffle:
         ds = ds.cache()
-        ds = ds.shuffle(size)
+
+        if shuffle:
+            size = cardinality(ds).numpy()
+            ds = ds.shuffle(size)
 
     if batch_size:
         ds = ds.batch(batch_size)
