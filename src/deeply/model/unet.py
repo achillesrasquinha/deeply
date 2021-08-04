@@ -1,4 +1,5 @@
 import json
+from deeply.util.model import get_checkpoint_prefix
 
 import numpy as np
 
@@ -28,7 +29,7 @@ from deeply.generators      import BaseDataGenerator
 from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
 from deeply.metrics         import jaccard_index, dice_coefficient
 from deeply.util.array      import sequencify, squash
-from deeply.util.datetime   import get_timestamp_str
+from deeply.util.model      import get_checkpoint_prefix
 
 def kernel_initializer(shape, dtype = None):
     n = np.prod(shape[:3])
@@ -393,7 +394,7 @@ class Trainer:
 
         callbacks = sequencify(kwargs.get("callbacks", []))
         
-        prefix    = "%s-%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
+        prefix    = get_checkpoint_prefix(model)
 
         if val:
             monitor = "val_%s" % monitor

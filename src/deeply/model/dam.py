@@ -87,7 +87,7 @@ def DAM(
                         batch_norm = batch_norm, dropout_rate = dropout_rate,
                         activation = fc_activation, n_classes = n_classes)
 
-            model   = BaseModel(inputs = input_, outputs = output)
+            model   = BaseModel(inputs = input_, outputs = output, name = net.name)
 
             models.append(model)
 

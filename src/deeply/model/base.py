@@ -1,11 +1,7 @@
-import os.path as osp
-
 from tensorflow.keras import Model
 from tensorflow.keras.utils import plot_model
 
-from tqdm.keras import TqdmCallback
-
-from deeply.callbacks import ProgressStepCallback
+from deeply.util.model import get_fit_kwargs
 class BaseModel(Model):
     def __init__(self, *args, **kwargs):
         self._super = super(BaseModel, self)
@@ -17,13 +13,5 @@ class BaseModel(Model):
         return plot_model(self, *args, **kwargs)
 
     def fit(self, *args, **kwargs):
-        verbose   = kwargs.pop("verbose", 0)
-        
-        callbacks = list(kwargs.pop("callbacks", []))
-        callbacks.append(ProgressStepCallback())
-
-        callbacks.append(TqdmCallback(verbose = verbose))
-
-        kwargs["callbacks"] = callbacks
-
+        kwargs = get_fit_kwargs(self, kwargs)
         return self._super.fit(*args, **kwargs)
