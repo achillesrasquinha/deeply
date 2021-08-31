@@ -9,7 +9,6 @@ class BaseModel(Model):
 
     def plot(self, *args, **kwargs):
         kwargs["show_shapes"] = kwargs.get("show_shapes", True)
-        
         return plot_model(self, *args, **kwargs)
 
     def fit(self, *args, **kwargs):

@@ -1,6 +1,6 @@
 from tensorflow.keras.callbacks import Callback
 
-from deeply.plots   import history_plot
+from deeply.plots   import history as history_plot
 from deeply._compat import iteritems
 
 class PlotHistoryCallback(Callback):

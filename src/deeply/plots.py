@@ -1,6 +1,10 @@
 import collections
 
 import matplotlib.pyplot as pplt
+import pandas as pd
+import seaborn as sns
+
+from sklearn.metrics import confusion_matrix as sk_confusion_matrix
 
 from deeply._compat import iteritems, iterkeys
 
@@ -51,11 +55,11 @@ def segplot(image, mask, predict = None, **kwargs):
 
     return _plot_base(fig, axes, **kwargs)
 
-def history_plot(history, **kwargs):
-    if isinstance(history, collections.Mapping):
-        histories = history
+def history(obj, **kwargs):
+    if isinstance(obj, collections.Mapping):
+        histories = obj
     else:
-        histories = history.history
+        histories = obj.history
 
     metrics   = [m for m in iterkeys(histories) if not m.startswith("val_")]
     n_plots   = len(metrics)
@@ -84,3 +88,8 @@ def history_plot(history, **kwargs):
         axes[i].legend(legends)
 
     return _plot_base(fig, axes, **kwargs)
+
+def confusion_matrix(y_true, y_pred):
+    matrix = sk_confusion_matrix(y_true, y_pred)
+    figure = sns.heatmap(matrix)
+    return figure

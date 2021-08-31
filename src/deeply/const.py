@@ -17,9 +17,9 @@ DEFAULT = \
     "auc_margin_loss_imratio": None,
     "auc_margin_loss_alpha": 0,
 
-    "densenet_growth_rate": 32
-}
-
-CONST = {
-    "densenet_input_shape": (224, 224, 3)
+    "transfer_densenet_input_shape": (224, 224, 3),
+    "transfer_densenet_weights": "imagenet",
+    "transfer_densenet_classes": 1,
+    
+    "densenet_growth_rate": 32,
 }

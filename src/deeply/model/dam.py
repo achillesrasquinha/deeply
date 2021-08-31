@@ -1,14 +1,6 @@
 from tensorflow.keras import (
     Input
 )
-from tensorflow.keras.layers import (
-    Layer,
-    Flatten,
-    Dense,
-    Activation,
-    BatchNormalization,
-    Dropout
-)
 from tensorflow.keras.applications import (
     DenseNet121,
     DenseNet169,
@@ -16,36 +8,10 @@ from tensorflow.keras.applications import (
     InceptionResNetV2
 )
 
-from deeply.const import CONST, DEFAULT
+from deeply.const import DEFAULT
 from deeply.model.base import BaseModel
 from deeply.model.densenet import DenseNet161
 from deeply.ensemble import Stacking
-
-def fully_connected_block(x, units = 256, depth = 3, growth_rate = 0.5, activation = "relu",
-    final_activation = "softmax", n_classes = 1, batch_norm = DEFAULT["batch_norm"],
-    dropout_rate = DEFAULT["dropout_rate"], kernel_initializer = None):
-    x = Flatten()(x)
-
-    if batch_norm:
-        x = BatchNormalization()(x)
-
-    for i in range(depth):
-        x = Dense(units, kernel_initializer = kernel_initializer)(x)
-        
-        if batch_norm:
-            x = BatchNormalization()(x)
-
-        x = Activation(activation = activation)(x)
-
-        if dropout_rate:
-            x = Dropout(dropout_rate)(x)
-
-        units = int(units * growth_rate)
-
-    x = Dense(n_classes, activation = final_activation,
-            kernel_initializer = kernel_initializer)(x)
-
-    return x
 
 def DAM(
     models       = None,

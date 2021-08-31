@@ -8,6 +8,10 @@ def split(ds, splits = (.6, .2, .2)):
     """
     Split a TensorFlow Dataset into splits.
     """
+    if len(splits) == 1:
+        splits = list(splits)
+        splits = tuple(list(splits) + [1 - splits[0]])
+    
     assert sum(splits) == 1
     
     ds_size = cardinality(ds).numpy()

@@ -133,13 +133,6 @@ class UNetModel(BaseModel):
 
         return self._super.compile(*args, **kwargs)
 
-    # def fit(self, *args, **kwargs):
-    #     return self._super.fit(*args, **kwargs)
-
-    def plot(self, *args, **kwargs):
-        kwargs["show_shapes"] = kwargs.get("show_shapes", True)
-        return self._super.plot(*args, **kwargs)
-
 def UNet(
     x = None,
     y = None,
@@ -316,44 +309,58 @@ def UnetPP(*args, **kwargs):
 
     return unetpp
 
+def UNet3D(*args, **kwargs):
+    """
+    Constructs a 3D U-Net.
+    
+    >>> from deeply.model.unet import UNet3D
+    >>> model = UNet3D()
+    """
+    unet = UNet(
+        name = "unet-3d",
+        **kwargs
+    )
+
+    return unet
+
 def _center_crop(arr, shape):
-    # arr_shape = arr.shape
+    arr_shape = arr.shape
 
-    # diff_x = (arr_shape[0] - shape[0])
-    # diff_y = (arr_shape[1] - shape[1])
+    diff_x = (arr_shape[0] - shape[0])
+    diff_y = (arr_shape[1] - shape[1])
 
-    # assert diff_x >= 0
-    # assert diff_y >= 0
+    assert diff_x >= 0
+    assert diff_y >= 0
 
-    # if diff_x == 0 and diff_y == 0:
-    #     return arr
+    if diff_x == 0 and diff_y == 0:
+        return arr
 
-    # off_lx  = diff_x // 2
-    # off_ly  = diff_y // 2
-    # off_rx  = diff_x - off_lx
-    # off_ry  = diff_y - off_ly
+    off_lx  = diff_x // 2
+    off_ly  = diff_y // 2
+    off_rx  = diff_x - off_lx
+    off_ry  = diff_y - off_ly
 
-    # cropped = arr[ off_lx : -off_ly, off_rx : -off_ry ]
+    cropped = arr[ off_lx : -off_ly, off_rx : -off_ry ]
 
-    # return cropped
+    return cropped
 
-    augmentor = iaa.Sequential([
-        iaa.CenterCropToFixedSize(
-            width  = shape[0],
-            height = shape[1]
-        )
-    ])
+    # augmentor = iaa.Sequential([
+    #     iaa.CenterCropToFixedSize(
+    #         width  = shape[0],
+    #         height = shape[1]
+    #     )
+    # ])
 
-    from_, to = (0, 1, 2), (1, 0, 2)
+    # from_, to = (0, 1, 2), (1, 0, 2)
 
-    arr = arr.numpy()
-    arr = np.moveaxis(arr, from_, to)
-    aug = augmentor(images = [arr])
-    aug = squash(aug)
+    # arr = arr.numpy()
+    # arr = np.moveaxis(arr, from_, to)
+    # aug = augmentor(images = [arr])
+    # aug = squash(aug)
 
-    aug = np.moveaxis(aug, to, from_)
+    # aug = np.moveaxis(aug, to, from_)
 
-    return aug
+    # return aug
 
 def _crop(shape):
     def crop(x, y):
@@ -413,9 +420,9 @@ class Trainer:
 
         callbacks.append(plothistory)
 
-        if early_stopping:
-            gen_early_stop = GeneralizedEarlyStopping(baseline = 0.05)
-            callbacks.append(gen_early_stop)
+        # if early_stopping:
+        #     gen_early_stop = GeneralizedEarlyStopping(baseline = 0.05)
+        #     callbacks.append(gen_early_stop)
 
         kwargs["callbacks"] = callbacks
 

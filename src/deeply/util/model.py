@@ -19,7 +19,7 @@ def get_fit_kwargs(model, kwargs, custom = None):
     callbacks = sequencify(kwargs.pop("callbacks", []))
 
     callbacks.append(ProgressStepCallback())
-    callbacks.append(TqdmCallback(verbose = verbose))
+    # callbacks.append(TqdmCallback(verbose = verbose))
 
     callbacks.append(ModelCheckpoint(
         filepath            = "%s.hdf5" % get_checkpoint_prefix(model),
