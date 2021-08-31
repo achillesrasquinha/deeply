@@ -1,7 +1,6 @@
 import collections
 
 import matplotlib.pyplot as pplt
-import pandas as pd
 import seaborn as sns
 
 from sklearn.metrics import confusion_matrix as sk_confusion_matrix

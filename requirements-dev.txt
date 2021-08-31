@@ -24,6 +24,7 @@ pydicom
 pylibjpeg
 pylibjpeg-libjpeg
 numpy>1.19
+seaborn
 pipenv
 jedi<0.18
 ipython

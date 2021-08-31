@@ -6,3 +6,4 @@ pydicom
 pylibjpeg
 pylibjpeg-libjpeg
 numpy>1.19
+seaborn
