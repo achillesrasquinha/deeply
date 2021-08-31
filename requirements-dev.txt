@@ -25,6 +25,7 @@ pylibjpeg
 pylibjpeg-libjpeg
 numpy>1.19
 seaborn
+scikit-learn
 pipenv
 jedi<0.18
 ipython
