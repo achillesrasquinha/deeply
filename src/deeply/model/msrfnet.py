@@ -30,15 +30,10 @@ from deeply.metrics         import jaccard_index, dice_coefficient
 from deeply.util.array      import sequencify, squash
 from deeply.util.model      import get_checkpoint_prefix, get_input
 
-def kernel_initializer(shape, dtype = None):
-    n = np.prod(shape[:3])
-    stddev = np.sqrt(2 / n)
-    return tf.random.normal(shape, stddev = stddev, dtype = dtype)
-
-class ConvBlock(Layer):
+class EncoderBlock(Layer):
     def __init__(self, filters, kernel_size = 3, activation = "relu", width = 2, batch_norm = True,
-        dropout_rate = 0.2, kernel_initializer = kernel_initializer, padding = "valid", *args, **kwargs):
-        self._super = super(ConvBlock, self)
+        dropout_rate = 0.2, kernel_initializer = None, padding = "valid", *args, **kwargs):
+        self._super = super(EncoderBlock, self)
         self._super.__init__(*args, **kwargs)
 
         self.dropout_rate = dropout_rate
@@ -66,8 +61,6 @@ class ConvBlock(Layer):
                 self.dropouts.append(dropout)
 
         self.width = width
-
-    # return x
 
     def call(self, inputs, training = False):
         x = inputs
@@ -132,7 +125,7 @@ class UNetModel(BaseModel):
 
         return self._super.compile(*args, **kwargs)
 
-def UNet(
+def MSRFNet(
     x = None,
     y = None,
     channels     = 1,
@@ -144,26 +137,26 @@ def UNet(
     filter_growth_rate = 2,
     activation   = "relu",
     padding      = "valid",
-    batch_norm   = True, # recommendation, don't use batch norm and dropout at the same time.
+    batch_norm   = True,
     dropout_rate = 0,
     pool_size    = 2,
     mp_strides   = 2,
     up_conv_size = 2,
     final_conv_size  = 1,
     final_activation = "softmax",
-    kernel_initializer = kernel_initializer,
-    name = "unet",
+    kernel_initializer = None,
+    name = "msrf-net",
     attention_gate = None,
     weights = None
 ):
     """
-    Constructs a U-Net.
+    Constructs a MSRF-Net.
 
     :param x: Input image width.
     :param y: Input image height.
     :param channels: Number of channels for input image.
 
-    :param layer_depth: Depth of the U-Net.
+    :param layer_depth: Depth of the MSRFNet-Net.
     :param n_conv: Number of convolutions in each layer.
     :param kernel_size: Size of kernel in a convolution.
     :param init_filters: Number of filters in initial convolution.
@@ -198,12 +191,12 @@ def UNet(
 
     # contracting path
     for _ in range(layer_depth):
-        m = ConvBlock(filters = filters, **conv_block_args)(m)
+        m = EncoderBlock(filters = filters, **conv_block_args)(m)
         contracting_layers.append(m)
         m = MaxPooling2D(pool_size = pool_size, strides = mp_strides)(m)
         filters = filters * filter_growth_rate
 
-    m = ConvBlock(filters = filters, **conv_block_args)(m)
+    m = EncoderBlock(filters = filters, **conv_block_args)(m)
 
     # expanding path
     for skip_layer in reversed(contracting_layers):
@@ -216,7 +209,7 @@ def UNet(
             skip_layer = attention_gate(skip_layer, m)
 
         m = copy_crop_concat_block(m, skip_layer)
-        m = ConvBlock(filters = filters, **conv_block_args)(m)
+        m = EncoderBlock(filters = filters, **conv_block_args)(m)
     
     m = Conv2D(filters = n_classes, kernel_size = final_conv_size, padding = padding,
                 kernel_initializer = kernel_initializer)(m)

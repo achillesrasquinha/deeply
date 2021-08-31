@@ -1,5 +1,9 @@
 import os.path as osp
+import csv
 
+from tensorflow.io.gfile import (
+    GFile
+)
 from tensorflow_datasets.core import (
     Version,
     GeneratorBasedBuilder,
@@ -44,6 +48,8 @@ class HyperKvasir(GeneratorBasedBuilder):
             description = _DATASET_DESCRIPTION,
             features    = FeaturesDict({
                 "image": ImageF(encoding_format = "jpeg"),
+                "organ": Text(),
+                "finding": Text(),
                 "label": Text(),
             }),
             supervised_keys = ("image", "label"),
@@ -53,6 +59,31 @@ class HyperKvasir(GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         path_extracted = dl_manager.download_and_extract(_DATASET_URL)
-        
+        return {
+            "data": self._generate_examples(path = path_extracted)
+        }
+
     def _generate_examples(self, path):
-        pass
+        dir_path   = osp.join(path, "labeled-images")
+        csv_path   = osp.join(dir_path, "image-labels.csv")
+        
+        with GFile(csv_path) as f:
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                image_hash  = row["Video file"]
+                image_fname = "%s.jpg" % row["Video file"]
+                organ       = row["Organ"]
+                finding     = row["Finding"]
+                label       = row["Classification"]
+
+                path_organ = "lower-gi-tract" if organ == "Lower GI" else "upper-gi-tract"
+
+                path_image = osp.join(dir_path, path_organ, label, finding, image_fname)
+
+                yield image_hash, {
+                    "image": path_image,
+                    "organ": organ,
+                    "finding": finding,
+                    "label": label
+                }

@@ -1,3 +1,5 @@
+
+from tensorflow.keras import Input
 from tensorflow.keras.callbacks import ModelCheckpoint
 
 from tqdm.keras import TqdmCallback
@@ -41,3 +43,12 @@ def get_fit_kwargs(model, kwargs, custom = None):
             kwargs[key] = value
 
     return kwargs
+
+def get_input(x, y, channels):
+    if not y:
+        y = x
+
+    input_shape = (x, y, channels)
+    input_ = Input(shape = input_shape, name = "inputs")
+
+    return input_
