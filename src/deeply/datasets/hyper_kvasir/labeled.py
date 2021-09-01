@@ -14,27 +14,17 @@ from tensorflow_datasets.core.features import (
     Image as ImageF,
     Text
 )
+from deeply.datasets.hyper_kvasir.base import (
+    _DATASET_HOMEPAGE,
+    _DATASET_DESCRIPTION,
+    _DATASET_CITATION
+)
 
-_DATASET_HOMEPAGE    = "https://datasets.simula.no/hyper-kvasir"
-_DATASET_URL         = osp.join(_DATASET_HOMEPAGE, "hyper-kvasir.zip")
-_DATASET_DESCRIPTION = """
-The data is collected during real gastro- and colonoscopy examinations at a Hospital in Norway and partly labeled by experienced gastrointestinal endoscopists. The dataset contains 110,079 images and 374 videos where it captures anatomical landmarks and pathological and normal findings. Resulting in around 1 million images and video frames all together.
-"""
-_DATASET_CITATION    = """\
-@misc{borgli2020,
-    title={Hyper-Kvasir: A Comprehensive Multi-Class Image and Video Dataset for Gastrointestinal Endoscopy},
-    url={osf.io/mkzcq},
-    DOI={10.31219/osf.io/mkzcq},
-    publisher={OSF Preprints},
-    author={Borgli, Hanna and Thambawita, Vajira and Smedsrud, Pia H and Hicks, Steven and Jha, Debesh and Eskeland, Sigrun L and Randel, Kristin R and Pogorelov, Konstantin and Lux, Mathias and Nguyen, Duc T D and Johansen, Dag and Griwodz, Carsten and Stensland, H{\aa}kon K and Garcia-Ceja, Enrique and Schmidt, Peter T and Hammer, Hugo L and Riegler, Michael A and Halvorsen, P{\aa}l and de Lange, Thomas},
-    year={2019},
-    month={Dec}
-}
-"""
+_DATASET_URL = osp.join(_DATASET_HOMEPAGE, "hyper-kvasir-labeled-images.zip")
 
-class HyperKvasir(GeneratorBasedBuilder):
+class HyperKvasirLabeled(GeneratorBasedBuilder):
     """
-    HyperKvasir Dataset.
+    HyperKvasir Labeled Dataset.
     """
 
     VERSION = Version("1.0.0")
@@ -64,8 +54,7 @@ class HyperKvasir(GeneratorBasedBuilder):
         }
 
     def _generate_examples(self, path):
-        dir_path   = osp.join(path, "labeled-images")
-        csv_path   = osp.join(dir_path, "image-labels.csv")
+        csv_path = osp.join(path, "image-labels.csv")
         
         with GFile(csv_path) as f:
             reader = csv.DictReader(f)
@@ -79,7 +68,7 @@ class HyperKvasir(GeneratorBasedBuilder):
 
                 path_organ = "lower-gi-tract" if organ == "Lower GI" else "upper-gi-tract"
 
-                path_image = osp.join(dir_path, path_organ, label, finding, image_fname)
+                path_image = osp.join(path, path_organ, label, finding, image_fname)
 
                 yield image_hash, {
                     "image": path_image,
