@@ -1,0 +1,37 @@
+{
+  "template": "https://github.com/achillesrasquinha/boilpy",
+  "commit": "86fa70e7bbf4a0e8ff1e2f4f2996a7967da417ce",
+  "context": {
+    "cookiecutter": {
+      "name": "deeply",
+      "version": "0.1.0",
+      "slug": "deeply",
+      "command": "deeply",
+      "cli": "argparse",
+      "config": "y",
+      "compat": "custom",
+      "jupyter": "y",
+      "sqlite": "y",
+      "pypy": "y",
+      "travis": "n",
+      "appveyor": "n",
+      "description": "A Deep Learning library",
+      "author": "Achilles Rasquinha",
+      "email": "achillesrasquinha@gmail.com",
+      "keywords": "deep learning",
+      "license": "MIT License",
+      "repo_service": "https://github.com",
+      "repo_service_username": "achillesrasquinha",
+      "repo_service_reponame": "deeply",
+      "docker_service_username": "achillesrasquinha",
+      "docker_service_reponame": "deeply",
+      "editor": "vscode",
+      "url": "https://github.com/achillesrasquinha/deeply",
+      "_copy_without_render": [
+        ".github/workflows/ci.yml"
+      ],
+      "_template": "https://github.com/achillesrasquinha/boilpy"
+    }
+  },
+  "directory": null
+}

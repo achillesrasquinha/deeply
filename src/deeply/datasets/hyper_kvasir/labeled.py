@@ -50,7 +50,7 @@ class HyperKvasirLabeled(GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         path_extracted = dl_manager.download_and_extract(_DATASET_URL)
         return {
-            "data": self._generate_examples(path = path_extracted)
+            "data": self._generate_examples(path = osp.join(path_extracted, "labeled-images"))
         }
 
     def _generate_examples(self, path):

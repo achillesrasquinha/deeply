@@ -50,7 +50,7 @@ class HyperKvasirSegmented(GeneratorBasedBuilder):
     def _split_generators(self, dl_manager):
         path_extracted = dl_manager.download_and_extract(_DATASET_URL)
         return {
-            "data": self._generate_examples(path = path_extracted)
+            "data": self._generate_examples(path = osp.join(path_extracted, "segmented-images"))
         }
 
     def _generate_examples(self, path):
@@ -60,6 +60,8 @@ class HyperKvasirSegmented(GeneratorBasedBuilder):
             data = json.load(f)
 
             for name, box in iteritems(data):
+                filename   = "%s.jpg" % name
+                
                 path_image = osp.join(path, "images", filename)
                 path_mask  = osp.join(path, "masks",  filename)
 

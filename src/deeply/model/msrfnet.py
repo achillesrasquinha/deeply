@@ -24,6 +24,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 import imgaug.augmenters as iaa
 
 from deeply.model.base      import BaseModel
+from deeply.model.se        import squeeze_excitation_block
 from deeply.generators      import BaseDataGenerator
 from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
 from deeply.metrics         import jaccard_index, dice_coefficient
@@ -42,6 +43,7 @@ class EncoderBlock(Layer):
         self.batch_norms  = [ ]
         self.activations  = [ ]
         self.dropouts     = [ ]
+        self.ses          = [ ]
 
         for _ in range(width):
             conv = Conv2D(filters = filters, kernel_size = kernel_size,
@@ -59,7 +61,7 @@ class EncoderBlock(Layer):
             if dropout_rate:
                 dropout = Dropout(rate = dropout_rate)
                 self.dropouts.append(dropout)
-
+                
         self.width = width
 
     def call(self, inputs, training = False):
@@ -75,6 +77,8 @@ class EncoderBlock(Layer):
 
             if training and self.dropouts:
                 x = self.dropouts[i](x)
+
+            x = squeeze_excitation_block(x)
 
         return x
 
@@ -176,8 +180,8 @@ def MSRFNet(
     References
         [1]. Ronneberger, Olaf, et al. “U-Net: Convolutional Networks for Biomedical Image Segmentation.” ArXiv:1505.04597 [Cs], May 2015. arXiv.org, http://arxiv.org/abs/1505.04597.
     
-    >>> from deeply.model.unet import UNet
-    >>> model = UNet()
+    >>> from deeply.model.msrfnet import MSRFNet
+    >>> model = MSRFNet()
     """
     input_ = get_input(x, y, channels)
     m = input_
