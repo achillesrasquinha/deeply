@@ -1,14 +1,14 @@
 <div align="center">
   <img src=".github/assets/logo.png" height="128">
   <h1>
-    deeply
+      deeply
   </h1>
   <h4>A Deep Learning library</h4>
 </div>
 
 <p align="center">
-    <a href="https://travis-ci.org/achillesrasquinha/deeply">
-      <img src="https://img.shields.io/travis/achillesrasquinha/deeply.svg?style=flat-square">
+    <a href='https://github.com/achillesrasquinha/deeply//actions?query=workflow:"Continuous Integration"'>
+      <img src="https://img.shields.io/github/workflow/status/achillesrasquinha/deeply/Continuous Integration?style=flat-square">
     </a>
     <a href="https://coveralls.io/github/achillesrasquinha/deeply">
       <img src="https://img.shields.io/coveralls/github/achillesrasquinha/deeply.svg?style=flat-square">
@@ -29,28 +29,31 @@
 
 ### Table of Contents
 * [Features](#features)
-* [Installation](#installation)
+* [Quick Start](#quick-start)
 * [Usage](#usage)
 * [License](#license)
 
-#### Features
+### Features
+* Python 2.7+ and Python 3.4+ compatible.
 
-
-#### Installation
+### Quick Start
 
 ```shell
-$ pip install git+https://github.com/achillesrasquinha/deeply.git
+$ pip install deeply
 ```
 
-#### Usage
+Check out [installation](docs/source/installation.md) for more details.
 
-##### Application Interface
+### Usage
+
+#### Application Interface
 
 ```python
 >>> import deeply
 ```
 
-##### Command-Line Interface
+
+#### Command-Line Interface
 
 ```console
 $ deeply
@@ -67,7 +70,8 @@ Commands:
   version  Show version and exit.
 ```
 
-#### License
+
+### License
 
 This repository has been released under the [MIT License](LICENSE).
 

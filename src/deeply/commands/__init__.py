@@ -10,18 +10,17 @@ from   functools import partial
 import traceback
 
 from deeply.commands.util 	import cli_format
-from deeply.util.array    	import flatten, sequencify
-from deeply.util._dict     import merge_dict
-from deeply.util.system   	import (read, write, touch, popen, which)
-from deeply.util.environ  	import getenvvar
-from deeply.util.datetime 	import get_timestamp_str
-from deeply.util.imports   import import_or_raise
-from deeply 		      	import (request as req, cli,
-    log, parallel
-)
-from deeply._compat		import builtins, iteritems
+from bpyutils.util.array    	import flatten, sequencify
+from bpyutils.util._dict        import merge_dict
+from bpyutils.util.system   	import (read, write, touch, popen, which)
+from bpyutils.util.environ  	import getenvvar
+from bpyutils.util.datetime 	import get_timestamp_str
+from bpyutils.util.imports      import import_or_raise
+from bpyutils.config			import environment
+from bpyutils import request as req, log, parallel
+from deeply 	import cli
+from bpyutils._compat		    import builtins, iteritems
 from deeply.__attr__      	import __name__
-from deeply.config			import environment
 from deeply.exception      import DependencyNotFoundError
 
 logger   = log.get_logger(level = log.DEBUG)

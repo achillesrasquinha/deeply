@@ -2,8 +2,8 @@ import os.path as osp
 
 # imports - compatibility imports
 from deeply.commands    import _command as command
-from deeply.util._dict  import merge_dict
-from deeply.util.string import strip_ansi
+from bpyutils.util._dict  import merge_dict
+from bpyutils.util.string import strip_ansi
 
 # imports - test imports
 import pytest

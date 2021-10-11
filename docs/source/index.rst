@@ -1,5 +1,9 @@
 deeply
+<<<<<<< HEAD
 ======
+=======
+===
+>>>>>>> template/master
 
 Release v\ |version|. (:ref:`Installation <installation>`)
 

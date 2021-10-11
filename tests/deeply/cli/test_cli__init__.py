@@ -1,10 +1,10 @@
 # imports - compatibility imports
-from deeply._compat import iteritems, iterkeys
+from bpyutils._compat import iteritems, iterkeys
 
 # imports - module imports
 from deeply import cli
 from deeply.cli import get_args
-from deeply.util._dict import merge_dict
+from bpyutils.util._dict import merge_dict
 
 def test_command():
     def _assert_command(values, override = dict(), initial = dict()):

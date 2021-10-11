@@ -10,7 +10,9 @@ PROJECT					= deeply
 PROJDIR					= ${BASEDIR}/src/deeply
 TESTDIR					= ${BASEDIR}/tests
 DOCSDIR					= ${BASEDIR}/docs
+
 NOTEBOOKSDIR			= ${DOCSDIR}/source/notebooks
+
 
 PYTHONPATH		 	   ?= python
 
@@ -32,8 +34,10 @@ PRECOMMIT				= ${VENVBIN}pre-commit
 SPHINXBUILD				= ${VENVBIN}sphinx-build
 TWINE					= ${VENVBIN}twine
 
+DOCKER_IMAGE		   ?= ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${PROJECT}
 
-SQLITE					= sqlite
+
+SQLITE				   ?= sqlite
 
 
 JOBS				   ?= $(shell $(PYTHON) -c "import multiprocessing as mp; print(mp.cpu_count())")
@@ -118,6 +122,7 @@ ifneq (${ENVIRONMENT},test)
 		$(BASEDIR)/.tox \
 		$(BASEDIR)/*.coverage \
 		$(BASEDIR)/*.coverage.* \
+		$(BASEDIR)/.coverage.* \
 		$(BASEDIR)/htmlcov \
 		$(BASEDIR)/dist \
 		$(BASEDIR)/build \
@@ -170,13 +175,14 @@ ifneq (${VERBOSE},true)
 endif
 
 	
-	# $(call log,INFO,Building Notebooks)
-	# @find $(DOCSDIR)/source/notebooks -type f -name '*.ipynb' -not -path "*/.ipynb_checkpoints/*" | \
-	# 	xargs $(JUPYTER) nbconvert \
-	# 		--to notebook 		\
-	# 		--inplace 			\
-	# 		--execute 			\
-	# 		--ExecutePreprocessor.timeout=300
+	$(call log,INFO,Building Notebooks)
+	@find $(DOCSDIR)/source/notebooks -type f -name '*.ipynb' -not -path "*/.ipynb_checkpoints/*" | \
+		xargs $(JUPYTER) nbconvert \
+			--to notebook 		\
+			--inplace 			\
+			--execute 			\
+			--ExecutePreprocessor.timeout=300
+	
 
 	$(call log,INFO,Building Documentation)
 	$(SPHINXBUILD) $(DOCSDIR)/source $(DOCSDIR)/build $(OUT)
@@ -190,7 +196,10 @@ endif
 docker-build: clean ## Build the Docker Image.
 	$(call log,INFO,Building Docker Image)
 
-	@docker build $(BASEDIR) --tag $(DOCKER_HUB_USERNAME)/$(PROJECT) $(DOCKER_BUILD_ARGS)
+	@docker build $(BASEDIR) --tag $(DOCKER_IMAGE) $(DOCKER_BUILD_ARGS)
+
+docker-push: ## Push Docker Image to Registry.
+	@docker push $(DOCKER_IMAGE)$(DOCKER_IMAGE_TAG)
 
 docker-tox: clean ## Test using Docker Tox Image.
 	$(call log,INFO,Running Tests using Docker Tox)
