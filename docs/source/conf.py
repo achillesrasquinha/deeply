@@ -13,10 +13,7 @@ SRCDIR  = osp.join(BASEDIR, "src")
 NOW     = dt.datetime.now()
 
 sys.path.insert(0, BASEDIR)
-<<<<<<< HEAD
 sys.path.insert(0, SRCDIR)
-=======
->>>>>>> template/master
 
 import deeply
 
@@ -27,21 +24,12 @@ copyright = "%s %s" % (NOW.year, deeply.__author__)
 version   = deeply.__version__
 release   = deeply.__version__
 
-<<<<<<< HEAD
-master_doc     = "index"
-
-=======
->>>>>>> template/master
 source_suffix       = [".rst"]
 
 master_doc          = "index"
 
 exclude_patterns    = [
-<<<<<<< HEAD
     osp.join(DOCSDIR,"source","notebooks",".ipynb_checkpoints")
-=======
-    osp.join(DOCSDIR, "source", "notebooks", ".ipynb_checkpoints")
->>>>>>> template/master
 ]
 
 extensions          = [
@@ -63,9 +51,4 @@ html_sidebars       = {
     "index": ["sidebar.html"],
     "**": [
         "sidebar.html"
-    ]
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> template/master
+]

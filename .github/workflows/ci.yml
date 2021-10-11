@@ -3,12 +3,9 @@ name: Continuous Integration
 on: [push, pull_request]
 
 env:
-<<<<<<< HEAD
-=======
   COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
->>>>>>> template/master
   ENVIRONMENT: test
   VERBOSE: true
   TERM: xterm
@@ -45,8 +42,4 @@ jobs:
           tox -e py$(echo "${{ matrix.python-version }}" | tr -d '.')
       - name: Run Coverage
         run: |
-<<<<<<< HEAD
-          coveralls
-=======
           coveralls --service github
->>>>>>> template/master
