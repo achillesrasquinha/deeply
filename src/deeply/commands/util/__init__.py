@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-from deeply.util.array   import sequencify
-from deeply.util.imports import import_handler
-=======
 from bpyutils.util.array   import sequencify
 from bpyutils.util.imports import import_handler
->>>>>>> template/master
 
 # imports - module imports
 from deeply.cli.parser import get_args
