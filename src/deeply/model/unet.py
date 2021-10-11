@@ -1,5 +1,5 @@
 import json
-from deeply.util.model import get_checkpoint_prefix
+from bpyutils.util.model import get_checkpoint_prefix
 
 import numpy as np
 
@@ -27,8 +27,8 @@ from deeply.model.base      import BaseModel
 from deeply.generators      import BaseDataGenerator
 from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
 from deeply.metrics         import jaccard_index, dice_coefficient
-from deeply.util.array      import sequencify, squash
-from deeply.util.model      import get_checkpoint_prefix, get_input
+from bpyutils.util.array      import sequencify, squash
+from bpyutils.util.model      import get_checkpoint_prefix, get_input
 
 def kernel_initializer(shape, dtype = None):
     n = np.prod(shape[:3])

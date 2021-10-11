@@ -14,7 +14,7 @@ from tensorflow_datasets.core.features import (
     Image as ImageF,
     Text
 )
-from deeply._compat import iteritems
+from bpyutils._compat import iteritems
 from deeply.datasets.hyper_kvasir.base import (
     _DATASET_HOMEPAGE,
     _DATASET_DESCRIPTION,

@@ -5,7 +5,7 @@ import seaborn as sns
 
 from sklearn.metrics import confusion_matrix as sk_confusion_matrix
 
-from deeply._compat import iteritems, iterkeys
+from bpyutils._compat import iteritems, iterkeys
 
 def _matshow(axes, mat, title = None, axis = False, **kwargs):
     plot_args = kwargs.pop("plot_args", {})

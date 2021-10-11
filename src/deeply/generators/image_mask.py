@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.image import (
 )
 
 from deeply.generators.base import BaseDataGenerator
-from deeply.util.system import get_basename
+from bpyutils.util.system import get_basename
 
 IMAGE_MASK_GENERATOR_SIZE = (256, 256)
 

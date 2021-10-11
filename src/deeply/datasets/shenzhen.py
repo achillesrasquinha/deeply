@@ -13,15 +13,16 @@ from tensorflow_datasets.core.features import (
     Tensor,
     Text
 )
+from deeply.__attr__ import __name__
 from deeply.datasets.montgomery import (
     _DATASET_CITATION,
     _str_to_int,
     sanitize_lines
 )
-from deeply.util.string import strip, safe_decode
-from deeply.log import get_logger
+from bpyutils.util.string import strip, safe_decode
+from bpyutils.log import get_logger
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 _DATASET_URL         = "http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip"
 _DATASET_KAGGLE      = "yoctoman/shcxr-lung-mask"

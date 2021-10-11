@@ -6,9 +6,9 @@ from tqdm.keras import TqdmCallback
 
 from deeply.callbacks.progress_step import ProgressStepCallback
 
-from deeply.util.array import sequencify
-from deeply.util.datetime import get_timestamp_str
-from deeply._compat import iteritems
+from bpyutils.util.array import sequencify
+from bpyutils.util.datetime import get_timestamp_str
+from bpyutils._compat import iteritems
 
 def get_checkpoint_prefix(model):
     prefix = "%s-%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))

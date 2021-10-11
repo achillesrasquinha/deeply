@@ -10,12 +10,22 @@ from deeply.datasets.siim_covid19   import SiimCovid19
 from deeply.datasets.hyper_kvasir.labeled   import HyperKvasirLabeled
 from deeply.datasets.hyper_kvasir.segmented import HyperKvasirSegmented
 
-from bpyutils import parallel
-from bpyutils.const import CPU_COUNT
+from bpyutils.util.array import squash
 
-# load = tfds.load
 def load(*names, **kwargs):
-    with parallel.no_daemon_pool(processes = CPU_COUNT) as pool:
-        results = pool.map(partial(tfds.load, **kwargs), names)
-        
-    return results
+    results = []
+    
+    # with parallel.no_daemon_pool(processes = CPU_COUNT) as pool:
+    #     results = pool.lmap(
+    #         partial(
+    #             _load,
+    #             **kwargs
+    #         )
+    #     , names)
+    # return results
+
+    for name in names:
+        result = tfds.load(name, **kwargs)
+        results.append(result)
+    
+    return squash(results)

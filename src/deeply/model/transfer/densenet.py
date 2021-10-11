@@ -12,7 +12,7 @@ from tensorflow.keras.layers import (
 )
 
 from deeply.model.base import BaseModel
-from deeply.util.imports import import_handler
+from bpyutils.util.imports import import_handler
 from deeply.const import DEFAULT
 
 def fully_connected_block(x, units = 256, depth = 3, growth_rate = 0.5, activation = "relu",

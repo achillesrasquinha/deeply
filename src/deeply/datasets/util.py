@@ -2,7 +2,7 @@ import numpy as np
 
 from tensorflow.data.experimental import cardinality
 
-from deeply.util.array import sequencify
+from bpyutils.util.array import sequencify
 
 def split(ds, splits = (.6, .2, .2)):
     """

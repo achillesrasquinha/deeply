@@ -18,9 +18,9 @@ import numpy as np
 from PIL import Image
 import imageio
 
-from deeply.util.string import strip, safe_decode
-from deeply.util.system import makedirs
-from deeply._compat import iterkeys, iteritems
+from bpyutils.util.string import strip, safe_decode
+from bpyutils.util.system import makedirs
+from bpyutils._compat import iterkeys, iteritems
 
 _DATASET_URL         = "http://openi.nlm.nih.gov/imgs/collections/NLM-MontgomeryCXRSet.zip"
 _DATASET_HOMEPAGE    = "https://lhncbc.nlm.nih.gov/LHC-publications/pubs/TuberculosisChestXrayImageDataSets.html"

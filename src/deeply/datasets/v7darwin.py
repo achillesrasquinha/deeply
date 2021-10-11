@@ -6,6 +6,8 @@ import requests as req
 from   PIL import Image, ImageDraw
 import imageio
 
+from deeply.__attr__ import __name__
+
 from tensorflow_datasets.core import (
     Version,
     GeneratorBasedBuilder,
@@ -16,10 +18,10 @@ from tensorflow_datasets.core.features import (
     Image as ImageF
 )
 from tqdm import tqdm
-from deeply.util.system import makedirs
-from deeply.log import get_logger
+from bpyutils.util.system import makedirs
+from bpyutils.log import get_logger
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 _DATASET_URL         = "https://github.com/v7labs/covid-19-xray-dataset/blob/master/annotations/all-images.zip?raw=true"
 _DATASET_HOMEPAGE    = "https://darwin.v7labs.com/v7-labs/covid-19-chest-x-ray-dataset"

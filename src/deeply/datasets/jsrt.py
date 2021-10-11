@@ -14,11 +14,12 @@ import numpy as np
 import imageio
 from   tqdm import tqdm
 
+from deeply.__attr__            import __name__
 from deeply.datasets.montgomery import merge_images
-from deeply.util.system import makedirs, read, write
-from deeply.log         import get_logger
+from bpyutils.util.system import makedirs, read, write
+from bpyutils.log         import get_logger
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 _DATASET_HOMEPAGE    = "http://db.jsrt.or.jp/eng.php"
 _DATASET_DESCRIPTION = """

@@ -25,11 +25,11 @@ from tensorflow_datasets.core.features import (
 import numpy as np
 from PIL import Image
 import imageio
-import pydicom
+# import pydicom
 
-from deeply.util.string import strip, safe_decode
-from deeply.util.system import makedirs
-from deeply._compat import iterkeys, iteritems
+from bpyutils.util.string import strip, safe_decode
+from bpyutils.util.system import makedirs
+from bpyutils._compat import iterkeys, iteritems
 
 _DATASET_KAGGLE      = "rsna-miccai-brain-tumor-radiogenomic-classification"
 _DATASET_HOMEPAGE    = ""

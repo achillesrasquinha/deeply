@@ -1,7 +1,7 @@
 from tensorflow.keras.callbacks import Callback
 
 from deeply.plots   import history as history_plot
-from deeply._compat import iteritems
+from bpyutils._compat import iteritems
 
 class PlotHistoryCallback(Callback):
     def __init__(self, fpath = "history.png", *args, **kwargs):

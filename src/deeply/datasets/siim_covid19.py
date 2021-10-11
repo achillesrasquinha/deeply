@@ -25,11 +25,12 @@ from tensorflow_datasets.core.features import (
 import numpy as np
 from PIL import Image
 import imageio
-import pydicom
+# import pydicom
 
-from deeply.util.string import strip, safe_decode
-from deeply.util.system import makedirs
-from deeply._compat import iterkeys, iteritems
+from bpyutils.util.string   import strip, safe_decode
+from bpyutils.util.system   import makedirs
+from bpyutils._compat       import iterkeys, iteritems
+from bpyutils.util.imports  import import_handler
 
 _DATASET_KAGGLE      = "siim-covid19-detection"
 _DATASET_HOMEPAGE    = ""
@@ -92,7 +93,8 @@ class SiimCovid19(GeneratorBasedBuilder):
         makedirs(dir_images, exist_ok = True)
 
         with GFile(csv_path) as f:
-            reader = csv.DictReader(f)
+            reader  = csv.DictReader(f)
+            pydicom = import_handler("pydicom")
             for row in reader:
                 study_instance_uid = row["StudyInstanceUID"]
                 image_uid  = row["id"].split("_image")[0]
