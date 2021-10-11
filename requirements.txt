@@ -1,11 +1,10 @@
-<<<<<<< HEAD
 tensorflow
 tensorflow-datasets
 imgaug
 pillow
-pydicom
-pylibjpeg
-pylibjpeg-libjpeg
+# pydicom
+# pylibjpeg
+# pylibjpeg-libjpeg
 seaborn
 scikit-learn
 git+git://github.com/achillesrasquinha/bpyutils.git@develop#egg=bpyutils
@@ -13,7 +12,3 @@ numpy==1.19.3
 six<=1.16.0
 typing-extensions<=3.7.4
 absl-py<0.13
-=======
-
-git+git://github.com/achillesrasquinha/bpyutils.git@develop#egg=bpyutils
->>>>>>> template/master
