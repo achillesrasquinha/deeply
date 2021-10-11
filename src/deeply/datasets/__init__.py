@@ -8,4 +8,9 @@ from deeply.datasets.siim_covid19   import SiimCovid19
 from deeply.datasets.hyper_kvasir.labeled   import HyperKvasirLabeled
 from deeply.datasets.hyper_kvasir.segmented import HyperKvasirSegmented
 
-load = tfds.load
+# from bpyutils
+
+# load = tfds.load
+def load(*names, **kwargs):
+    with parallel.no_daemon_pool(processes = N_JOBS) as pool:
+        pool.map()
