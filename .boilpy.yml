@@ -21,7 +21,7 @@ default_context:
   repo_service_reponame: "deeply"
   docker_service_username: "achillesrasquinha"
   docker_service_reponame: "deeply"
-  github_action: "y"
+  github_action: "n"
   ml: "n"
   editor: "vscode"
   url: "https://github.com/achillesrasquinha/deeply"
