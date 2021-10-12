@@ -4,6 +4,8 @@ from tensorflow.data.experimental import cardinality
 
 from bpyutils.util.array import sequencify
 
+SPLIT_TYPES = ("train", "val", "test")
+
 def split(ds, splits = (.6, .2, .2)):
     """
     Split a TensorFlow Dataset into splits.
