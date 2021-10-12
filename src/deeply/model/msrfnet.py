@@ -1,5 +1,5 @@
 import json
-from bpyutils.util.model import get_checkpoint_prefix
+from deeply.util.model import get_checkpoint_prefix
 
 import numpy as np
 
@@ -29,7 +29,7 @@ from deeply.generators      import BaseDataGenerator
 from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
 from deeply.metrics         import jaccard_index, dice_coefficient
 from bpyutils.util.array      import sequencify, squash
-from bpyutils.util.model      import get_checkpoint_prefix, get_input
+from deeply.util.model      import get_checkpoint_prefix, get_input
 
 class EncoderBlock(Layer):
     def __init__(self, filters, kernel_size = 3, activation = "relu", width = 2, batch_norm = True,

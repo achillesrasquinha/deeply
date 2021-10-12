@@ -14,7 +14,7 @@ import tqdm as tq
 from deeply.model.base     import BaseModel
 from deeply.model.logistic import LogisticRegression
 from bpyutils.util._dict     import merge_dict
-from bpyutils.util.model     import get_fit_kwargs
+from deeply.util.model     import get_fit_kwargs
 
 def get_model_loss(model, data, training = False):
     X, y   = data

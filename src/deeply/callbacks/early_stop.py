@@ -1,9 +1,10 @@
 from tensorflow.keras.callbacks import EarlyStopping
 
+from deeply.__attr__ import __name__
 from deeply.const import DEFAULT
-from deeply.log import get_logger
+from bpyutils.log import get_logger
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 class GeneralizedEarlyStopping(EarlyStopping):
     """

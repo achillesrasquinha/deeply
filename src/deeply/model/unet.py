@@ -1,5 +1,4 @@
 import json
-from bpyutils.util.model import get_checkpoint_prefix
 
 import numpy as np
 
@@ -23,12 +22,12 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 
 import imgaug.augmenters as iaa
 
+from deeply.util.model      import get_checkpoint_prefix, get_input
 from deeply.model.base      import BaseModel
 from deeply.generators      import BaseDataGenerator
 from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
 from deeply.metrics         import jaccard_index, dice_coefficient
-from bpyutils.util.array      import sequencify, squash
-from bpyutils.util.model      import get_checkpoint_prefix, get_input
+from bpyutils.util.array    import sequencify, squash
 
 def kernel_initializer(shape, dtype = None):
     n = np.prod(shape[:3])
