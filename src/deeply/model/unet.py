@@ -1,4 +1,6 @@
+import os, os.path as osp
 import json
+import shutil
 
 import numpy as np
 
@@ -27,7 +29,9 @@ from deeply.model.base      import BaseModel
 from deeply.generators      import BaseDataGenerator
 from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
 from deeply.metrics         import jaccard_index, dice_coefficient
-from bpyutils.util.array    import sequencify, squash
+from bpyutils.util.array    import sequencify
+from bpyutils.util.system   import make_archive, make_temp_dir
+from bpyutils.util.datetime import get_timestamp_str
 
 def kernel_initializer(shape, dtype = None):
     n = np.prod(shape[:3])
@@ -374,6 +378,9 @@ def _format_dataset(ds, mapper = None, target_shape = None, batch_size = 1, **kw
 
     return ds
 class Trainer:
+    def __init__(self, artifacts_path = None):
+        self.artifacts_path = osp.abspath(artifacts_path or get_timestamp_str('%Y%m%d%H%M%S'))
+
     def fit(self, model, train, val = None, batch_size = 32, early_stopping = True, monitor = "loss", **kwargs):
         target_shape = model.output_shape[1:]
 
@@ -399,32 +406,37 @@ class Trainer:
         if val:
             monitor = "val_%s" % monitor
 
-        filepath   = "%s.hdf5" % prefix
-        checkpoint = ModelCheckpoint(
-            filepath          = filepath,
-            monitor           = monitor,
-            save_best_only    = True,
-            save_weights_only = True
-        )
+        history = None
 
-        callbacks.append(checkpoint)
+        with make_temp_dir() as tmp_dir:
+            filepath   = osp.join(tmp_dir, "%s.hdf5" % prefix)
+            checkpoint = ModelCheckpoint(
+                filepath          = filepath,
+                monitor           = monitor,
+                save_best_only    = True,
+                save_weights_only = True
+            )
 
-        plothistory = PlotHistoryCallback()
+            callbacks.append(checkpoint)
 
-        callbacks.append(plothistory)
+            plothistory = PlotHistoryCallback(fpath = osp.join(tmp_dir, "history.png"))
 
-        # if early_stopping:
-        #     gen_early_stop = GeneralizedEarlyStopping(baseline = 0.05)
-        #     callbacks.append(gen_early_stop)
+            callbacks.append(plothistory)
 
-        kwargs["callbacks"] = callbacks
+            # if early_stopping:
+            #     gen_early_stop = GeneralizedEarlyStopping(baseline = 0.05)
+            #     callbacks.append(gen_early_stop)
 
-        history  = model.fit(train, validation_data = val, **kwargs)
+            kwargs["callbacks"] = callbacks
 
-        filepath = "%s.json" % prefix 
+            history  = model.fit(train, validation_data = val, **kwargs)
 
-        with open(filepath, mode = "w") as f:
-            json.dump(history.history, f)
+            filepath = osp.join(tmp_dir, "%s.json" % prefix)
+
+            with open(filepath, mode = "w") as f:
+                json.dump(history.history, f)
+                
+            make_archive(self.artifacts_path, "zip", tmp_dir)
 
         return history
 

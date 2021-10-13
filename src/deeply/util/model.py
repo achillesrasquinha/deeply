@@ -15,8 +15,8 @@ def get_checkpoint_prefix(model):
     return prefix
 
 def get_fit_kwargs(model, kwargs, custom = None):
-    verbose   = kwargs.pop("verbose", 0)
-    monitor   = kwargs.pop("monitor", "loss")
+    verbose = kwargs.pop("verbose", 0)
+    monitor = kwargs.pop("monitor", "loss")
 
     callbacks = sequencify(kwargs.pop("callbacks", []))
 

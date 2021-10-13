@@ -10,6 +10,8 @@ from deeply.datasets.siim_covid19   import SiimCovid19
 from deeply.datasets.hyper_kvasir.labeled   import HyperKvasirLabeled
 from deeply.datasets.hyper_kvasir.segmented import HyperKvasirSegmented
 
+from deeply.datasets.colonoscopy import CVCClinicDB
+
 from bpyutils.util.array import squash
 
 def load(*names, **kwargs):
