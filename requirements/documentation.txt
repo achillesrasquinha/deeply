@@ -7,3 +7,4 @@ pydot
 pydotplus
 pydot-ng
 graphviz
+sphinx-autobuild

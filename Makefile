@@ -25,6 +25,7 @@ PIP					   ?= ${VENVBIN}pip
 PYTEST				   ?= ${VENVBIN}pytest
 TOX						= ${VENVBIN}tox
 COVERALLS			   ?= ${VENVBIN}coveralls
+DOCSTR_COVERAGE		   ?= ${VENVBIN}docstr-coverage
 IPYTHON					= ${VENVBIN}ipython
 
 JUPYTER					= ${VENVBIN}jupyter
@@ -32,6 +33,7 @@ JUPYTER					= ${VENVBIN}jupyter
 SAFETY					= ${VENVBIN}safety
 PRECOMMIT				= ${VENVBIN}pre-commit
 SPHINXBUILD				= ${VENVBIN}sphinx-build
+SPHINXAUTOBUILD			= ${VENVBIN}sphinx-autobuild
 TWINE					= ${VENVBIN}twine
 
 DOCKER_IMAGE		   ?= ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${PROJECT}
@@ -144,6 +146,9 @@ endif
 
 	$(PYTEST) -s -n $(JOBS) --cov $(PROJDIR) $(IARGS) -vv $(ARGS)
 
+doc-coverage: install ## Display documentation coverage.
+	$(DOCSTR_COVERAGE) $(PROJDIR)
+
 ifeq (${ENVIRONMENT},development)
 	$(call browse,file:///${BASEDIR}/htmlcov/index.html)
 endif
@@ -173,16 +178,14 @@ docs: install ## Build Documentation
 ifneq (${VERBOSE},true)
 	$(eval OUT = > /dev/null)
 endif
-
 	
-	$(call log,INFO,Building Notebooks)
-	@find $(DOCSDIR)/source/notebooks -type f -name '*.ipynb' -not -path "*/.ipynb_checkpoints/*" | \
-		xargs $(JUPYTER) nbconvert \
-			--to notebook 		\
-			--inplace 			\
-			--execute 			\
-			--ExecutePreprocessor.timeout=300
-	
+# $(call log,INFO,Building Notebooks)
+# @find $(DOCSDIR)/source/notebooks -type f -name '*.ipynb' -not -path "*/.ipynb_checkpoints/*" | \
+# 	xargs $(JUPYTER) nbconvert \
+# 		--to notebook 		\
+# 		--inplace 			\
+# 		--execute 			\
+# 		--ExecutePreprocessor.timeout=300
 
 	$(call log,INFO,Building Documentation)
 	$(SPHINXBUILD) $(DOCSDIR)/source $(DOCSDIR)/build $(OUT)

@@ -51,4 +51,5 @@ html_sidebars       = {
     "index": ["sidebar.html"],
     "**": [
         "sidebar.html"
-]
+    ]
+}
