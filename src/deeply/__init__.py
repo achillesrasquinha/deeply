@@ -22,6 +22,7 @@ from deeply.__attr__ import (
     __author__
 )
 from deeply.__main__    import main
+from deeply             import ops
 
 from bpyutils.cache       import Cache
 from bpyutils.config      import Settings

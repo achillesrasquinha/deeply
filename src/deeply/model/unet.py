@@ -3,6 +3,7 @@ import json
 import shutil
 
 import numpy as np
+from deeply.metrics import tversky_index
 
 import tensorflow as tf
 from tensorflow.data  import Dataset
@@ -28,7 +29,7 @@ from deeply.util.model      import get_checkpoint_prefix, get_input
 from deeply.model.base      import BaseModel
 from deeply.generators      import BaseDataGenerator
 from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
-from deeply.metrics         import jaccard_index, dice_coefficient
+from deeply.metrics         import jaccard_index, dice_coefficient, tversky_index
 from bpyutils.util.array    import sequencify
 from bpyutils.util.system   import make_archive, make_temp_dir
 from bpyutils.util.datetime import get_timestamp_str
@@ -130,6 +131,7 @@ class UNetModel(BaseModel):
             
         metrics.append(dice_coefficient)
         metrics.append(jaccard_index)
+        metrics.append(tversky_index)
 
         kwargs["metrics"]   = metrics
 

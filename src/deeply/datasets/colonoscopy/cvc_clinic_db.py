@@ -1,4 +1,4 @@
-import os, os.path as osp
+import os.path as osp
 from glob import glob
 
 import tensorflow as tf
@@ -9,21 +9,13 @@ from tensorflow_datasets.core import (
 )
 from tensorflow_datasets.core.features import (
     FeaturesDict,
-    Image as ImageF,
-    Text,
-    Tensor,
-    ClassLabel,
+    Image as ImageF
 )
-import numpy as np
 from PIL import Image
-import imageio
 
-from bpyutils.util.string  import strip, safe_decode
-from bpyutils.util.system  import makedirs
 from bpyutils.util.imports import import_or_raise
-from bpyutils._compat import iterkeys, iteritems
 
-_DATASET_URL         = "https://www.dropbox.com/s/p5qe9eotetjnbmq/CVC-ClinicDB.rar"
+_DATASET_URL         = "https://www.dropbox.com/s/p5qe9eotetjnbmq/CVC-ClinicDB.rar?dl=1"
 _DATASET_HOMEPAGE    = "https://polyp.grand-challenge.org/CVCClinicDB/"
 _DATASET_DESCRIPTION = """
 The CVC-ClinicDB database is built in collaboration with Hospital Clinic of Barcelona, Spain. CVC-ClinicDB has been generated from 23 different video studies from standard colonoscopy interventions with white light. CVC-ClinicDB database comprises 612 polyp images of size 576 × 768.
@@ -44,48 +36,9 @@ _DATASET_CITATION    = """\
 }
 """
 
-_SANITIZE_LABELS = {
-    "sex": {
-        "male": ["M"],
-        "female": ["F"],
-        "other": ["O"]
-    }
-}
-
-def _sanitize_label(type_, label):
-    type_ = _SANITIZE_LABELS[type_]
-    
-    for key, value in iteritems(type_):
-        if label in value:
-            return key
-
-    return label
-
-def sanitize_lines(lines):
-    return list(filter(bool, [strip(line) for line in lines]))
-
-def _str_to_int(o):
-    stripped = "".join((s for s in o if s.isdigit()))
-    stripped = stripped.lstrip("0")
-    
-    return int(stripped)
-
-def merge_images(*args, **kwargs):
-    assert len(args) >= 2
-
-    arr = imageio.imread(args[0])
-
-    for path in args:
-        a   = imageio.imread(path)
-        arr = np.maximum(arr, a)
-
-    output = kwargs.get("output")
-
-    if output:
-        img = Image.fromarray(arr)
-        img.save(output)
-
-    return arr
+def _tiff_to_jpeg(source, dest):
+    img = Image.open(source)
+    img.save(dest, "JPEG", quality = 100)
 
 class CVCClinicDB(GeneratorBasedBuilder):
     """
@@ -112,49 +65,35 @@ class CVCClinicDB(GeneratorBasedBuilder):
 
     def _split_generators(self, dl_manager):
         path_downloaded = dl_manager.download(_DATASET_URL)
-        patoolib        = import_or_raise("patoolib", name = "patool")
-        print(dir(dl_manager))
-        path_extracted  = patoolib.extract_archive(path_downloaded)
-        # return {
-        #     "data": self._generate_examples(path = osp.join(path_extracted, "CVC-ClinicDB"))
-        # }
+        path_target     = osp.join(dl_manager.download_dir, "CVC-ClinicDB")
+        
+        if not osp.exists(path_target):
+            patoolib       = import_or_raise("patoolib", name = "patool")
+            patoolib.extract_archive(path_downloaded, outdir = dl_manager.download_dir)
+
+        return {
+            "data": self._generate_examples(path = osp.join(path_target, ""))
+        }
         
     def _generate_examples(self, path):
-        
-        pass
-        # path_images = osp.join(path, "CXR_png")
-        # path_data   = osp.join(path, "ClinicalReadings")
-        # path_masks  = osp.join(path, "ManualMask")
-        # path_masks_merged = osp.join(path_masks, "merged")
+        path_images = osp.join(path, "Original")
+        path_masks  = osp.join(path, "Ground Truth")
 
-        # makedirs(path_masks_merged, exist_ok = True)
+        for path_img_tif in glob(osp.join(path_images, "*.tif")):
+            fname     = osp.basename(osp.normpath(path_img_tif))
+            prefix    = str(fname).split(".tif")[0]
 
-        # for path_img in glob(osp.join(path_images, "*.png")):
-        #     fname  = osp.basename(osp.normpath(path_img))
-        #     prefix = str(fname).split(".png")[0]
+            path_img  = osp.join(path_images, "%s.jpg" % prefix)
+            if not osp.exists(path_img):
+                _tiff_to_jpeg(path_img_tif, path_img)
 
-        #     path_txt  = osp.join(path_data, "%s.txt" % prefix)
+            path_mask_tif = osp.join(path_masks, fname)
+            path_mask     = osp.join(path_masks, "%s.jpg" % prefix)
 
-        #     path_mask = osp.join(path_masks_merged, "%s.png" % prefix)
+            if not osp.exists(path_mask):
+                _tiff_to_jpeg(path_mask_tif, path_mask)
 
-        #     if not osp.exists(path_mask):
-        #         path_mask_left  = osp.join(path_masks, "leftMask",  "%s.png" % prefix)
-        #         path_mask_right = osp.join(path_masks, "rightMask", "%s.png" % prefix)
-
-        #         merge_images(path_mask_left, path_mask_right, output = path_mask)
-                
-        #     with open(path_txt) as f:
-        #         content = f.readlines()
-        #         lines   = sanitize_lines(content)
-
-        #         sex     = _sanitize_label("sex", safe_decode(strip(lines[0].split(": ")[1])))
-        #         age     = _str_to_int(safe_decode(strip(lines[1].split(": ")[1])))
-        #         label   = safe_decode(strip(lines[2]))
-
-        #         yield prefix, {
-        #             "image": path_img,
-        #              "mask": path_mask,
-        #               "sex": sex,
-        #               "age": age,
-        #             "label": label
-        #         }
+            yield fname, {
+                "image": path_img,
+                 "mask": path_mask
+            }
