@@ -45,7 +45,13 @@ class ConvBlock(Layer):
         self._super = super(ConvBlock, self)
         self._super.__init__(*args, **kwargs)
 
+        self.filters      = filters
+        self.kernel_size  = kernel_size
+        self.activation   = activation
+        self.batch_norm   = batch_norm
         self.dropout_rate = dropout_rate
+        self.padding      = padding
+        self.kernel_initializer = kernel_initializer
 
         self.convs        = [ ]
         self.batch_norms  = [ ]
@@ -88,6 +94,22 @@ class ConvBlock(Layer):
                 x = self.dropouts[i](x)
 
         return x
+
+    def get_config(self):
+        return {
+            "filters": self.filters,
+            "kernel_size": self.kernel_size,
+            "activation": self.activation,
+            "width": self.width,
+            "batch_norm": self.batch_norm,
+            "dropout_rate": self.dropout_rate,
+            "padding": self.padding,
+            "kernel_initializer": self.kernel_initializer
+        }
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
 
 def get_crop_length(a, b):
     c = a - b

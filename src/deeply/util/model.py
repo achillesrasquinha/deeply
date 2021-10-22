@@ -41,7 +41,7 @@ def get_fit_kwargs(model, kwargs, custom = None):
                 value       += kwarg_value
                 
             kwargs[key] = value
-
+            
     return kwargs
 
 def get_input(x, y, channels):
