@@ -9,6 +9,7 @@ from deeply.datasets.v7darwin       import V7Darwin
 from deeply.datasets.siim_covid19   import SiimCovid19
 from deeply.datasets.hyper_kvasir.labeled   import HyperKvasirLabeled
 from deeply.datasets.hyper_kvasir.segmented import HyperKvasirSegmented
+from deeply.datasets.kvasir.segmented import KvasirSegmented
 
 from deeply.datasets.colonoscopy import CVCClinicDB
 
