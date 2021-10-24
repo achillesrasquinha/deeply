@@ -13,7 +13,7 @@ from tensorflow_datasets.core.features import (
 from bpyutils.util.system import read
 
 _DATASET_HOMEPAGE    = "https://polyp.grand-challenge.org/CVCClinicDB/"
-_DATASET_URL         = "https://www.kaggle.com/achillesrasquinha/cvcclinicdb/download"
+_DATASET_KAGGLE      = "achillesrasquinha/cvcclinicdb"
 _DATASET_DESCRIPTION = """
 CVC-ClinicDB is a database of frames extracted from colonoscopy videos. These frames contain several examples of polyps. In addition to the frames, we provide the ground truth for the polyps. This ground truth consists of a mask corresponding to the region covered by the polyp in the image
 """
@@ -44,7 +44,7 @@ class CVCClinicDB(GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        path_extracted = dl_manager.download_and_extract(_DATASET_URL)
+        path_extracted = dl_manager.download_kaggle_data(_DATASET_KAGGLE)
         return {
             "data": self._generate_examples(path = osp.join(path_extracted, "CVC-ClinicDB"))
         }
