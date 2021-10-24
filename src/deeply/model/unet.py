@@ -418,10 +418,10 @@ class Trainer:
             val = _format_dataset(val, **format_args)
 
         if isinstance(train, BaseDataGenerator):
-            kwargs["steps_per_epoch"]  = train.n_samples
+            kwargs["steps_per_epoch"]  = train.n_samples // batch_size
 
         if isinstance(val, BaseDataGenerator):
-            kwargs["validation_steps"] = val.n_samples
+            kwargs["validation_steps"] = val.n_samples // batch_size
 
         callbacks = sequencify(kwargs.get("callbacks", []))
         
