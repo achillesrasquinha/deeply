@@ -34,6 +34,7 @@ from bpyutils.util.array    import sequencify
 from bpyutils.util.system   import make_archive, make_temp_dir
 from bpyutils.util.datetime import get_timestamp_str
 
+# verify with paper...
 def kernel_initializer(shape, dtype = None):
     n = np.prod(shape[:3])
     stddev = np.sqrt(2 / n)
@@ -238,6 +239,7 @@ def UNet(
         m = Conv2DTranspose(filters = filters, kernel_size = up_conv_size,
             strides = pool_size, padding = padding,
             kernel_initializer = kernel_initializer)(m)
+        m = Activation(activation = activation)
 
         if attention_gate:
             skip_layer = attention_gate(skip_layer, m)
