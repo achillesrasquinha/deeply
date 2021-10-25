@@ -1,12 +1,16 @@
-FROM  python:3.7-alpine
+FROM python:3.9
 
 LABEL maintainer=achillesrasquinha@gmail.com
 
-ENV DEEPLY_PATH=/usr/local/src/deeply
+ENV DEEPLY_PATH=/deeply
 
-RUN apk add --no-cache \
-        bash \
-        git \
+RUN apt-get update && \
+        apt-get install -y --no-install-recommends \
+                ffmpeg \
+                libsm6 \
+                libxext6 \
+                bash \
+                git \
     && mkdir -p $DEEPLY_PATH
 
 COPY . $DEEPLY_PATH
