@@ -1,7 +1,7 @@
 deeply
 ======
 
-Release v\ |version|. (:ref:`Installation <install>`)
+Release v\ |version|. (:ref:`Installation <install:>`)
 
 .. image:: https://img.shields.io/travis/achillesrasquinha/ccapi.svg?style=flat-square
     :target: https://travis-ci.org/achillesrasquinha/ccapi
@@ -28,4 +28,3 @@ Release v\ |version|. (:ref:`Installation <install>`)
     :target: https://paypal.me/achillesrasquinha
 
 **deeply** is an elegant and simple Deep Learning library written in Python, containing a growing collection of deep learning models, datasets and utilities.
-

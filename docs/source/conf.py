@@ -29,7 +29,7 @@ source_suffix       = [".rst"]
 master_doc          = "index"
 
 exclude_patterns    = [
-    osp.join(DOCSDIR,"source","notebooks",".ipynb_checkpoints")
+    osp.join(DOCSDIR, "source", "notebooks", ".ipynb_checkpoints")
 ]
 
 extensions          = [
