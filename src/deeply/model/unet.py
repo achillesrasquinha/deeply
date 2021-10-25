@@ -239,7 +239,7 @@ def UNet(
         m = Conv2DTranspose(filters = filters, kernel_size = up_conv_size,
             strides = pool_size, padding = padding,
             kernel_initializer = kernel_initializer)(m)
-        m = Activation(activation = activation)
+        m = Activation(activation = activation)(m)
 
         if attention_gate:
             skip_layer = attention_gate(skip_layer, m)
