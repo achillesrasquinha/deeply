@@ -57,7 +57,8 @@ class ETISLarib(GeneratorBasedBuilder):
 
             path_mask = osp.join(path_masks, fname)
 
-            yield prefix, {
-                "image": path_img,
-                 "mask": path_mask
-            }
+            if osp.exists(path_mask):
+                yield prefix, {
+                    "image": path_img,
+                    "mask": path_mask
+                }
