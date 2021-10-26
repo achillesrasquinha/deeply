@@ -1,16 +1,9 @@
-import os.path as osp
-from glob import glob
+from deeply.datasets.util import image_mask
 
 from tensorflow_datasets.core import (
     Version,
-    GeneratorBasedBuilder,
-    DatasetInfo
+    GeneratorBasedBuilder
 )
-from tensorflow_datasets.core.features import (
-    FeaturesDict,
-    Image as ImageF
-)
-from bpyutils.util.system import read
 
 _DATASET_HOMEPAGE    = "https://polyp.grand-challenge.org/CVCClinicDB/"
 _DATASET_KAGGLE      = "achillesrasquinha/cvcclinicdb"
@@ -27,39 +20,19 @@ class CVCClinicDB(GeneratorBasedBuilder):
 
     VERSION = Version("1.0.0")
     RELEASE_NOTES = {
-        "1.0.0": "Initial Release."
+        "1.0.0": "Initial Release"
     }
 
-    def _info(self):
-        return DatasetInfo(
-            builder     = self,
+    def _info(self, *args, **kwargs):
+        return image_mask._info(self,
             description = _DATASET_DESCRIPTION,
-            features    = FeaturesDict({
-                "image": ImageF(encoding_format = "jpeg"),
-                 "mask": ImageF(encoding_format = "jpeg")
-            }),
-            supervised_keys = ("image", "mask"),
             homepage    = _DATASET_HOMEPAGE,
-            citation    = _DATASET_CITATION
+            citation    = _DATASET_CITATION,
+            *args, **kwargs
         )
 
-    def _split_generators(self, dl_manager):
-        path_extracted = dl_manager.download_kaggle_data(_DATASET_KAGGLE)
-        return {
-            "data": self._generate_examples(path = osp.join(path_extracted, "CVC-ClinicDB"))
-        }
-        
-    def _generate_examples(self, path):
-        path_images = osp.join(path, "images")
-        path_masks  = osp.join(path, "masks")
+    def _split_generators(self, *args, **kwargs):
+        return image_mask._split_generators(self, kaggle = _DATASET_KAGGLE, *args, **kwargs)
 
-        for path_img in glob(osp.join(path_images, "*.jpg")):
-            fname  = osp.basename(osp.normpath(path_img))
-            prefix = str(fname).split(".jpg")[0]
-
-            path_mask = osp.join(path_masks, fname)
-
-            yield prefix, {
-                "image": path_img,
-                 "mask": path_mask
-            }
+    def _generate_examples(self, *args, **kwargs):
+        return image_mask._generate_examples(*args, **kwargs)
