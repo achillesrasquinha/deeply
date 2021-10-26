@@ -12,6 +12,7 @@ from deeply.datasets.hyper_kvasir.segmented import HyperKvasirSegmented
 from deeply.datasets.kvasir.segmented import KvasirSegmented
 
 from deeply.datasets.colonoscopy import CVCClinicDB
+from deeply.datasets.colonoscopy import ETISLarib
 
 from bpyutils.util.array import squash
 
