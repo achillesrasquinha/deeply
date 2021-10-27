@@ -2,7 +2,16 @@ import itertools
 
 from imgaug.augmenters import Augmenter, Sequential
 from imgaug.augmentables.batches import _AUGMENTABLE_NAMES
+from imgaug.multicore import Pool
 import imgaug as ia
+
+from bpyutils import parallel
+from bpyutils.util.types import build_fn
+
+from deeply.const import N_JOBS
+
+def _augment_batch(sequence, batch, parents = None, hooks = None):
+    return sequence.augment_batches_(batch, parents = parents, hooks = hooks)
 
 class Combination(Augmenter):
     def __init__(self, children = None, *args, **kwargs):
@@ -23,7 +32,7 @@ class Combination(Augmenter):
 
                 for L in range(1, length + 1):
                     for subset in itertools.combinations(children, L):
-                        self.combinations.append(subset)
+                        self.combinations.append(Sequential(subset))
                         
             else:
                 raise ValueError("Expected None or Augmenter or list of Augmenter, "
@@ -31,19 +40,24 @@ class Combination(Augmenter):
 
     def _augment_batch_(self, batch, random_state, parents, hooks):
         batch_copy   = batch.deepcopy()
-        batch_result = batch.deepcopy()
+        batch_result = batch_copy
 
         with batch.propagation_hooks_ctx(self, hooks, parents):
-            for combination in self.combinations:
-                sequential = Sequential(combination)
+            # with parallel.no_daemon_pool(processes = N_JOBS) as pool:
+            #     function_   = build_fn(_augment_batch, batch = batch, parents = parents + [self], hooks = hooks)
+            #     results     = pool.imap(function_, self.combinations)
+
+            #     for result in results:
+            #         batch_result = self._append_batch(batch_result, result)
+            for sequential in self.combinations:
                 result = sequential.augment_batch_(batch,
-                    parents  = parents + [self],
-                    hooks    = hooks
+                    parents = parents + [self],
+                    hooks   = hooks
                 )
 
                 batch_result = self._append_batch(batch_result, result)
 
-                batch  = batch_copy.deepcopy()
+                result = batch_copy.deepcopy()
 
         batch_result = self._drop_batch_duplicates(batch_result)
 

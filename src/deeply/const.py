@@ -1,3 +1,13 @@
+import multiprocessing as mp
+
+from bpyutils.util.environ import getenv
+
+from deeply.__attr__ import __name__ as NAME
+
+_PREFIX = NAME.upper()
+
+N_JOBS  = getenv("JOBS", mp.cpu_count(), prefix = _PREFIX)
+
 DEFAULT = \
 {
     "batch_norm": True,
