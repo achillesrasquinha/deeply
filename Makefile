@@ -158,6 +158,8 @@ ifeq (${ENVIRONMENT},test)
 endif
 
 shell: install ## Launch an IPython shell.
+	clear
+	
 	$(call log,INFO,Launching Python Shell)
 	$(IPYTHON) \
 		--no-banner

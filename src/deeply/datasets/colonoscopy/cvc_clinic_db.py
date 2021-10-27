@@ -35,4 +35,4 @@ class CVCClinicDB(GeneratorBasedBuilder):
         return image_mask._split_generators(self, kaggle = _DATASET_KAGGLE, *args, **kwargs)
 
     def _generate_examples(self, *args, **kwargs):
-        return image_mask._generate_examples(*args, **kwargs)
+        return image_mask._generate_examples(self, *args, **kwargs)
