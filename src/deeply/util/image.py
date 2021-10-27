@@ -5,7 +5,7 @@ import imageio
 from bpyutils.util.system import makedirs, get_basename
 from bpyutils.util.string import get_random_str
 
-def augment(augmentor, images, dir_path = None, filename = None, format_ = "jpg"):
+def augment(augmentor, images, dir_path = None, prefix = None, filename = None, format_ = "jpg"):
     images = augmentor(images = images)
 
     if filename:
@@ -14,7 +14,9 @@ def augment(augmentor, images, dir_path = None, filename = None, format_ = "jpg"
 
     makedirs(dir_path, exist_ok = True)
     
-    for image in images:
-        fname = filename or "%s.%s" % (get_random_str(), format_)
-        path  = osp.join(dir_path, fname)
+    for i, image in enumerate(images):
+        suffix = i if prefix else ""
+
+        fname  = filename or "%s%s.%s" % (prefix or get_random_str(), suffix, format_)
+        path   = osp.join(dir_path, fname)
         imageio.imwrite( path, image )

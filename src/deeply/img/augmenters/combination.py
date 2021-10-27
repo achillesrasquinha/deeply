@@ -1,7 +1,5 @@
 import itertools
 
-from bpyutils.util.array import squash
-
 from imgaug.augmenters import Augmenter, Sequential
 from imgaug.augmentables.batches import _AUGMENTABLE_NAMES
 import imgaug as ia
@@ -25,7 +23,6 @@ class Combination(Augmenter):
 
                 for L in range(1, length + 1):
                     for subset in itertools.combinations(children, L):
-                        subset = squash(subset)
                         self.combinations.append(subset)
                         
             else:
@@ -61,11 +58,11 @@ class Combination(Augmenter):
             prev = getattr(batch, augmentable_name, None)
             next = getattr(value, augmentable_name, None)
 
-            if next:
+            if next is not None:
                 value = prev
 
-                if prev:
-                    value = list(itertools.chain(prev, next)) 
+                if prev is not None:
+                    value = list(itertools.chain(prev, next))
                 else:
                     value = next
 
