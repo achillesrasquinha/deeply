@@ -1,9 +1,11 @@
 from deeply.ops.integrations import (
-    WeightsAndBiases
+    WeightsAndBiases,
+    AzureML
 )
 
 SERVICE_REGISTRY = {
-    "wandb": WeightsAndBiases
+    "wandb": WeightsAndBiases,
+    "azure-ml": AzureML
 }
 
 def service(name):

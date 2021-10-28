@@ -4,6 +4,7 @@ import shutil
 
 import numpy as np
 from deeply.metrics import tversky_index
+from deeply.model.transfer.backbone import BackBone
 
 import tensorflow as tf
 from tensorflow.data  import Dataset
@@ -182,6 +183,7 @@ def UNet(
     kernel_initializer = kernel_initializer,
     name = "unet",
     attention_gate = None,
+    backbone = None,
     weights = None
 ):
     """
@@ -214,6 +216,9 @@ def UNet(
     >>> from deeply.model.unet import UNet
     >>> model = UNet()
     """
+    if backbone:
+        backbone = BackBone.get(backbone)
+
     input_ = get_input(x, y, channels)
     m = input_
 
