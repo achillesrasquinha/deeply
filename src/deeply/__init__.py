@@ -15,7 +15,7 @@ except ImportError:
 from deeply.__attr__ import (
     __name__,
     __version__,
-
+    __build__,
 
     __description__,
 
@@ -23,6 +23,7 @@ from deeply.__attr__ import (
 )
 from deeply.__main__    import main
 from deeply             import ops
+from deeply.config      import PATH
 
 from bpyutils.cache       import Cache
 from bpyutils.config      import Settings
