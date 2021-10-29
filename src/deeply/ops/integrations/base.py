@@ -35,11 +35,14 @@ class BaseService:
 
         return "%s%s" % (_PREFIX, suffix)
 
-    def init(self, name):
+    def init(self, *args, **kwargs):
         raise NotImplementedError
 
-    def upload(self):
+    def upload(self, *args, **kwargs):
         raise NotImplementedError
 
-    def watch(self):
+    def download(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def watch(self, *args, **kwargs):
         raise NotImplementedError

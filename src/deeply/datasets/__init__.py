@@ -14,6 +14,11 @@ from deeply.datasets.kvasir.segmented import KvasirSegmented
 from deeply.datasets.colonoscopy import CVCClinicDB
 from deeply.datasets.colonoscopy import ETISLarib
 
+from deeply.datasets.util import (
+    split,
+    concat
+)
+
 from bpyutils.util.array import squash
 
 def load(*names, **kwargs):

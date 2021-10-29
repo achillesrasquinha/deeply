@@ -6,6 +6,7 @@ from bpyutils.util.string  import get_random_str
 
 from deeply.config import PATH
 from deeply.ops.integrations.base import BaseService
+from deeply.exception import OpsError
 
 _PREFIX = "WANDB"
 
@@ -29,6 +30,8 @@ class WeightsAndBiases(BaseService):
 
     def upload(self, *files, name = None, dest = None):
         module   = self.module
+        runner   = self._runner
+
         name     = name or get_random_str()
 
         artifact = module.Artifact(name, type = 'dataset')
@@ -50,7 +53,21 @@ class WeightsAndBiases(BaseService):
             fn = getattr(artifact, module_attr)
             fn(source, destination)
 
-        self._runner.log_artifact(artifact)
+        runner.log_artifact(artifact)
+
+    def download(self, name, target_dir = None):
+        module      = self.module
+        runner      = self._runner
+
+        target_dir  = target_dir or PATH["CACHE"]
+
+        try:
+            artifact  = runner.use_artifact(name)
+            directory = artifact.download(root = target_dir)
+        except (module.errors.CommError, ValueError):
+            raise OpsError("No data object %s found." % name)
+
+        return directory
 
     def watch(self, *models):
         module = self.module

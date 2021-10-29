@@ -217,7 +217,7 @@ def UNet(
     >>> model = UNet()
     """
     if backbone:
-        backbone = BackBone.get(backbone)
+        backbone = BackBone.get(backbone, weights = weights)
 
     input_ = get_input(x, y, channels)
     m = input_

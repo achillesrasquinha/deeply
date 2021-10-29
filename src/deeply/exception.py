@@ -9,3 +9,6 @@ class PopenError(DeeplyError, sp.CalledProcessError):
 
 class DependencyNotFoundError(ImportError):
     pass
+
+class OpsError(DeeplyError):
+    pass

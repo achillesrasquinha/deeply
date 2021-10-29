@@ -26,13 +26,18 @@ Release v\ |version|. (:ref:`Installation <install:>`)
     >>> import deeply.datasets as dd
     >>> # load data
     >>> mnist = dd.load("mnist")
-    >>> train, val, test = dd.util.split(mnist)
+    >>> train, val, test = dd.split(mnist)
     >>> # build model
     >>> model = deeply.model("efficient-net-b7")
-    >>> model.fit(train, validation_data = val, epochs = 50)
+    >>> model.fit(train, validation_data = val, epochs = 10)
 
 ⭐ features
 -----------
+
+- Create end-to-end pipeline repositories using deeply templates.
+- Avoid unnecessary code so you can simply focus on product delivery.
+- Integrate third-party MLOps Infrastructure for real-time experiment tracking with breeze.
+- Access to a wide range of datasets.
 
 deeply officially supports Python 3.5+.
 
@@ -42,9 +47,18 @@ deeply officially supports Python 3.5+.
 .. toctree::
    :maxdepth: 2
 
+   template/index
    models/index
    datasets/index
    ops/index
+
+api
+---
+
+.. toctree::
+   :maxdepth: 1
+
+   api/metrics
 
 🤝 contribution
 ---------------
