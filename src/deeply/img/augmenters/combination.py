@@ -1,17 +1,8 @@
 import itertools
 
 from imgaug.augmenters import Augmenter, Sequential
-from imgaug.augmentables.batches import _AUGMENTABLE_NAMES
-from imgaug.multicore import Pool
+from imgaug.augmentables.batches import _AUGMENTABLE_NAMES, Batch
 import imgaug as ia
-
-from bpyutils import parallel
-from bpyutils.util.types import build_fn
-
-from deeply.const import N_JOBS
-
-def _augment_batch(sequence, batch, parents = None, hooks = None):
-    return sequence.augment_batches_(batch, parents = parents, hooks = hooks)
 
 class Combination(Augmenter):
     def __init__(self, children = None, *args, **kwargs):
@@ -33,14 +24,14 @@ class Combination(Augmenter):
                 for L in range(1, length + 1):
                     for subset in itertools.combinations(children, L):
                         self.combinations.append(Sequential(subset))
-                        
+
             else:
                 raise ValueError("Expected None or Augmenter or list of Augmenter, "
                     "got %s." % (type(children),))
 
     def _augment_batch_(self, batch, random_state, parents, hooks):
         batch_copy   = batch.deepcopy()
-        batch_result = batch_copy
+        batch_result = batch.deepcopy()
 
         with batch.propagation_hooks_ctx(self, hooks, parents):
             # with parallel.no_daemon_pool(processes = N_JOBS) as pool:
@@ -49,6 +40,7 @@ class Combination(Augmenter):
 
             #     for result in results:
             #         batch_result = self._append_batch(batch_result, result)
+            
             for sequential in self.combinations:
                 result = sequential.augment_batch_(batch,
                     parents = parents + [self],
@@ -57,7 +49,7 @@ class Combination(Augmenter):
 
                 batch_result = self._append_batch(batch_result, result)
 
-                result = batch_copy.deepcopy()
+                batch = batch_copy.deepcopy()
 
         batch_result = self._drop_batch_duplicates(batch_result)
 
@@ -73,16 +65,19 @@ class Combination(Augmenter):
             next = getattr(value, augmentable_name, None)
 
             if next is not None:
-                value = prev
+                val = prev
 
                 if prev is not None:
-                    value = list(itertools.chain(prev, next))
+                    val = list(itertools.chain(prev, next))
                 else:
-                    value = next
+                    val = next
 
-                setattr(batch, augmentable_name, value)
+                setattr(batch, augmentable_name, val)
                 
         return batch
 
     def get_parameters(self):
         return []
+
+    def get_children_lists(self):
+        return self.combinations
