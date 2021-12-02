@@ -33,6 +33,10 @@ class WeightsAndBiases(BaseService):
         runner   = self._runner
 
         name     = name or get_random_str()
+        aliases  = "latest"
+
+        if ":" in name:
+            name, aliases = name.split(":")
 
         artifact = module.Artifact(name, type = 'dataset')
 
@@ -53,7 +57,7 @@ class WeightsAndBiases(BaseService):
             fn = getattr(artifact, module_attr)
             fn(source, destination)
 
-        runner.log_artifact(artifact)
+        runner.log_artifact(artifact, aliases = aliases)
 
     def download(self, name, target_dir = None):
         module      = self.module
