@@ -1,42 +1,32 @@
 from deeply.model.factory import ModelFactory
 
-_EFFICIENT_NET_FREEZE_LAYERS = [
-    "block6a_expand_activation",
-    "block4a_expand_activation",
+from bpyutils.util.types import lmap
+
+_EFFICIENT_NET_FEATURE_LAYERS = [
+    "block2a_expand_activation",
     "block3a_expand_activation",
-    "block2a_expand_activation"
+    "block4a_expand_activation",
+    "block6a_expand_activation"
 ]
 
-class BackBone(ModelFactory):
-    MODELS = {
-        "efficient-net-b0": {
-            "freeze_layers": _EFFICIENT_NET_FREEZE_LAYERS
-        },
-        "efficient-net-b1": {
-            "freeze_layers": _EFFICIENT_NET_FREEZE_LAYERS
-        },
-        "efficient-net-b2": {
-            "freeze_layers": _EFFICIENT_NET_FREEZE_LAYERS
-        },
-        "efficient-net-b3": {
-            "freeze_layers": _EFFICIENT_NET_FREEZE_LAYERS
-        },
-        "efficient-net-b4": {
-            "freeze_layers": _EFFICIENT_NET_FREEZE_LAYERS
-        },
-        "efficient-net-b5": {
-            "freeze_layers": _EFFICIENT_NET_FREEZE_LAYERS
-        },
-        "efficient-net-b6": {
-            "freeze_layers": _EFFICIENT_NET_FREEZE_LAYERS
-        },
-        "efficient-net-b7": {
-            "freeze_layers": _EFFICIENT_NET_FREEZE_LAYERS
+MODELS = {
+    key: value for key, value in lmap(lambda x: ("efficient-net-b%s" % x, {
+            "feature_layers": _EFFICIENT_NET_FEATURE_LAYERS
         }
-    }
+    ), range(8))
+}
 
-    def __init__(self):
-        self._model = None
+class BackBone(ModelFactory):
+    def __init__(self, name, *args, **kwargs):
+        if name not in MODELS:
+            raise ValueError("No backbone %s found." % name)
 
-    def get(self, name, *args, **kwargs):
-        self._model = ModelFactory.get(name, *args, **kwargs)
+        self._name = name
+        self._build(*args, **kwargs)
+
+    def _build(self, *args, **kwargs):
+        self._model = ModelFactory.get(self._name, include_top = False, *args, **kwargs)
+
+    def get_feature_layers(self):
+        model_meta = MODELS[self._name]
+        return [self._model.get_layer(feature_layer) for feature_layer in model_meta["feature_layers"]]

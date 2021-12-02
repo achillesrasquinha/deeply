@@ -184,7 +184,9 @@ def UNet(
     name = "unet",
     attention_gate = None,
     backbone = None,
-    weights = None
+    backbone_weights = "imagenet",
+    freeze_backbone  = False,
+    weights = None,
 ):
     """
     Constructs a U-Net.
@@ -216,11 +218,8 @@ def UNet(
     >>> from deeply.model.unet import UNet
     >>> model = UNet()
     """
-    if backbone:
-        backbone = BackBone.get(backbone, weights = weights)
-
-    input_ = get_input(x, y, channels)
-    m = input_
+    input_shape = (x, y, channels)
+    input_  = get_input(*input_shape)
 
     filters = init_filters
     conv_block_args = dict(kernel_size = kernel_size,
@@ -229,12 +228,23 @@ def UNet(
 
     contracting_layers = [ ]
 
-    # contracting path
-    for _ in range(layer_depth):
-        m = ConvBlock(filters = filters, **conv_block_args)(m)
-        contracting_layers.append(m)
-        m = MaxPooling2D(pool_size = pool_size, strides = mp_strides)(m)
-        filters = filters * filter_growth_rate
+    if backbone:
+        backbone = BackBone(backbone, input_tensor = input_, input_shape = input_shape, weights = backbone_weights)
+        input_   = backbone._model.input
+        m        = backbone._model.output
+
+        for feature_layer in backbone.get_feature_layers():
+            contracting_layers.append(feature_layer.output)
+            filters = filters * filter_growth_rate
+    else:
+        m = input_
+
+        # contracting path
+        for _ in range(layer_depth):
+            m = ConvBlock(filters = filters, **conv_block_args)(m)
+            contracting_layers.append(m)
+            m = MaxPooling2D(pool_size = pool_size, strides = mp_strides)(m)
+            filters = filters * filter_growth_rate
 
     m = ConvBlock(filters = filters, **conv_block_args)(m)
 

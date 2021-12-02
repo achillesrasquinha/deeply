@@ -1,43 +1,14 @@
-from tensorflow.keras.applications import (
-    EfficientNetB0,
-    EfficientNetB1,
-    EfficientNetB2,
-    EfficientNetB3,
-    EfficientNetB4,
-    EfficientNetB5,
-    EfficientNetB6,
-    EfficientNetB7
-)
+from bpyutils.util.types   import lmap
+from bpyutils.util.imports import import_handler
 
 class ModelFactory:
     MODELS = {
-        "efficient-net-b0": {
-            "model_class": EfficientNetB0
-        },
-        "efficient-net-b1": {
-            "model_class": EfficientNetB1
-        },
-        "efficient-net-b2": {
-            "model_class": EfficientNetB2
-        },
-        "efficient-net-b3": {
-            "model_class": EfficientNetB3
-        },
-        "efficient-net-b4": {
-            "model_class": EfficientNetB4
-        },
-        "efficient-net-b5": {
-            "model_class": EfficientNetB5
-        },
-        "efficient-net-b6": {
-            "model_class": EfficientNetB6
-        },
-        "efficient-net-b7": {
-            "model_class": EfficientNetB7
-        }
+        key: value for key, value in lmap(lambda x: ("efficient-net-b%s" % x, {
+            "model_class": import_handler("tensorflow.keras.applications.EfficientNetB%s" % x)
+        }), range(8))
     }
 
-    def get(self, name, *args, **kwargs):
+    def get(name, *args, **kwargs):
         if name not in ModelFactory.MODELS:
             raise ValueError("No model %s found." % name)
 

@@ -34,12 +34,13 @@ def tversky_index(y_true, y_pred, smooth = 1, alpha = 0.7):
     Links
         1. https://arxiv.org/pdf/1810.07842.pdf
     """
-    axis = (1, 2, 3)
-    tp   = K.sum(y_true * y_pred, axis = axis)
-    fn   = K.sum(y_true * (1 - y_pred), axis = axis)
-    fp   = K.sum((1 - y_true) * y_pred, axis = axis)
+    y_true, y_pred = y_cast(y_true, y_pred)
 
-    return K.mean((tp + smooth) / (tp + alpha * fn + (1 - alpha) * fp + smooth), axis = 0)
+    tp = reduce_sum(y_true * y_pred)
+    fn = reduce_sum(y_true * (1 - y_pred))
+    fp = reduce_sum((1 - y_true) * y_pred)
+
+    return reduce_mean((tp + smooth) / (tp + alpha * fn + (1 - alpha) * fp + smooth))
 
 def focal_tversky_index(*args, **kwargs):
     """
