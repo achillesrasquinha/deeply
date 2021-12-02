@@ -36,7 +36,7 @@ deeply is a simple and elegant Deep Learning library written in Python containin
 >>> import deeply.datasets as dd
 >>> # load data
 >>> mnist = dd.load("mnist")
->>> train, val, test = dd.split(mnist)
+>>> (train, val), test = dd.split(mnist["train"], splits = (.8, .2)), mnist["test"]
 >>> # build model
 >>> model = deeply.model("efficient-net-b7")
 >>> model.fit(train, validation_data = val, epochs = 10)
