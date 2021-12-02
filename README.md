@@ -3,8 +3,23 @@
   <h1>
       deeply
   </h1>
-  <h4>A Deep Learning library</h4>
 </div>
+
+deeply is a simple and elegant Deep Learning library written in Python containing a growing collection of deep learning models, datasets and utilities.
+
+**Behold, the power of deeply**:
+
+```python
+>>> # import deeply
+>>> import deeply
+>>> import deeply.datasets as dd
+>>> # load data
+>>> mnist = dd.load("mnist")
+>>> train, val, test = dd.split(mnist)
+>>> # build model
+>>> model = deeply.model("efficient-net-b7")
+>>> model.fit(train, validation_data = val, epochs = 10)
+```
 
 <p align="center">
     <a href='https://github.com/achillesrasquinha/deeply//actions?query=workflow:"Continuous Integration"'>
