@@ -5,22 +5,6 @@
   </h1>
 </div>
 
-deeply is a simple and elegant Deep Learning library written in Python containing a growing collection of deep learning models, datasets and utilities.
-
-**Behold, the power of deeply**:
-
-```python
->>> # import deeply
->>> import deeply
->>> import deeply.datasets as dd
->>> # load data
->>> mnist = dd.load("mnist")
->>> train, val, test = dd.split(mnist)
->>> # build model
->>> model = deeply.model("efficient-net-b7")
->>> model.fit(train, validation_data = val, epochs = 10)
-```
-
 <p align="center">
     <a href='https://github.com/achillesrasquinha/deeply//actions?query=workflow:"Continuous Integration"'>
       <img src="https://img.shields.io/github/workflow/status/achillesrasquinha/deeply/Continuous Integration?style=flat-square">
@@ -41,6 +25,22 @@ deeply is a simple and elegant Deep Learning library written in Python containin
       <img src="https://img.shields.io/badge/made%20with-boilpy-red.svg?style=flat-square">
     </a>
 </p>
+
+deeply is a simple and elegant Deep Learning library written in Python containing a growing collection of deep learning models, datasets and utilities.
+
+**Behold, the power of deeply**:
+
+```python
+>>> # import deeply
+>>> import deeply
+>>> import deeply.datasets as dd
+>>> # load data
+>>> mnist = dd.load("mnist")
+>>> train, val, test = dd.split(mnist)
+>>> # build model
+>>> model = deeply.model("efficient-net-b7")
+>>> model.fit(train, validation_data = val, epochs = 10)
+```
 
 ### Table of Contents
 * [Features](#features)
