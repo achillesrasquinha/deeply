@@ -1,7 +1,7 @@
 <div align="center">
   <img src=".github/assets/logo.png" height="128">
   <h1>
-      deeply
+    deeply
   </h1>
 </div>
 
@@ -38,7 +38,7 @@ deeply is a simple and elegant Deep Learning library written in Python containin
 >>> mnist = dd.load("mnist")
 >>> (train, val), test = dd.split(mnist["train"], splits = (.8, .2)), mnist["test"]
 >>> # build model
->>> model = deeply.model("efficient-net-b7")
+>>> model = deeply.hub("efficient-net-b7", pretrained = True)
 >>> model.fit(train, validation_data = val, epochs = 10)
 ```
 

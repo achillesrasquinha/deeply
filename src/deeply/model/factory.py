@@ -3,9 +3,12 @@ from bpyutils.util.imports import import_handler
 
 class ModelFactory:
     MODELS = {
-        key: value for key, value in lmap(lambda x: ("efficient-net-b%s" % x, {
-            "model_class": import_handler("tensorflow.keras.applications.EfficientNetB%s" % x)
-        }), range(8))
+        **{
+            key: value for key, value in lmap(lambda x: ("efficient-net-b%s" % x, {
+                "model_class": import_handler("tensorflow.keras.applications.EfficientNetB%s" % x)
+            }), range(8))
+
+        }
     }
 
     def get(name, *args, **kwargs):

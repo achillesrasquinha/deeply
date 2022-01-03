@@ -32,4 +32,6 @@ DEFAULT = \
     "transfer_densenet_classes": 1,
     
     "densenet_growth_rate": 32,
+
+    "weights": "imagenet"
 }

@@ -8,11 +8,12 @@ from deeply.model.transfer.backbone import BackBone
 
 import tensorflow as tf
 from tensorflow.data  import Dataset
-from tensorflow.keras.backend import int_shape
+from tensorflow.keras import Input
+# from tensorflow.keras.backend import int_shape
+import tensorflow.keras.backend as K
 from tensorflow.keras.layers import (
     Layer,
     Conv2D,
-    MaxPooling2D,
     Activation,
     Cropping2D,
     Conv2DTranspose,
@@ -20,11 +21,12 @@ from tensorflow.keras.layers import (
     Concatenate,
     Add,
     Multiply,
-    BatchNormalization
+    BatchNormalization,
+    Dense
 )
 from tensorflow.keras.callbacks import ModelCheckpoint
 
-import imgaug.augmenters as iaa
+# import imgaug.augmenters as iaa
 
 from deeply.util.model      import get_checkpoint_prefix, get_input
 from deeply.model.base      import BaseModel
@@ -32,6 +34,8 @@ from deeply.model.layer     import ActivationBatchNormDropout
 from deeply.generators      import BaseDataGenerator
 from deeply.callbacks       import GeneralizedEarlyStopping, PlotHistoryCallback
 from deeply.metrics         import jaccard_index, dice_coefficient, tversky_index
+
+from bpyutils.util._dict    import merge_dict
 from bpyutils.util.array    import sequencify
 from bpyutils.util.system   import make_archive, make_temp_dir
 from bpyutils.util.datetime import get_timestamp_str
@@ -66,9 +70,17 @@ class ConvBlock(Layer):
                 kernel_initializer = kernel_initializer, padding = padding)
             self.convs.append(conv)
 
-            activation = ActivationBatchNormDropout(activation = activation,
-                batch_norm = batch_norm, dropout_rate = dropout_rate)
+            activation = Activation(activation = activation)
             self.activations.append(activation)
+            
+            if batch_norm:
+                bn = BatchNormalization()
+                self.batch_norms.append(bn)
+
+            # https://stats.stackexchange.com/a/317313
+            if dropout_rate:
+                dropout = Dropout(rate = dropout_rate)
+                self.dropouts.append(dropout)
 
         self.width = width
 
@@ -78,9 +90,15 @@ class ConvBlock(Layer):
         x = inputs
 
         for i in range(self.width):
-            x = self.convs[i](x, training = training)
+            x = self.convs[i](x)
 
-            x = self.activations[i](x, training = training)
+            x = self.activations[i](x)
+            
+            if training and self.batch_norms:
+                x = self.batch_norms[i](x)
+
+            if training and self.dropouts:
+                x = self.dropouts[i](x)
 
         return x
 
@@ -127,9 +145,9 @@ def copy_crop_concat_block(x, skip_layer, **kwargs):
 
     return x
 
-class UNetModel(BaseModel):
+class VAEModel(BaseModel):
     def __init__(self, *args, **kwargs):
-        self._super = super(UNetModel, self)
+        self._super = super(VAEModel, self)
         self._super.__init__(*args, **kwargs)
 
     def compile(self, *args, **kwargs):
@@ -148,45 +166,109 @@ class UNetModel(BaseModel):
 
         return self._super.compile(*args, **kwargs)
 
-def UNet(
+class DenseBlock(Layer):
+    def __init__(self, units, activation = "relu", width = 2, batch_norm = True,
+        dropout_rate = 0.2, kernel_initializer = kernel_initializer, *args, **kwargs):
+        self._super = super(DenseBlock, self)
+        self._super.__init__(*args, **kwargs)
+
+        self.units        = units
+        self.activation   = activation
+        self.batch_norm   = batch_norm
+        self.dropout_rate = dropout_rate
+        self.kernel_initializer = kernel_initializer
+
+        self.denses       = [ ]
+        self.activations  = [ ]
+
+        for _ in range(width):
+            dense = Dense(units, kernel_initializer = kernel_initializer)
+            self.denses.append(dense)
+
+            activation = ActivationBatchNormDropout(activation = activation,
+                batch_norm = batch_norm, dropout_rate = dropout_rate)
+            self.activations.append(activation)
+
+        self.width        = width
+
+    def call(self, inputs, training = False):
+        x = inputs
+
+        for i in range(self.width):
+            x = self.denses[i](x, training = training)
+
+            x = self.activations[i](x, training = training)
+
+        return x
+
+    def get_config(self):
+        return {
+            "units": self.units,
+            "kernel_size": self.kernel_size,
+            "activation": self.activation,
+            "batch_norm": self.batch_norm,
+            "dropout_rate": self.dropout_rate,
+            "width": self.width,
+            "kernel_initializer": self.kernel_initializer
+        }
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+class Sampling(Layer):
+    def call(self, inputs):
+        z_mean, z_log_var = inputs
+        z_sigma = K.exp(0.5 * z_log_var)
+
+        shape   = tf.shape(z_mean)
+        batch, n_dim = shape[0], shape[1]
+
+        epsilon = K.random_normal(shape = (batch, n_dim))
+
+        return z_mean + z_sigma * epsilon
+
+def VAE(
     x = None,
     y = None,
     channels     = 1,
-    n_classes    = 2,
+    init_units   = 512,
+    layer_growth_rate = 0.5,
     layer_depth  = 4,
-    n_conv       = 2,
-    kernel_size  = 3,
-    init_filters = 64,
-    filter_growth_rate = 2,
+    n_dense      = 2,
+    latent_dim   = 2,
     activation   = "relu",
-    padding      = "valid",
     batch_norm   = True, # recommendation, don't use batch norm and dropout at the same time.
     dropout_rate = 0,
-    pool_size    = 2,
-    mp_strides   = 2,
-    up_conv_size = 2,
-    final_conv_size  = 1,
     final_activation = "softmax",
     kernel_initializer = kernel_initializer,
-    name = "unet",
-    attention_gate = None,
+    name = "vae",
     backbone = None,
     backbone_weights = "imagenet",
-    freeze_backbone  = False,
     weights = None,
+    # n_classes    = 2,
+    # kernel_size  = 3,
+    # padding      = "valid",
+    # pool_size    = 2,
+    # mp_strides   = 2,
+    # up_conv_size = 2,
+    # final_conv_size  = 1,
+    attention_gate = None,
+    freeze_backbone  = False,
 ):
     """
-    Constructs a U-Net.
+    Constructs a Variational Auto-Encoder (VAE).
 
     :param x: Input image width.
     :param y: Input image height.
     :param channels: Number of channels for input image.
+    :param layer_depth: Depth of the VAE.
+    :param init_units: Number of neurons in the initial layer.
+    :param layer_growth_rate: Growth rate of layers.
+    :param n_dense: Number of dense sub-layers in each layer.
+    :param kernel_initializer: Weight initializer for each block.
 
-    :param layer_depth: Depth of the U-Net.
-    :param n_conv: Number of convolutions in each layer.
     :param kernel_size: Size of kernel in a convolution.
-    :param init_filters: Number of filters in initial convolution.
-    :param filter_growth_rate: Growth rate of filter over convolutions.
     :param activation: Activation function after each convolution.
     :param batch_norm: Batch Normalization after each convolution.
     :param dropout_rate: Dropout rate after each convolution.
@@ -195,65 +277,82 @@ def UNet(
     :param up_conv_size: Size of upsampling layer.
     :param final_activation: Activation function on final layer.
     :param final_conv_size: Kernel size of final convolution.
-    :param kernel_initializer: Weight initializer for each convolution block.
     :param attention_gate: Use a custom attention gate.
-    :param
 
     References
         [1]. Ronneberger, Olaf, et al. “U-Net: Convolutional Networks for Biomedical Image Segmentation.” ArXiv:1505.04597 [Cs], May 2015. arXiv.org, http://arxiv.org/abs/1505.04597.
     
-    >>> from deeply.model.unet import UNet
-    >>> model = UNet()
+    >>> from deeply.model.vae import VAE
+    >>> model = VAE()
     """
     input_shape = (x, y, channels)
     input_  = get_input(*input_shape)
 
-    filters = init_filters
-    conv_block_args = dict(kernel_size = kernel_size,
-        activation = activation, dropout_rate = dropout_rate, width = n_conv,
-        kernel_initializer = kernel_initializer, padding = padding, batch_norm = batch_norm)
+    n_units = init_units
 
-    contracting_layers = [ ]
+    dense_block_args = dict(activation = activation, dropout_rate = dropout_rate, width = n_dense,
+        kernel_initializer = kernel_initializer, batch_norm = batch_norm)
+
+    # contracting_layers = [ ]
 
     if backbone:
         backbone = BackBone(backbone, input_tensor = input_, input_shape = input_shape, weights = backbone_weights)
         input_   = backbone._model.input
         m        = backbone._model.output
 
-        for feature_layer in backbone.get_feature_layers():
-            contracting_layers.append(feature_layer.output)
-            filters = filters * filter_growth_rate
+    #     for feature_layer in backbone.get_feature_layers():
+    #         contracting_layers.append(feature_layer.output)
+    #         filters = filters * filter_growth_rate
     else:
         m = input_
 
         # contracting path
         for _ in range(layer_depth):
-            m = ConvBlock(filters = filters, **conv_block_args)(m)
-            contracting_layers.append(m)
-            m = MaxPooling2D(pool_size = pool_size, strides = mp_strides)(m)
-            filters = filters * filter_growth_rate
+            # m = ConvBlock(filters = filters, **conv_block_args)(m)
+            # contracting_layers.append(m)
+            # m = MaxPooling2D(pool_size = pool_size, strides = mp_strides)(m)
+            # filters = filters * filter_growth_rate
+            m = DenseBlock(units = n_units, **dense_block_args)(m)
+            n_units = int(n_units * layer_growth_rate)
 
-    m = ConvBlock(filters = filters, **conv_block_args)(m)
+    latent_block_args  = merge_dict(dense_block_args, { "activation": None })
+
+    z_mean    = DenseBlock(units = latent_dim, **latent_block_args)(m)
+    z_log_var = DenseBlock(units = latent_dim, **latent_block_args)(m)
+    m         = Sampling()([z_mean, z_log_var])
+
+    decoder_block_args = dense_block_args
 
     # expanding path
-    for skip_layer in reversed(contracting_layers):
-        filters = filters // filter_growth_rate
-        m = Conv2DTranspose(filters = filters, kernel_size = up_conv_size,
-            strides = pool_size, padding = padding,
-            kernel_initializer = kernel_initializer)(m)
-        m = Activation(activation = activation)(m)
+    # for skip_layer in reversed(contracting_layers):
+    #     filters = filters // filter_growth_rate
+    #     m = Conv2DTranspose(filters = filters, kernel_size = up_conv_size,
+    #         strides = pool_size, padding = padding,
+    #         kernel_initializer = kernel_initializer)(m)
+    #     m = Activation(activation = activation)(m)
+        
+    #     if attention_gate:
+    #         skip_layer = attention_gate(skip_layer, m)
 
-        if attention_gate:
-            skip_layer = attention_gate(skip_layer, m)
+    #     m = copy_crop_concat_block(m, skip_layer)
+    #     m = ConvBlock(filters = filters, **conv_block_args)(m)
 
-        m = copy_crop_concat_block(m, skip_layer)
-        m = ConvBlock(filters = filters, **conv_block_args)(m)
+    for i in range(layer_depth):
+        n_units = n_units // layer_growth_rate
+
+        if i == 0:
+            decoder_block_args = merge_dict(dense_block_args, { "input_dim": (latent_dim,) })
+
+        if i == layer_depth - 1:
+            decoder_block_args = merge_dict(dense_block_args, { "activation": final_activation })
+
+        m = DenseBlock(units = n_units, **decoder_block_args)(m)
     
-    m = Conv2D(filters = n_classes, kernel_size = final_conv_size, padding = padding,
-                kernel_initializer = kernel_initializer)(m)
-    output_layer = Activation(activation = final_activation, name = "outputs")(m)
+    # m = Conv2D(filters = n_classes, kernel_size = final_conv_size, padding = padding,
+    #             kernel_initializer = kernel_initializer)(m)
+    # output_layer = Activation(activation = final_activation, name = "outputs")(m)
 
-    model = UNetModel(inputs = [input_], outputs = [output_layer], name = name)
+    model = VAEModel(inputs = [input_], outputs = [m], name = name)
 
     if weights:
         model.load_weights(weights)
@@ -307,42 +406,6 @@ def AttentionUNet(*args, **kwargs):
     unet = UNet(
         name = "attention-unet",
         attention_gate = _attention_gate,
-        **kwargs
-    )
-
-    return unet
-
-def UnetPP(*args, **kwargs):
-    """
-    Constructs a U-Net++.
-
-    >>> from deeply.model.unet import UnetPP
-    >>> model = UnetPP()
-    """
-    layer_depth = kwargs.get("layer_depth", 4)
-    unets = [ ]
-
-    for i in range(layer_depth):
-        unet = UNet(
-            name = "unet++-%s" % i,
-            layer_depth = i,
-            **kwargs
-        )
-        unets.append(unet)
-
-    unetpp = None
-
-    return unetpp
-
-def UNet3D(*args, **kwargs):
-    """
-    Constructs a 3D U-Net.
-    
-    >>> from deeply.model.unet import UNet3D
-    >>> model = UNet3D()
-    """
-    unet = UNet(
-        name = "unet-3d",
         **kwargs
     )
 
@@ -405,6 +468,7 @@ def _format_dataset(ds, mapper = None, target_shape = None, batch_size = 1, **kw
         ds = ds.batch(batch_size)
 
     return ds
+    
 class Trainer:
     def __init__(self, artifacts_path = None):
         self.artifacts_path = osp.abspath(artifacts_path or get_timestamp_str('%Y%m%d%H%M%S'))
@@ -467,65 +531,3 @@ class Trainer:
             make_archive(self.artifacts_path, "zip", tmp_dir)
 
         return history
-
-def _generate_samples(x = 200, y = None, channels = 1, n_samples = 100,
-    r_min_f = 1, r_max_f = 10, seg_min_f = 1, seg_max_f = 5):
-    if not y:
-        y = x
-
-    features, labels = np.empty((n_samples, y, x, channels)), \
-        np.empty((n_samples, y, x))
-    
-    size = min(x, y)
-    compute_factor = lambda f: (f / 100) * size
-    min_radius = compute_factor(r_min_f)
-    max_radius = compute_factor(r_max_f)
-    
-    min_segs   = compute_factor(seg_min_f)
-    max_segs   = compute_factor(seg_max_f)
-
-    for i in range(n_samples):
-        feature = np.ones((y, x, channels))
-        mask    = np.zeros((y, x), dtype = np.bool)
-
-        n_segs  = np.random.randint(min_segs, max_segs)
-
-        for _ in range(n_segs):
-            from_       = np.random.randint(0, x)
-            to          = np.random.randint(0, y)
-
-            radius      = np.random.randint(min_radius, max_radius)
-
-            cx, cy      = np.ogrid[-to:y-to, -from_:x-from_]
-            circle      = cx*cx + cy*cy <= radius*radius
-
-            color       = np.random.randint(1, 255)
-            
-            mask        = np.logical_or(mask, circle)
-            
-            feature[circle] = color
-
-        # noise
-        feature += np.random.normal(size = feature.shape)
-        feature -= np.amin(feature)
-        feature /= np.amax(feature)
-
-        features[i] = feature
-        labels[i]   = mask
-
-    return features, labels
-
-def generate_toy(splits = (.6, .2, .2), n_samples = 100, **kwargs):
-    """
-    Create a toy dataset for U-Net Image Segmentation.
-
-    :param x: Width of image.
-    :param y: Height of image.
-    :param channels: Number of channels in image.
-    :param n_samples: Number of samples to generate.
-    :param splits: Number of dataset splits.
-    """
-    return [
-        Dataset.from_tensor_slices(_generate_samples(n_samples = int(split * n_samples), **kwargs))
-            for split in splits
-    ]
