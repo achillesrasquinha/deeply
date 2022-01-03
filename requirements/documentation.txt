@@ -8,3 +8,4 @@ pydotplus
 pydot-ng
 graphviz
 sphinx-autobuild
+sphinx-press-theme
