@@ -22,6 +22,8 @@ from deeply.datasets.util import (
 from bpyutils.util.array import squash
 
 def load(*names, **kwargs):
+    kwargs["as_supervised"] = kwargs.get("as_supervised", True)
+
     results = []
     
     # with parallel.no_daemon_pool(processes = CPU_COUNT) as pool:

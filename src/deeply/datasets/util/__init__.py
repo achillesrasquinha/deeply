@@ -6,6 +6,10 @@ from bpyutils.util.array import sequencify
 
 SPLIT_TYPES = ("train", "val", "test")
 
+def length(ds):
+    length = cardinality(ds)
+    return length.numpy()
+
 def split(ds, splits = (.6, .2, .2)):
     """
     Split a TensorFlow Dataset into splits.
@@ -16,7 +20,7 @@ def split(ds, splits = (.6, .2, .2)):
     
     assert sum(splits) == 1
     
-    ds_size = cardinality(ds).numpy()
+    ds_size = length(ds)
     curr_ds = ds
 
     for split in splits:

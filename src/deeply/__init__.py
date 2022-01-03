@@ -24,6 +24,7 @@ from deeply.__attr__ import (
 from deeply.__main__    import main
 from deeply             import ops
 from deeply.config      import PATH
+from deeply.deeply      import hub
 
 from bpyutils.cache       import Cache
 from bpyutils.config      import Settings

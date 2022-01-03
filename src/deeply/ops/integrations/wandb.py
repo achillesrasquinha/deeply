@@ -25,7 +25,6 @@ class WeightsAndBiases(BaseService):
 
     def init(self, name):
         module = self.module
-
         self._runner = module.init(project = name)
 
     def upload(self, *files, name = None, dest = None):
