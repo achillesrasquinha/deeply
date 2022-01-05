@@ -4,7 +4,7 @@ import shutil
 
 import numpy as np
 from deeply.metrics import tversky_index
-from deeply.model.transfer.backbone import BackBone
+# from deeply.model.transfer.backbone import BackBone
 
 import tensorflow as tf
 from tensorflow.data  import Dataset
@@ -22,7 +22,9 @@ from tensorflow.keras.layers import (
     Add,
     Multiply,
     BatchNormalization,
-    Dense
+    Dense,
+    Flatten,
+    Reshape
 )
 from tensorflow.keras.callbacks import ModelCheckpoint
 
@@ -39,6 +41,7 @@ from bpyutils.util._dict    import merge_dict
 from bpyutils.util.array    import sequencify
 from bpyutils.util.system   import make_archive, make_temp_dir
 from bpyutils.util.datetime import get_timestamp_str
+from bpyutils.util.imports  import import_handler
 
 # verify with paper...
 def kernel_initializer(shape, dtype = None):
@@ -224,7 +227,7 @@ class Sampling(Layer):
         shape   = tf.shape(z_mean)
         batch, n_dim = shape[0], shape[1]
 
-        epsilon = K.random_normal(shape = (batch, n_dim))
+        epsilon = K.random_normal(shape = shape)
 
         return z_mean + z_sigma * epsilon
 
@@ -242,19 +245,23 @@ def VAE(
     dropout_rate = 0,
     final_activation = "softmax",
     kernel_initializer = kernel_initializer,
-    name = "vae",
-    backbone = None,
+    name             = "vae",
+    backbone         = None,
     backbone_weights = "imagenet",
-    weights = None,
-    # n_classes    = 2,
-    # kernel_size  = 3,
-    # padding      = "valid",
+    weights          = None,
+    layer_block      = DenseBlock,
+    kernel_size      = 3,
+    strides          = 1,
+    n_classes        = 2,
+    padding          = "valid",
     # pool_size    = 2,
     # mp_strides   = 2,
     # up_conv_size = 2,
-    # final_conv_size  = 1,
+    final_conv_size  = 1,
+    final_unit_size  = 16,
     attention_gate = None,
     freeze_backbone  = False,
+    *args, **kwargs
 ):
     """
     Constructs a Variational Auto-Encoder (VAE).
@@ -285,24 +292,37 @@ def VAE(
     >>> from deeply.model.vae import VAE
     >>> model = VAE()
     """
+    if not y:
+        y = x
+
     input_shape = (x, y, channels)
     input_  = get_input(*input_shape)
 
     n_units = init_units
 
-    dense_block_args = dict(activation = activation, dropout_rate = dropout_rate, width = n_dense,
+    print("type", type(layer_block))
+    print(isinstance(layer_block))
+
+    layer_block_args = dict(activation = activation, dropout_rate = dropout_rate, width = n_dense,
         kernel_initializer = kernel_initializer, batch_norm = batch_norm)
+
+    
+
+    if type(layer_block) == ConvBlock:
+        layer_block_args = merge_dict(layer_block_args, { "filters": init_units,
+            "kernel_size": kernel_size, "strides": strides, "padding": padding })
 
     # contracting_layers = [ ]
 
     if backbone:
+        BackBone = import_handler("deeply.model.transfer.backbone.BackBone")
         backbone = BackBone(backbone, input_tensor = input_, input_shape = input_shape, weights = backbone_weights)
         input_   = backbone._model.input
         m        = backbone._model.output
 
-    #     for feature_layer in backbone.get_feature_layers():
-    #         contracting_layers.append(feature_layer.output)
-    #         filters = filters * filter_growth_rate
+        # for feature_layer in backbone.get_feature_layers():
+        #     contracting_layers.append(feature_layer.output)
+        #     filters = filters * filter_growth_rate
     else:
         m = input_
 
@@ -312,16 +332,29 @@ def VAE(
             # contracting_layers.append(m)
             # m = MaxPooling2D(pool_size = pool_size, strides = mp_strides)(m)
             # filters = filters * filter_growth_rate
-            m = DenseBlock(units = n_units, **dense_block_args)(m)
+            m = layer_block(n_units, **layer_block_args)(m)
+            
             n_units = int(n_units * layer_growth_rate)
+            x       = x // 2
+            y       = y // 2
 
-    latent_block_args  = merge_dict(dense_block_args, { "activation": None })
+    if x <= 0:
+        x = 3 # minimum dimensions for features
+
+    if y <= 0:
+        y = 3
+
+    if isinstance(layer_block, ConvBlock):
+        m = Flatten()(m)
+        m = DenseBlock(units = final_unit_size, *layer_block_args)(m)
+
+    latent_block_args  = merge_dict(layer_block_args, { "activation": None })
 
     z_mean    = DenseBlock(units = latent_dim, **latent_block_args)(m)
     z_log_var = DenseBlock(units = latent_dim, **latent_block_args)(m)
     m         = Sampling()([z_mean, z_log_var])
 
-    decoder_block_args = dense_block_args
+    decoder_block_args = layer_block_args
 
     # expanding path
     # for skip_layer in reversed(contracting_layers):
@@ -337,22 +370,30 @@ def VAE(
     #     m = copy_crop_concat_block(m, skip_layer)
     #     m = ConvBlock(filters = filters, **conv_block_args)(m)
 
+    if isinstance(layer_block, ConvBlock):
+        m = DenseBlock(x * y * n_units, **layer_block_args)(m)
+        m = Reshape((x, y, n_units))(m)
+
+        layer_block = Conv2DTranspose
+
+    print(layer_block)
+
     for i in range(layer_depth):
-        n_units = n_units // layer_growth_rate
+        n_units  = n_units // layer_growth_rate
 
         if i == 0:
-            decoder_block_args = merge_dict(dense_block_args, { "input_dim": (latent_dim,) })
+            decoder_block_args = merge_dict(layer_block_args, { "input_dim": (latent_dim,) })
 
         if i == layer_depth - 1:
-            decoder_block_args = merge_dict(dense_block_args, { "activation": final_activation })
+            decoder_block_args = merge_dict(layer_block_args, { "activation": final_activation })
 
-        m = DenseBlock(units = n_units, **decoder_block_args)(m)
+        m = layer_block(n_units, **decoder_block_args)(m)
     
-    # m = Conv2D(filters = n_classes, kernel_size = final_conv_size, padding = padding,
-    #             kernel_initializer = kernel_initializer)(m)
-    # output_layer = Activation(activation = final_activation, name = "outputs")(m)
+    m = layer_block(n_classes, kernel_size = final_conv_size, padding = padding,
+                kernel_initializer = kernel_initializer)(m)
+    output_layer = Activation(activation = final_activation, name = "outputs")(m)
 
-    model = VAEModel(inputs = [input_], outputs = [m], name = name)
+    model = VAEModel(inputs = [input_], outputs = [output_layer], name = name)
 
     if weights:
         model.load_weights(weights)
@@ -531,3 +572,21 @@ class Trainer:
             make_archive(self.artifacts_path, "zip", tmp_dir)
 
         return history
+
+def ConvolutionalVAE(*args, **kwargs):
+    """
+    Constructs a Convolutional VAE.
+
+    References
+        [1]. Oktay, Ozan, et al. “Attention U-Net: Learning Where to Look for the Pancreas.” ArXiv:1804.03999 [Cs], May 2018. arXiv.org, http://arxiv.org/abs/1804.03999.
+
+    >>> import deeply
+    >>> model = deeply.hub("convolutional-variational-autoencoder")
+    """
+    model = VAE(
+        name = "convolutional-vae",
+        layer_block = ConvBlock,
+        **kwargs
+    )
+
+    return model

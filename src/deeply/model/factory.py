@@ -8,6 +8,12 @@ class ModelFactory:
                 "model_class": import_handler("tensorflow.keras.applications.EfficientNetB%s" % x)
             }), range(8))
 
+        },
+        "variational-autoencoder": {
+            "model_class": import_handler("deeply.model.vae.VAE")
+        },
+        "convolutional-variational-autoencoder": {
+            "model_class": import_handler("deeply.model.vae.ConvolutionalVAE")
         }
     }
 
