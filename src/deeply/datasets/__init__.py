@@ -16,7 +16,8 @@ from deeply.datasets.colonoscopy import ETISLarib
 
 from deeply.datasets.util import (
     split,
-    concat
+    concat,
+    length
 )
 
 from bpyutils.util.array import squash

@@ -47,6 +47,8 @@ PYTHON_ENVIRONMENT      = $(shell $(PYTHON) -c "import sys;v=sys.version_info;pr
 
 NULL					= /dev/null
 
+TF_CPP_MIN_LOG_LEVEL	= 3
+
 define log
 	$(eval CLEAR     = \033[0m)
 	$(eval BOLD		 = \033[0;1m)
@@ -239,7 +241,6 @@ start: ## Start app.
 
 notebooks: ## Launch Notebooks
 	$(JUPYTER) notebook --notebook-dir $(DOCSDIR) $(ARGS)
-
 
 help: ## Show help and exit.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)

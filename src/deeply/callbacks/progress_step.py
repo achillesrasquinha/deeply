@@ -7,7 +7,9 @@ class ProgressStepCallback(Callback):
         print(str)
 
     def on_train_begin(self, logs = None):
-        self._write("Begin Training...")
+        # self._write("Begin Training...")
+        pass
 
     def on_train_batch_begin(self, batch, logs = None):
-        self._write("Begin Training Batch...")
+        # self._write("Begin Training Batch...")
+        pass

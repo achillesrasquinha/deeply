@@ -81,7 +81,7 @@ class Sampling(Layer):
 
         return z_mean + z_sigma * epsilon
 
-def VAE(
+def ConvolutionalAE(
     x                   = None,
     y                   = None,
     channels            = 1,
@@ -107,7 +107,7 @@ def VAE(
 
     kernel_initializer  = None,
 
-    name                = "vae",
+    name                = "gan",
 
     backbone            = None,
     backbone_weights    = "imagenet",
@@ -117,7 +117,7 @@ def VAE(
     *args, **kwargs
 ):
     """
-    Constructs a Variational Auto-Encoder (VAE).
+    A generic convolutional autoencoder.
 
     :param x: Input features length.
     :param y: Input features height.
@@ -156,7 +156,6 @@ def VAE(
     >>> from deeply.model.vae import VAE
     >>> model = VAE()
     """
-
     is_convolution = is_layer_type(layer_block, "convolution")
 
     if not input_shape:
@@ -220,7 +219,6 @@ def VAE(
 
     if is_convolution:
         m = Flatten()(m)
-
         m = DenseBlock(encoder_fc_units, **final_block_args)(m)
 
     z_mean    = DenseBlock(latent_dim, **final_block_args, name = "z_mean")(m)
@@ -265,23 +263,5 @@ def VAE(
         model.load_weights(weights)
 
     model.compile()
-
-    return model
-
-def ConvolutionalVAE(*args, **kwargs):
-    """
-    Constructs a Convolutional VAE.
-
-    References
-        [1]. Kingma, Diederik P., and Max Welling. “Auto-Encoding Variational Bayes.” ArXiv:1312.6114 [Cs, Stat], May 2014. arXiv.org, http://arxiv.org/abs/1312.6114.
-
-    >>> import deeply
-    >>> model = deeply.hub("convolutional-variational-autoencoder")
-    """
-    model = VAE(
-        name = "convolutional-vae",
-        layer_block = ConvBlock,
-        **kwargs
-    )
 
     return model

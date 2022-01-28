@@ -81,7 +81,7 @@ class Sampling(Layer):
 
         return z_mean + z_sigma * epsilon
 
-def VAE(
+def GAN(
     x                   = None,
     y                   = None,
     channels            = 1,
@@ -107,7 +107,7 @@ def VAE(
 
     kernel_initializer  = None,
 
-    name                = "vae",
+    name                = "gan",
 
     backbone            = None,
     backbone_weights    = "imagenet",
@@ -117,7 +117,7 @@ def VAE(
     *args, **kwargs
 ):
     """
-    Constructs a Variational Auto-Encoder (VAE).
+    Generative Adversarial Networks (GAN).
 
     :param x: Input features length.
     :param y: Input features height.
@@ -156,7 +156,6 @@ def VAE(
     >>> from deeply.model.vae import VAE
     >>> model = VAE()
     """
-
     is_convolution = is_layer_type(layer_block, "convolution")
 
     if not input_shape:
@@ -183,7 +182,7 @@ def VAE(
     base_layer_args = dict(activation = activation, dropout_rate = dropout_rate,
         kernel_initializer = kernel_initializer, batch_norm = batch_norm, width = layer_width)
 
-    layer_args      = base_layer_args
+    layer_args = base_layer_args
 
     if is_layer_type(layer_block, "convolution"):
         layer_args = merge_dict(base_layer_args, {
@@ -220,7 +219,6 @@ def VAE(
 
     if is_convolution:
         m = Flatten()(m)
-
         m = DenseBlock(encoder_fc_units, **final_block_args)(m)
 
     z_mean    = DenseBlock(latent_dim, **final_block_args, name = "z_mean")(m)
@@ -268,7 +266,7 @@ def VAE(
 
     return model
 
-def ConvolutionalVAE(*args, **kwargs):
+def DCGAN(*args, **kwargs):
     """
     Constructs a Convolutional VAE.
 
@@ -278,8 +276,8 @@ def ConvolutionalVAE(*args, **kwargs):
     >>> import deeply
     >>> model = deeply.hub("convolutional-variational-autoencoder")
     """
-    model = VAE(
-        name = "convolutional-vae",
+    model = GAN(
+        name = "dcgan",
         layer_block = ConvBlock,
         **kwargs
     )

@@ -26,15 +26,14 @@
     </a>
 </p>
 
-deeply is a simple and elegant Deep Learning library written in Python containing a growing collection of deep learning models, datasets and utilities.
+🧠 deeply is a simple and elegant Deep Learning library written in Python containing a growing collection of deep learning models, datasets and utilities.
 
 **Behold, the power of deeply**:
 
 ```python
->>> # import deeply
 >>> import deeply
 >>> import deeply.datasets as dd
->>> # load data
+>>> # load mnist
 >>> mnist = dd.load("mnist")
 >>> (train, val), test = dd.split(mnist["train"], splits = (.8, .2)), mnist["test"]
 >>> # build model

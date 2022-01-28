@@ -1,3 +1,6 @@
+import tensorflow as tf
+import tensorflow.keras.backend as K
+
 from deeply.losses.auc_margin import (
     AUCMarginLoss,
     auc_margin_loss
@@ -18,3 +21,6 @@ def tversky_loss(*args, **kwargs):
 
 def focal_tversky_loss(*args, **kwargs):
     return 1 - focal_tversky_index(*args, **kwargs)
+
+def bernoulli_loss(y_true, y_pred):
+    return K.sum(K.binary_crossentropy(y_true, y_pred), axis = -1)

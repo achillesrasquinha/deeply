@@ -5,4 +5,4 @@
    :maxdepth: 3
 
    unet
-   vae
+   convolutional-vae
