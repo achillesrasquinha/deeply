@@ -14,6 +14,9 @@ class ModelFactory:
         },
         "convolutional-variational-autoencoder": {
             "model_class": import_handler("deeply.model.vae.ConvolutionalVAE")
+        },
+        "generative-adversarial-network": {
+            "model_class": import_handler("deeply.model.gan.GAN")
         }
     }
 
