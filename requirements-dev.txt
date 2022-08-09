@@ -29,10 +29,6 @@ pillow
 seaborn
 scikit-learn
 bpyutils
-numpy>=1.20
-six<=1.16.0
-typing-extensions<=3.7.4.3
-absl-py<0.13
 pydot
 pipenv
 jedi<0.18
