@@ -37,6 +37,11 @@ def _plot_base(fig, axes, super_title = None, to_file = None, figsize = None):
 
     return fig, axes
 
+def _get_plot_kwargs(**kwargs):
+    return {
+        "cmap": kwargs.get("cmap", "gray")
+    }
+
 def segplot(image, mask, predict = None, **kwargs):
     """
     Segmentation Plot
@@ -47,7 +52,7 @@ def segplot(image, mask, predict = None, **kwargs):
 
     fig, axes = pplt.subplots(1, n_plots, sharex = True, sharey = True)
 
-    plot_args = { "cmap": pplt.cm.gray }
+    plot_args = _get_plot_kwargs(**kwargs)
 
     _matshow(axes[0], mat = image, title = "Image")
     _matshow(axes[1], mat = mask,  title = "Mask", plot_args = plot_args)
@@ -84,11 +89,13 @@ def imgplot(images, **kwargs):
     if not type(axes) is np.ndarray:
         plots = [sequencify(axes)]
 
+    plot_args = _get_plot_kwargs(**kwargs)
+
     k = 0
 
     for i in range(size):
         for j in range(size):
-            _matshow(plots[i][j], mat = images[k])
+            _matshow(plots[i][j], mat = images[k], plot_args = plot_args)
             k += 1
 
     return _plot_base(fig, squash(plots), **kwargs)

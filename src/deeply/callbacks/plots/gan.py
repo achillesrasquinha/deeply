@@ -32,6 +32,7 @@ class GANPlotCallback(Callback):
 
             generated_images  = self.model.generator(self.sample_data, training = False)
             generated_images *= 255.0
+            generated_images  = tf.cast(generated_images, tf.uint8)
 
             imgplot(generated_images)
             pplt.show()
