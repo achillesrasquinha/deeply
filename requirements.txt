@@ -1,4 +1,4 @@
-tensorflow-aarch64
+tensorflow-aarch64<2.8
 tensorflow-datasets
 imgaug
 pillow
@@ -7,8 +7,9 @@ pillow
 # pylibjpeg-libjpeg
 seaborn
 scikit-learn
-git+git://github.com/achillesrasquinha/bpyutils.git@develop#egg=bpyutils
+bpyutils
 numpy==1.19.3
 six<=1.16.0
 typing-extensions<=3.7.4
 absl-py<0.13
+pydot

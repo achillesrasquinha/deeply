@@ -1,11 +1,14 @@
 import collections
 
+import numpy as np
 import matplotlib.pyplot as pplt
 import seaborn as sns
+import tensorflow as tf
 
 from sklearn.metrics import confusion_matrix as sk_confusion_matrix
 
-from bpyutils._compat import iteritems, iterkeys
+from bpyutils._compat import iterkeys
+from bpyutils.util.array import sequencify, squash
 
 def _matshow(axes, mat, title = None, axis = False, **kwargs):
     plot_args = kwargs.pop("plot_args", {})
@@ -53,6 +56,42 @@ def segplot(image, mask, predict = None, **kwargs):
         _matshow(axes[2], mat = predict, title = "Prediction", plot_args = plot_args)
 
     return _plot_base(fig, axes, **kwargs)
+
+def imgplot(images, **kwargs):
+    """
+    Grid Plot
+    """
+    sequence = False
+
+    if tf.is_tensor(images) or type(images) is np.ndarray:
+        shape = images.shape
+
+        if len(shape) > 3:
+            length   = shape[0]
+        else:
+            length   = 1
+            sequence = True
+
+    if sequence or isinstance(images, (list, tuple)):
+        images = sequencify(images)
+        length = len(images)
+
+    size = max(int(np.sqrt(length)), 1)
+
+    fig, axes = pplt.subplots(size, size, sharex = True, sharey = True)
+    plots = axes
+
+    if not type(axes) is np.ndarray:
+        plots = [sequencify(axes)]
+
+    k = 0
+
+    for i in range(size):
+        for j in range(size):
+            _matshow(plots[i][j], mat = images[k])
+            k += 1
+
+    return _plot_base(fig, squash(plots), **kwargs)
 
 def history(obj, **kwargs):
     if isinstance(obj, collections.Mapping):

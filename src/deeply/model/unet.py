@@ -405,6 +405,7 @@ def _format_dataset(ds, mapper = None, target_shape = None, batch_size = 1, **kw
         ds = ds.batch(batch_size)
 
     return ds
+
 class Trainer:
     def __init__(self, artifacts_path = None):
         self.artifacts_path = osp.abspath(artifacts_path or get_timestamp_str('%Y%m%d%H%M%S'))

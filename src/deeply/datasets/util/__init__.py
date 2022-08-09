@@ -2,7 +2,7 @@ import numpy as np
 
 from tensorflow.data.experimental import cardinality
 
-from bpyutils.util.array import sequencify
+from bpyutils.util.array import sequencify, squash
 
 SPLIT_TYPES = ("train", "val", "test")
 

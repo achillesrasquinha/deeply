@@ -33,5 +33,7 @@ DEFAULT = \
     
     "densenet_growth_rate": 32,
 
-    "weights": "imagenet"
+    "weights": "imagenet",
+
+    "gan_learning_rate": 1e-4
 }

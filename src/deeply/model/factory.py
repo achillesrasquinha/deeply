@@ -17,6 +17,9 @@ class ModelFactory:
         },
         "generative-adversarial-network": {
             "model_class": import_handler("deeply.model.gan.GAN")
+        },
+        "convolutional-generative-adversarial-network": {
+            "model_class": import_handler("deeply.model.gan.DCGAN")
         }
     }
 

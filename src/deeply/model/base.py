@@ -4,6 +4,7 @@ from tensorflow.keras.utils import plot_model
 from bpyutils.util.array import sequencify
 
 from deeply.util.model import get_fit_kwargs
+
 class BaseModel(Model):
     def __init__(self, *args, **kwargs):
         self._super = super(BaseModel, self)

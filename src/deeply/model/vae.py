@@ -10,7 +10,6 @@ from tensorflow.keras.layers import (
     Reshape,
     Input
 )
-from tensorflow.keras.losses import binary_crossentropy
 
 from deeply.util.model      import get_input
 from deeply.model.base      import BaseModel
