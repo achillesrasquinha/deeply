@@ -1,4 +1,4 @@
-tensorflow-aarch64<2.8
+tensorflow
 tensorflow-datasets
 imgaug
 pillow
