@@ -13,6 +13,8 @@ from bpyutils.util.array import sequencify, squash
 def _matshow(axes, mat, title = None, axis = False, **kwargs):
     plot_args = kwargs.pop("plot_args", {})
 
+    print(mat.shape)
+
     axes.matshow(np.squeeze(mat), **plot_args)
     
     if title:
