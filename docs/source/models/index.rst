@@ -6,3 +6,4 @@
 
    unet
    convolutional-vae
+   generative-adversarial-network
