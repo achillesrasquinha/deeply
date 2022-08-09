@@ -10,6 +10,6 @@ scikit-learn
 bpyutils
 numpy==1.19.3
 six<=1.16.0
-typing-extensions<=3.7.4
+typing-extensions<=3.7.4.3
 absl-py<0.13
 pydot
