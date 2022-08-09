@@ -17,6 +17,7 @@ def get_checkpoint_prefix(model):
 def get_fit_kwargs(model, kwargs, custom = None):
     verbose = kwargs.pop("verbose", 1)
     monitor = kwargs.pop("monitor", "loss")
+    use_multiprocessing = kwargs.pop("use_multiprocessing", True)
 
     callbacks = sequencify(kwargs.pop("callbacks", []))
 
@@ -32,6 +33,7 @@ def get_fit_kwargs(model, kwargs, custom = None):
 
     kwargs["verbose"]   = 0
     kwargs["callbacks"] = callbacks
+    kwargs["use_multiprocessing"] = use_multiprocessing
 
     if custom:
         for key, value in iteritems(custom):

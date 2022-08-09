@@ -10,3 +10,6 @@ class AutoEncoder(BaseModel):
 
         self.encoder = encoder
         self.decoder = decoder
+
+    def fit(self, *args, **kwargs):
+        self._super.fit(*args, **kwargs)

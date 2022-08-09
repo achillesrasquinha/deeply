@@ -35,5 +35,6 @@ DEFAULT = \
 
     "weights": "imagenet",
 
-    "gan_learning_rate": 1e-4
+    "gan_learning_rate": 1e-4,
+    "gan_plot_callback_samples": 16,
 }

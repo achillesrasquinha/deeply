@@ -18,13 +18,14 @@ from deeply.model.base      import BaseModel
 from deeply.model.layer     import ConvBlock, DenseBlock
 from deeply.model.types     import is_layer_type
 from deeply.model.autoencoder import AutoEncoder
+from deeply.callbacks import GANPlotCallback
 from deeply.const import DEFAULT
 
 from bpyutils.util._dict    import merge_dict
 from bpyutils.util.imports  import import_handler
 from bpyutils.util.array    import sequencify
 
-_binary_cross_entropy_logits = BinaryCrossentropy(from_logits = True)
+_binary_cross_entropy_logits = BinaryCrossentropy(from_logits = False)
 
 def generator_loss(fake_output):
     return _binary_cross_entropy_logits(tf.ones_like(fake_output), fake_output)
@@ -64,6 +65,14 @@ class GANModel(AutoEncoder):
         self.discriminator_optimizer = Adam(learning_rate)
 
         self._super.compile(*args, **kwargs)
+
+    def fit(self, *args, **kwargs):
+        callbacks = kwargs.pop("callbacks", [])
+        callbacks.append(GANPlotCallback(self))
+
+        kwargs["callbacks"] = callbacks
+
+        return self._super.fit(*args, **kwargs) 
 
     def train_step(self, data):
         generator_input_shape = self.generator.input.shape
