@@ -205,6 +205,11 @@ docker-build: clean ## Build the Docker Image.
 
 	@docker build $(BASEDIR) --tag $(DOCKER_IMAGE) $(DOCKER_BUILD_ARGS)
 
+docker-test: clean ## Testing within Docker Image.
+	$(call log,INFO,Building Docker Image)
+	
+	@docker run --rm -it $(DOCKER_IMAGE) "tox"
+
 docker-push: ## Push Docker Image to Registry.
 	@docker push $(DOCKER_IMAGE)$(DOCKER_IMAGE_TAG)
 

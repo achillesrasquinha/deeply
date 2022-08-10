@@ -1,3 +1,4 @@
+tensorflow-aarch64
 tensorflow-datasets
 imgaug
 pillow
