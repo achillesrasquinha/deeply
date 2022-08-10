@@ -5,6 +5,7 @@ import os.path as osp
 import glob
 import io
 import shutil
+import platform
 
 from setuptools import setup, find_packages
 
@@ -70,6 +71,12 @@ def get_dependencies(type_ = None):
             str(ir.req) for ir in parse_requirements(path, session = "hack")
                 if str(ir.req) not in requirements
         ]
+
+    arch = platform.machine()
+    if arch.startswith("arm"):
+        requirements.append("tensorflow-aarch64")
+    else:
+        requirements.append("tensorflow")
     
     return requirements
 
