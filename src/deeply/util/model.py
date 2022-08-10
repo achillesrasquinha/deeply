@@ -9,6 +9,7 @@ from deeply.callbacks.progress_step import ProgressStepCallback
 from bpyutils.util.array import sequencify
 from bpyutils.util.datetime import get_timestamp_str
 from bpyutils._compat import iteritems
+from bpyutils.util._dict import merge_dict
 
 def get_checkpoint_prefix(model):
     prefix = "%s-%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
@@ -55,3 +56,14 @@ def get_input(x, y, channels):
     input_ = Input(shape = input_shape, name = "inputs")
 
     return input_
+
+def create_model_fn(func, doc = "", args = {}):
+    def wrapper(**kwargs):
+        kwargs   = merge_dict(args, kwargs)
+
+        function = func(**kwargs)
+        function.__doc__ = doc
+
+        return function
+
+    return wrapper
