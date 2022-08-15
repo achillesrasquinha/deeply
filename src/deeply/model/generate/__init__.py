@@ -1,50 +1,43 @@
 import numpy as np
 
-import tensorflow as tf
-import tensorflow.keras.backend as K
 from tensorflow.keras.layers import (
-    Layer,
     Activation,
-    Conv2DTranspose,
     Flatten,
     Reshape,
-    Input
+    Input,
+    LeakyReLU
 )
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.losses import BinaryCrossentropy
 
-from deeply.util.model      import get_input
-from deeply.model.base      import BaseModel
-from deeply.model.layer     import ConvBlock, DenseBlock, Conv2DTransposeBlock
-from deeply.model.types     import is_layer_type
-from deeply.model.autoencoder import AutoEncoder
-from deeply.callbacks import GANPlotCallback
 from deeply.const import DEFAULT
-from deeply.util.model import create_model_fn
+from deeply.model.base      import BaseModel
+from deeply.model.layer     import DenseBlock, Conv2DTransposeBlock
+from deeply.model.types     import is_layer_type
+from deeply.util.model      import get_activation
 
 from bpyutils.util._dict    import merge_dict
 from bpyutils.util.imports  import import_handler
-from bpyutils.util.array    import sequencify
 
 def GenerativeModel(
     x                   = None,
     y                   = None,
     channels            = 1,
     input_shape         = None,
-    init_units          = 64,
+    init_encoder_units  = 64,
+    init_decoder_units  = 128,
     kernel_size         = 3,
     strides             = 2,
     padding             = "same",
-    activation          = "leaky_relu",
-    activation_args     = { },
+    activation          = LeakyReLU,
+    activation_args     = { "alpha": 0.2 },
     layer_width         = 1,
     layer_depth         = 2,
     output_resolution   = 0.25,
-    layer_growth_rate   = 1,
+    encoder_layer_growth_rate = 1,
+    decoder_layer_growth_rate = 1,
     feature_growth_rate = 1,
     minimum_features_x  = 5,
     minimum_features_y  = 5,
-    discriminator_fc_units = 1,
+    encoder_fc_units    = 1,
     final_activation    = "sigmoid",
     final_units         = 1,
     latent_dim          = 100,
@@ -52,9 +45,16 @@ def GenerativeModel(
     batch_norm          = True,
     dropout_rate        = 0,
 
-    kernel_initializer  = None,
+    encoder_dropout_rate = 0,
+    encoder_batch_norm   = False,
+    decoder_dropout_rate = 0,
+    decoder_batch_norm   = False,
 
-    name                = "gan",
+    kernel_initializer   = None,
+
+    name                = "generative",
+    encoder_name        = "encoder",
+    decoder_name        = "decoder",
 
     backbone            = None,
     backbone_weights    = "imagenet",
@@ -62,6 +62,9 @@ def GenerativeModel(
     layer_block         = DenseBlock,
 
     model_type          = None,
+
+    encoder_learning_rate = DEFAULT["generative_model_encoder_learning_rate"],
+    decoder_learning_rate = DEFAULT["generative_model_decoder_learning_rate"],
 
     *args, **kwargs
 ):
@@ -73,6 +76,7 @@ def GenerativeModel(
     :param channels: Number of channels for an input image.
     :param init_units: Number of neurons in the initial layer.
     :param activation: Activation function after each layer.
+    :param activation_args: Arguments for the activation function.
     :param kernel_initializer: Weight initializer for each layer.
     :param layer_width: Width of each layer.
     :param layer_growth_rate: Growth rate of layers.
@@ -126,11 +130,13 @@ def GenerativeModel(
 
     input_  = Input(shape = input_shape)
 
-    n_units = init_units
+    n_units = init_encoder_units
 
-    base_layer_args = dict(activation = activation, dropout_rate = dropout_rate,
-        kernel_initializer = kernel_initializer, batch_norm = batch_norm, width = layer_width,
-        activation_args = activation_args)
+    activation = get_activation(activation, **(activation_args or {}))
+
+    base_layer_args = dict(activation = activation, dropout_rate = encoder_dropout_rate,
+        kernel_initializer = kernel_initializer, batch_norm = encoder_batch_norm,
+        width = layer_width)
 
     layer_args = base_layer_args
 
@@ -144,32 +150,32 @@ def GenerativeModel(
         input_   = backbone._model.input
         m        = backbone._model.output
 
-        # for _ in backbone.get_feature_layers():
-        #     n_units = int(n_units * layer_growth_rate)
+        for _ in backbone.get_feature_layers():
+            n_units = int(n_units * encoder_layer_growth_rate)
 
-            # if is_convolution:
-            #     x = int(x * feature_growth_rate)
-            #     y = int(y * feature_growth_rate)
+            if is_convolution:
+                x = int(x * feature_growth_rate)
+                y = int(y * feature_growth_rate)
     else:
         m = input_
 
         for _ in range(layer_depth):
             m = layer_block(n_units, **layer_args)(m)
-            # n_units = int(n_units * layer_growth_rate)
+            n_units = int(n_units * encoder_layer_growth_rate)
 
-            # if is_convolution:
-            #     x = int(x * feature_growth_rate)
-            #     y = int(y * feature_growth_rate)
+            if is_convolution:
+                x = int(x * feature_growth_rate)
+                y = int(y * feature_growth_rate)
 
-    # if is_convolution:
-    #     x = max(minimum_features_x, x)
-    #     y = max(minimum_features_y, y)
+    if is_convolution:
+        x = max(minimum_features_x, x)
+        y = max(minimum_features_y, y)
 
     final_block_args = merge_dict(base_layer_args, { "activation": final_activation })
 
     if is_convolution:
         m = Flatten()(m)
-        m = DenseBlock(discriminator_fc_units, **final_block_args)(m)
+        m = DenseBlock(encoder_fc_units, **final_block_args)(m)
 
     # z_mean    = DenseBlock(latent_dim, **final_block_args, name = "z_mean")(m)
     # z_log_var = DenseBlock(latent_dim, **final_block_args, name = "z_log_var")(m)
@@ -178,14 +184,17 @@ def GenerativeModel(
     
     # z         = Sampling(name = "z")([z_mean, z_log_var])
 
-    discriminator = BaseModel(inputs = [input_], outputs = m, name = "%s-discriminator" % name)
-    discriminator.compile()
+    encoder = BaseModel(inputs = [input_], outputs = m, name = "%s-%s" % (name, encoder_name))
+    encoder.compile(learning_rate = encoder_learning_rate)
 
-    generator_input = Input(latent_dim)
-    m = generator_input
+    decoder_input = Input(latent_dim)
+    m = decoder_input
 
-    # n_units = n_units // layer_growth_rate
-    n_units *= 2
+    # n_units = init_decoder_units // layer_growth_rate
+    n_units = init_decoder_units
+
+    base_layer_args["dropout_rate"] = decoder_dropout_rate
+    base_layer_args["batch_norm"]   = decoder_batch_norm
 
     if is_convolution:
         x = int(x * output_resolution)
@@ -197,26 +206,27 @@ def GenerativeModel(
 
         layer_block = Conv2DTransposeBlock
         
-        for key in ("width", "dropout_rate", "batch_norm", "activation_args"):
+        for key in ("width",):
             layer_args.pop(key)
 
     if is_convolution:
-        layer_args = merge_dict(layer_args, { "kernel_size": strides * 2 })
+        layer_args = merge_dict(layer_args, { "kernel_size": strides * 2 + 1 })
 
     for _ in range(layer_depth):
+        n_units = int(n_units * decoder_layer_growth_rate)
         m = layer_block(n_units, **layer_args)(m)
-    #     n_units  = n_units // layer_growth_rate
 
     if is_convolution:
         layer_args = merge_dict(layer_args, { "activation": None,
             "strides": 1, "kernel_size": (x, y) })
 
     m = layer_block(final_units, **layer_args)(m)
-    output_layer = Activation(activation = final_activation, name = "outputs")(m)
+    output_layer = Activation(activation = final_activation, name = "output")(m)
 
-    generator = BaseModel(inputs = [generator_input], outputs = [output_layer], name = "%s-generator" % name)
+    decoder = BaseModel(inputs = [decoder_input],
+        outputs = [output_layer], name = "%s-%s" % (name, decoder_name))
 
-    model = model_type(discriminator, generator, name = name)
+    model = model_type(encoder, decoder, name = name)
 
     if weights:
         model.load_weights(weights)

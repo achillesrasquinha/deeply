@@ -12,12 +12,15 @@ class ActivationBatchNormDropout(Layer):
     """
         Activation -> Batch Normalization -> Dropout
     """
-    def __init__(self, activation = "relu", activation_args = None, batch_norm = True, dropout_rate = 0.5, *args, **kwargs):
+    def __init__(self, activation = "relu", batch_norm = True, dropout_rate = 0.5, *args, **kwargs):
         self._super = super(ActivationBatchNormDropout, self)
         self._super.__init__(*args, **kwargs)
 
-        self.activation_args = activation_args or {}
-        self.activation  = Activation(activation = activation, **self.activation_args) if activation else None
+        if not isinstance(activation, Layer):
+            self.activation = Activation(activation = activation) if activation else None
+        else:
+            self.activation = activation
+
         self.batch_norm  = BatchNormalization() if batch_norm else None
         self.dropout     = Dropout(rate = dropout_rate) if dropout_rate else None
 
@@ -37,7 +40,7 @@ class ActivationBatchNormDropout(Layer):
         return x
 
 class DenseBlock(Layer):
-    def __init__(self, units, activation = "relu", activation_args = None, width = 2, batch_norm = True,
+    def __init__(self, units, activation = "relu", width = 2, batch_norm = True,
         dropout_rate = 0.2, kernel_initializer = None, *args, **kwargs):
         self._super = super(DenseBlock, self)
         self._super.__init__(*args, **kwargs)
@@ -47,7 +50,6 @@ class DenseBlock(Layer):
         self.batch_norm   = batch_norm
         self.dropout_rate = dropout_rate
         self.kernel_initializer = kernel_initializer
-        self.activation_args = activation_args
 
         self.denses       = [ ]
         self.activations  = [ ]
@@ -80,7 +82,7 @@ class DenseBlock(Layer):
             "batch_norm": self.batch_norm,
             "dropout_rate": self.dropout_rate,
             "width": self.width,
-            "kernel_initializer": self.kernel_initializer
+            "kernel_initializer": self.kernel_initializer,
         }
 
     @classmethod
@@ -88,7 +90,7 @@ class DenseBlock(Layer):
         return cls(**config)
 
 class ConvBlock(Layer):
-    def __init__(self, filters, kernel_size = 3, activation = "relu", activation_args = None, 
+    def __init__(self, filters, kernel_size = 3, activation = "relu",
         width = 2, batch_norm = True, dropout_rate = 0.2, kernel_initializer = None,
         padding = "valid", strides = 1, *args, **kwargs):
         self._super = super(ConvBlock, self)
@@ -102,7 +104,6 @@ class ConvBlock(Layer):
         self.dropout_rate = dropout_rate
         self.padding      = padding
         self.kernel_initializer = kernel_initializer
-        self.activation_args = activation_args
 
         self.convs        = [ ]
         self.activations  = [ ]
@@ -114,7 +115,6 @@ class ConvBlock(Layer):
             self.convs.append(conv)
 
             activation = ActivationBatchNormDropout(activation = activation,
-                activation_args = activation_args, 
                 batch_norm = batch_norm, dropout_rate = dropout_rate)
             self.activations.append(activation)
 
@@ -148,8 +148,8 @@ class ConvBlock(Layer):
         return cls(**config)
 
 class Conv2DTransposeBlock(Layer):
-    def __init__(self, filters, kernel_size = 3, activation = "relu", activation_args = None, 
-        width = 2, batch_norm = True, dropout_rate = 0.2, kernel_initializer = None,
+    def __init__(self, filters, kernel_size = 3, activation = "relu",
+        width = 1, batch_norm = True, dropout_rate = 0.2, kernel_initializer = None,
         padding = "valid", strides = 1, *args, **kwargs):
         self._super = super(Conv2DTransposeBlock, self)
         self._super.__init__(*args, **kwargs)
@@ -162,7 +162,6 @@ class Conv2DTransposeBlock(Layer):
         self.dropout_rate = dropout_rate
         self.padding      = padding
         self.kernel_initializer = kernel_initializer
-        self.activation_args = activation_args
 
         self.convs        = [ ]
         self.activations  = [ ]
@@ -174,7 +173,6 @@ class Conv2DTransposeBlock(Layer):
             self.convs.append(conv)
 
             activation = ActivationBatchNormDropout(activation = activation,
-                activation_args = activation_args, 
                 batch_norm = batch_norm, dropout_rate = dropout_rate)
             self.activations.append(activation)
 

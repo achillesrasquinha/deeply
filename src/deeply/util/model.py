@@ -67,3 +67,25 @@ def create_model_fn(func, doc = "", args = {}):
         return function
 
     return wrapper
+
+def get_activation(activation, **kwargs):
+    if not isinstance(activation, str):
+        return activation(**kwargs)
+
+    return activation
+
+def update_kwargs(kwargs, custom):
+    for key, config in iteritems(custom):
+        prev = kwargs.pop(key, config.get("default", None))
+
+        item = config["item"]
+        
+        if isinstance(prev, list):
+            item  = sequencify(item)
+            prev += item
+        else:
+            prev  = item
+
+        kwargs[key] = prev
+
+    return kwargs

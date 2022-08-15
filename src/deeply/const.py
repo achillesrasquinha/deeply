@@ -37,4 +37,8 @@ DEFAULT = \
 
     "gan_learning_rate": 1e-4,
     "gan_plot_callback_samples": 16,
+
+    "base_model_learning_rate": 1e-4,
+    "generative_model_encoder_learning_rate": 1e-4,
+    "generative_model_decoder_learning_rate": 1e-4,
 }

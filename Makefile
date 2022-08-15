@@ -121,7 +121,7 @@ ifneq (${ENVIRONMENT},test)
 	@find $(BASEDIR) | grep -E "__pycache__|\.pyc" | xargs rm -rf
 
 	@rm -rf \
-		$(BASEDIR)/*.egg-info \
+		$(BASEDIR)/**/*.egg-info \
 		$(BASEDIR)/.pytest_cache \
 		$(BASEDIR)/.tox \
 		$(BASEDIR)/*.coverage \

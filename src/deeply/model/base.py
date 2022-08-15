@@ -1,8 +1,8 @@
 from tensorflow.keras import Model
 from tensorflow.keras.utils import plot_model
+from tensorflow.keras.optimizers import Adam
 
-from bpyutils.util.array import sequencify
-
+from deeply.const import DEFAULT
 from deeply.util.model import get_fit_kwargs
 
 class BaseModel(Model):
@@ -23,8 +23,10 @@ class BaseModel(Model):
         kwargs = get_fit_kwargs(self, kwargs, custom = {
             "callbacks": self.callbacks
         })
+
         return self._super.fit(*args, **kwargs)
 
     def compile(self, *args, **kwargs):
-        kwargs["optimizer"] = kwargs.get("optimizer", "adam")
+        learning_rate       = kwargs.pop("learning_rate", DEFAULT["base_model_learning_rate"])
+        kwargs["optimizer"] = kwargs.get("optimizer", Adam(learning_rate = learning_rate))
         return self._super.compile(*args, **kwargs)
