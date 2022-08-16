@@ -20,7 +20,7 @@ class GANPlotCallback(Callback):
 
         generator        = model.generator
         generator_input_shape = generator.input_shape
-        _, noise_dim     = generator_input_shape
+        _, noise_dim = generator_input_shape
 
         self.sample_data = tf.random.normal([self.n_samples, noise_dim])
 
@@ -31,7 +31,7 @@ class GANPlotCallback(Callback):
             display.clear_output(wait = True)
 
             generated_images  = self.model.generator(self.sample_data, training = False)
-            generated_images *= 127.5 + 127.5
+            generated_images *= 255.0
             generated_images  = tf.cast(generated_images, tf.uint8)
 
             imgplot(generated_images)

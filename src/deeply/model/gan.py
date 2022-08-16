@@ -72,6 +72,7 @@ class GANModel(AutoEncoder):
 
         return self._super.fit(*args, **kwargs)
 
+    @tf.function
     def train_step(self, data):
         generator_input_shape = self.generator.input.shape
         _, noise_dim  = generator_input_shape
