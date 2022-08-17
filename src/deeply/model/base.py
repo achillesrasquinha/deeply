@@ -7,10 +7,16 @@ from deeply.util.model import get_fit_kwargs
 
 class BaseModel(Model):
     def __init__(self, *args, **kwargs):
+        self._scaler   = kwargs.pop("scaler", None)
+
         self._super = super(BaseModel, self)
         self._super.__init__(**kwargs)
 
         self.callbacks = []
+
+    @property
+    def scaler(self):
+        return getattr(self, "_scaler", None)
 
     def plot(self, *args, **kwargs):
         kwargs["show_shapes"] = kwargs.get("show_shapes", True)

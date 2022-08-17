@@ -38,19 +38,6 @@ class GANModel(AutoEncoder):
     def discriminator(self):
         return self.encoder
 
-    def compile(self, *args, **kwargs):
-        optimizer     = kwargs.pop("optimizer", Adam)
-        learning_rate = kwargs.pop("learning_rate", None)
-
-        generator_learning_rate     = learning_rate or kwargs.get("generator_learning_rate",     DEFAULT["generative_model_encoder_learning_rate"])
-        discriminator_learning_rate = learning_rate or kwargs.get("discriminator_learning_rate", DEFAULT["generative_model_decoder_learning_rate"])
-
-        self._optimizer = {}
-        self._optimizer["generator"]     = optimizer(learning_rate = generator_learning_rate)
-        self._optimizer["discriminator"] = optimizer(learning_rate = discriminator_learning_rate)
-
-        self._super.compile(*args, **kwargs)
-
     def fit(self, *args, **kwargs):
         kwargs = update_kwargs(kwargs, {
             "callbacks": {
@@ -59,20 +46,8 @@ class GANModel(AutoEncoder):
             }
         })
 
-        args = list(args)
-        
-        X = args[0]
-
-        n_samples = dataset_length(X)
-        self._batch_size = kwargs.get("batch_size", None)
-
-        if self._batch_size:
-            args[0] = X.batch(self._batch_size)
-            kwargs["steps_per_epoch"] = n_samples / self._batch_size
-
         return self._super.fit(*args, **kwargs)
 
-    @tf.function
     def train_step(self, data):
         generator_input_shape = self.generator.input.shape
         _, noise_dim  = generator_input_shape
@@ -80,7 +55,9 @@ class GANModel(AutoEncoder):
         generator     = self.generator
         discriminator = self.discriminator
 
-        noise = tf.random.normal([self._batch_size or 1, noise_dim]) # TODO: get batch size from data
+        batch_size    = tf.shape(data)[0]
+
+        noise = tf.random.normal(shape = (batch_size, noise_dim)) # TODO: get batch size from data
 
         with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
             generated_output = generator(noise, training = True)
@@ -91,14 +68,11 @@ class GANModel(AutoEncoder):
             loss_generator      = generator_loss(fake_output)
             loss_discriminator  = discriminator_loss(real_output, fake_output)
 
-        generator_train_vars     = generator.trainable_variables
-        discriminator_train_vars = discriminator.trainable_variables
-
-        generator_gradients      = generator_tape.gradient(loss_generator, generator_train_vars)
-        discriminator_gradients  = discriminator_tape.gradient(loss_discriminator, discriminator_train_vars)
+        generator_gradients      = generator_tape.gradient(loss_generator, generator.trainable_variables)
+        discriminator_gradients  = discriminator_tape.gradient(loss_discriminator, discriminator.trainable_variables)
         
-        self._optimizer["generator"].apply_gradients(zip(generator_gradients, generator_train_vars))
-        self._optimizer["discriminator"].apply_gradients(zip(discriminator_gradients, discriminator_train_vars))
+        generator.optimizer.apply_gradients(zip(generator_gradients, generator.trainable_variables))
+        discriminator.optimizer.apply_gradients(zip(discriminator_gradients, discriminator.trainable_variables))
 
         # TODO: update metrics
         return merge_dict(

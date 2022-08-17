@@ -31,7 +31,10 @@ class GANPlotCallback(Callback):
             display.clear_output(wait = True)
 
             generated_images  = self.model.generator(self.sample_data, training = False)
-            generated_images *= 255.0
+
+            if self.model.scaler:
+                generated_images = self.model.scaler.inverse_transform(generated_images)
+                
             generated_images  = tf.cast(generated_images, tf.uint8)
 
             imgplot(generated_images)

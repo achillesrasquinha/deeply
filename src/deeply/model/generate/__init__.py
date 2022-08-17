@@ -1,3 +1,5 @@
+from collections import Sequence
+
 import numpy as np
 
 from tensorflow.keras.layers import (
@@ -24,8 +26,12 @@ def GenerativeModel(
     input_shape         = None,
     init_encoder_units  = 64,
     init_decoder_units  = 128,
-    kernel_size         = 3,
-    strides             = 2,
+    kernel_size         = 5,
+    
+    encoder_strides     = 2,
+    decoder_strides     = 2,
+    final_strides       = 2,
+
     padding             = "same",
     activation          = LeakyReLU,
     activation_args     = { "alpha": 0.2 },
@@ -41,9 +47,6 @@ def GenerativeModel(
     final_activation    = "sigmoid",
     final_units         = 1,
     latent_dim          = 100,
-
-    batch_norm          = True,
-    dropout_rate        = 0,
 
     encoder_dropout_rate = 0,
     encoder_batch_norm   = False,
@@ -142,7 +145,7 @@ def GenerativeModel(
 
     if is_layer_type(layer_block, "convolution"):
         layer_args = merge_dict(base_layer_args, {
-            "kernel_size": kernel_size, "strides": strides, "padding": padding })
+            "kernel_size": kernel_size, "strides": encoder_strides, "padding": padding })
 
     if backbone:
         BackBone = import_handler("deeply.model.transfer.backbone.BackBone")
@@ -205,28 +208,30 @@ def GenerativeModel(
         m = Reshape((x, y, n_units))(m)
 
         layer_block = Conv2DTransposeBlock
-        
-        for key in ("width",):
-            layer_args.pop(key)
 
     if is_convolution:
-        layer_args = merge_dict(layer_args, { "kernel_size": strides * 2 + 1 })
+        layer_args = merge_dict(layer_args, { "kernel_size": kernel_size, "width": 1,
+            "use_bias": False })
 
-    for _ in range(layer_depth):
+    for i in range(layer_depth):
+        if isinstance(decoder_strides, Sequence):
+            layer_args["strides"] = decoder_strides[i]
+
         n_units = int(n_units * decoder_layer_growth_rate)
         m = layer_block(n_units, **layer_args)(m)
 
     if is_convolution:
         layer_args = merge_dict(layer_args, { "activation": None,
-            "strides": 1, "kernel_size": (x, y) })
+            "strides": final_strides, "kernel_size": (x, y) })
 
     m = layer_block(final_units, **layer_args)(m)
     output_layer = Activation(activation = final_activation, name = "output")(m)
 
     decoder = BaseModel(inputs = [decoder_input],
         outputs = [output_layer], name = "%s-%s" % (name, decoder_name))
+    decoder.compile(learning_rate = decoder_learning_rate)
 
-    model = model_type(encoder, decoder, name = name)
+    model = model_type(encoder, decoder, name = name, **kwargs)
 
     if weights:
         model.load_weights(weights)

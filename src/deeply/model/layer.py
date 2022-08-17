@@ -1,3 +1,6 @@
+from bpyutils.util._dict import merge_dict
+from bpyutils._compat import iteritems, iterkeys
+
 from tensorflow.keras.layers import (
     Layer,
     Activation,
@@ -27,11 +30,11 @@ class ActivationBatchNormDropout(Layer):
     def call(self, inputs, training = False):
         x = inputs
 
-        if self.activation:
-            x = self.activation(x)
-        
         if training and self.batch_norm:
             x = self.batch_norm(x)
+
+        if self.activation:
+            x = self.activation(x)
 
         # https://stats.stackexchange.com/a/317313
         if training and self.dropout:
@@ -39,168 +42,101 @@ class ActivationBatchNormDropout(Layer):
 
         return x
 
-class DenseBlock(Layer):
-    def __init__(self, units, activation = "relu", width = 2, batch_norm = True,
-        dropout_rate = 0.2, kernel_initializer = None, *args, **kwargs):
-        self._super = super(DenseBlock, self)
-        self._super.__init__(*args, **kwargs)
+def get_default_block_kwargs():
+    return {
+        "activation": "relu",
+        "width": 2,
+        "batch_norm": True,
+        "dropout_rate": 0.2,
+        "kernel_initializer": None,
+        "use_bias": True
+    }
 
-        self.units        = units
-        self.activation   = activation
-        self.batch_norm   = batch_norm
-        self.dropout_rate = dropout_rate
-        self.kernel_initializer = kernel_initializer
+def generate_block(name, layer_type, layer_kwargs = {}):
+    default_kwargs = get_default_block_kwargs()
 
-        self.denses       = [ ]
-        self.activations  = [ ]
+    merged_kwargs  = merge_dict(default_kwargs, layer_kwargs)
 
-        for _ in range(width):
-            dense = Dense(units, kernel_initializer = kernel_initializer)
-            self.denses.append(dense)
+    class Block(Layer):
+        def __init__(self, *args, **kwargs):
+            args = list(args)
 
-            activation = ActivationBatchNormDropout(activation = activation,
-                batch_norm = batch_norm, dropout_rate = dropout_rate)
-            self.activations.append(activation)
+            if len(args):
+                setattr(self, "units", args.pop(0))
+            else:
+                raise ValueError("No units provided.")
 
-        self.width        = width
+            block_kwargs = { }
+            final_layer_kwargs = layer_kwargs
 
-    def call(self, inputs, training = False):
-        x = inputs
+            for key, default_value in iteritems(merged_kwargs):
+                if key in kwargs:
+                    block_kwargs[key] = kwargs.pop(key, default_value)
+                    setattr(self, key, block_kwargs[key])
 
-        for i in range(self.width):
-            x = self.denses[i](x, training = training)
+                    if key in layer_kwargs:
+                        final_layer_kwargs[key] = block_kwargs[key]
 
-            x = self.activations[i](x, training = training)
+            self._super = super(Block, self)
+            self._super.__init__(*args, **kwargs)
 
-        return x
+            self.layers       = [ ]
+            self.activations  = [ ]
 
-    def get_config(self):
-        return {
-            "units": self.units,
-            "kernel_size": self.kernel_size,
-            "activation": self.activation,
-            "batch_norm": self.batch_norm,
-            "dropout_rate": self.dropout_rate,
-            "width": self.width,
-            "kernel_initializer": self.kernel_initializer,
-        }
+            for _ in range(self.width):
+                layer = layer_type(self.units, kernel_initializer = self.kernel_initializer,
+                    **final_layer_kwargs)
+                self.layers.append(layer)
 
-    @classmethod
-    def from_config(cls, config):
-        return cls(**config)
+                activation = ActivationBatchNormDropout(activation = self.activation,
+                    batch_norm = self.batch_norm, dropout_rate = self.dropout_rate)
+                self.activations.append(activation)
 
-class ConvBlock(Layer):
-    def __init__(self, filters, kernel_size = 3, activation = "relu",
-        width = 2, batch_norm = True, dropout_rate = 0.2, kernel_initializer = None,
-        padding = "valid", strides = 1, *args, **kwargs):
-        self._super = super(ConvBlock, self)
-        self._super.__init__(*args, **kwargs)
+            self._block_attrs = merge_dict(block_kwargs, { "units": self.units })
 
-        self.filters      = filters
-        self.kernel_size  = kernel_size
-        self.strides      = strides
-        self.activation   = activation
-        self.batch_norm   = batch_norm
-        self.dropout_rate = dropout_rate
-        self.padding      = padding
-        self.kernel_initializer = kernel_initializer
+        def call(self, inputs, training = False):
+            x = inputs
 
-        self.convs        = [ ]
-        self.activations  = [ ]
+            for i in range(self.width):
+                x = self.layers[i](x, training = training)
+                x = self.activations[i](x, training = training)
 
-        for _ in range(width):
-            conv = Conv2D(filters = filters, kernel_size = kernel_size,
-                kernel_initializer = kernel_initializer, padding = padding,
-                strides = strides)
-            self.convs.append(conv)
+            return x
 
-            activation = ActivationBatchNormDropout(activation = activation,
-                batch_norm = batch_norm, dropout_rate = dropout_rate)
-            self.activations.append(activation)
+        def get_config(self):
+            config = self._super.get_config()
 
-        self.width = width
+            for key in iterkeys(self._block_attrs):
+                config.update({ key: getattr(self, key)})
 
-    def call(self, inputs, training = False):
-        x = inputs
+            return config
 
-        for i in range(self.width):
-            x = self.convs[i](x)
+        @classmethod
+        def from_config(cls, config):
+            return cls(**config)
 
-            x = self.activations[i](x, training = training)
+    Block.__name__ = name
 
-        return x
+    return Block
 
-    def get_config(self):
-        return {
-            "filters": self.filters,
-            "kernel_size": self.kernel_size,
-            "strides": self.strides,
-            "activation": self.activation,
-            "width": self.width,
-            "batch_norm": self.batch_norm,
-            "dropout_rate": self.dropout_rate,
-            "padding": self.padding,
-            "kernel_initializer": self.kernel_initializer
-        }
+def get_conv_block_kwargs():
+    return {
+        "kernel_size": 3,
+        "strides": 1,
+        "padding": "valid"
+    }
 
-    @classmethod
-    def from_config(cls, config):
-        return cls(**config)
-
-class Conv2DTransposeBlock(Layer):
-    def __init__(self, filters, kernel_size = 3, activation = "relu",
-        width = 1, batch_norm = True, dropout_rate = 0.2, kernel_initializer = None,
-        padding = "valid", strides = 1, *args, **kwargs):
-        self._super = super(Conv2DTransposeBlock, self)
-        self._super.__init__(*args, **kwargs)
-
-        self.filters      = filters
-        self.kernel_size  = kernel_size
-        self.strides      = strides
-        self.activation   = activation
-        self.batch_norm   = batch_norm
-        self.dropout_rate = dropout_rate
-        self.padding      = padding
-        self.kernel_initializer = kernel_initializer
-
-        self.convs        = [ ]
-        self.activations  = [ ]
-
-        for _ in range(width):
-            conv = Conv2DTranspose(filters = filters, kernel_size = kernel_size,
-                kernel_initializer = kernel_initializer, padding = padding,
-                strides = strides)
-            self.convs.append(conv)
-
-            activation = ActivationBatchNormDropout(activation = activation,
-                batch_norm = batch_norm, dropout_rate = dropout_rate)
-            self.activations.append(activation)
-
-        self.width = width
-
-    def call(self, inputs, training = False):
-        x = inputs
-
-        for i in range(self.width):
-            x = self.convs[i](x)
-
-            x = self.activations[i](x, training = training)
-
-        return x
-
-    def get_config(self):
-        return {
-            "filters": self.filters,
-            "kernel_size": self.kernel_size,
-            "strides": self.strides,
-            "activation": self.activation,
-            "width": self.width,
-            "batch_norm": self.batch_norm,
-            "dropout_rate": self.dropout_rate,
-            "padding": self.padding,
-            "kernel_initializer": self.kernel_initializer
-        }
-
-    @classmethod
-    def from_config(cls, config):
-        return cls(**config)
+DenseBlock = generate_block(
+    name = "DenseBlock",
+    layer_type = Dense
+)
+ConvBlock  = generate_block(
+    name = "ConvBlock",
+    layer_type   = Conv2D,
+    layer_kwargs = get_conv_block_kwargs()
+)
+Conv2DTransposeBlock = generate_block(
+    name = "Conv2DTransposeBlock",
+    layer_type   = Conv2DTranspose,
+    layer_kwargs = get_conv_block_kwargs()
+)
