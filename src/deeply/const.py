@@ -36,7 +36,7 @@ DEFAULT = \
     "weights": "imagenet",
 
     "gan_learning_rate": 1e-4,
-    "gan_plot_callback_samples": 16,
+    "gan_plot_callback_samples": 4,
 
     "base_model_learning_rate": 1e-4,
     "generative_model_encoder_learning_rate": 1e-4,
