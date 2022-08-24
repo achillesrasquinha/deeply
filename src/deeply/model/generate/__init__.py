@@ -196,8 +196,8 @@ def GenerativeModel(
     # n_units = init_decoder_units // layer_growth_rate
     n_units = init_decoder_units
 
-    base_layer_args["dropout_rate"] = decoder_dropout_rate
-    base_layer_args["batch_norm"]   = decoder_batch_norm
+    layer_args["dropout_rate"] = decoder_dropout_rate
+    layer_args["batch_norm"]   = decoder_batch_norm
 
     if is_convolution:
         x = int(x * output_resolution)
