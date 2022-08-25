@@ -7,16 +7,28 @@ on:
 
 env:
   COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+<<<<<<< HEAD
+=======
+
+>>>>>>> template/master
   ENVIRONMENT: test
   VERBOSE: true
   TERM: xterm
 
+<<<<<<< HEAD
   DEEPLY_JOBS_GITHUB_USERNAME: achillesrasquinha
+=======
+  DEEPLY_JOBS_GITHUB_USERNAME: ${{ github.actor }}
+>>>>>>> template/master
   DEEPLY_JOBS_GITHUB_OAUTH_TOKEN: ${{ secrets.DEEPLY_JOBS_GITHUB_OAUTH_TOKEN }}
 
 jobs:
   jobs:
+<<<<<<< HEAD
     name: Test
+=======
+    name: Jobs
+>>>>>>> template/master
     runs-on: ubuntu-latest
     
     steps:
@@ -37,4 +49,8 @@ jobs:
           python setup.py develop
       - name: Run Jobs
         run: |
+<<<<<<< HEAD
           python -c "import deeply; deeply.run_all_jobs()"
+=======
+          bpyutils --run-jobs deeply.jobs
+>>>>>>> template/master

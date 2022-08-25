@@ -13,7 +13,10 @@ SRCDIR  = osp.join(BASEDIR, "src")
 NOW     = dt.datetime.now()
 
 sys.path.insert(0, BASEDIR)
+<<<<<<< HEAD
 sys.path.insert(0, SRCDIR)
+=======
+>>>>>>> template/master
 
 import deeply
 

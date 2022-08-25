@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 tensorflow
 tensorflow-datasets
 imgaug
@@ -9,3 +10,7 @@ seaborn
 scikit-learn
 bpyutils
 pydot
+=======
+
+bpyutils
+>>>>>>> template/master

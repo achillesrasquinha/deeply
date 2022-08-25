@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> template/master
 # imports - module imports
 from deeply.exception import (
     DeeplyError

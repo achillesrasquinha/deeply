@@ -21,20 +21,38 @@ from deeply.__attr__ import (
 
     __author__
 )
+<<<<<<< HEAD
 from deeply.__main__    import main
 from deeply             import ops
 from deeply.config      import PATH
 from deeply.deeply      import hub
+=======
+from deeply.config      import PATH
+from deeply.__main__    import main
+>>>>>>> template/master
 
 from bpyutils.cache       import Cache
 from bpyutils.config      import Settings
 from bpyutils.util.jobs   import run_all as run_all_jobs, run_job
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> template/master
 cache = Cache(dirname = __name__)
 cache.create()
 
 settings = Settings()
 
+<<<<<<< HEAD
 def get_version_str():
     version = "%s%s" % (__version__, " (%s)" % __build__ if __build__ else "")
     return version
+=======
+
+def get_version_str():
+    version = "%s%s" % (__version__, " (%s)" % __build__ if __build__ else "")
+    return version
+
+
+>>>>>>> template/master

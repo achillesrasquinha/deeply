@@ -1,5 +1,10 @@
 .PHONY: shell test help requirements
 
+<<<<<<< HEAD
+=======
+# SHELL				   := /bin/bash
+
+>>>>>>> template/master
 BASEDIR					= $(shell pwd)
 -include ${BASEDIR}/.env
 
@@ -27,9 +32,17 @@ TOX						= ${VENVBIN}tox
 COVERALLS			   ?= ${VENVBIN}coveralls
 DOCSTR_COVERAGE		   ?= ${VENVBIN}docstr-coverage
 IPYTHON					= ${VENVBIN}ipython
+<<<<<<< HEAD
 
 JUPYTER					= ${VENVBIN}jupyter
 
+=======
+PYLINT					= ${VENVBIN}pylint
+
+JUPYTER					= ${VENVBIN}jupyter
+
+DOCKER_COMPOSE			= ${VENVBIN}docker-compose
+>>>>>>> template/master
 SAFETY					= ${VENVBIN}safety
 PRECOMMIT				= ${VENVBIN}pre-commit
 SPHINXBUILD				= ${VENVBIN}sphinx-build
@@ -41,6 +54,10 @@ DOCKER_TAG			   ?= latest
 DOCKER_IMAGE		   ?= ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${PROJECT}:${DOCKER_TAG}
 DOCKER_BUILDKIT		   ?= 1
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> template/master
 SQLITE				   ?= sqlite
 
 
@@ -49,8 +66,11 @@ PYTHON_ENVIRONMENT      = $(shell $(PYTHON) -c "import sys;v=sys.version_info;pr
 
 NULL					= /dev/null
 
+<<<<<<< HEAD
 TF_CPP_MIN_LOG_LEVEL	= 3
 
+=======
+>>>>>>> template/master
 define log
 	$(eval CLEAR     = \033[0m)
 	$(eval BOLD		 = \033[0;1m)
@@ -60,7 +80,11 @@ define log
 	$(eval BULLET 	 = "→")
 	$(eval TIMESTAMP = $(shell date +%H:%M:%S))
 
+<<<<<<< HEAD
 	@echo "${BULLET} ${$1}[${TIMESTAMP}]${CLEAR} ${BOLD}$2${CLEAR}"
+=======
+	@printf "${BULLET} ${$1}[${TIMESTAMP}]${CLEAR} ${BOLD}$2${CLEAR}\n"
+>>>>>>> template/master
 endef
 
 define browse
@@ -84,13 +108,26 @@ endif
 info: ## Display Information
 	@echo "Python Environment: ${PYTHON_ENVIRONMENT}"
 
+<<<<<<< HEAD
+=======
+upgrade-tools: # Upgrade pip, setuptools, wheel to latest
+ifneq (${VERBOSE},true)
+	$(eval OUT = > /dev/null)
+endif
+	$(PIP) install --upgrade pip setuptools wheel $(OUT)
+
+>>>>>>> template/master
 requirements: ## Build Requirements
 	$(call log,INFO,Building Requirements)
 	@find $(BASEDIR)/requirements -maxdepth 1 -type f | grep -v 'jobs' | xargs awk '{print}' > $(BASEDIR)/requirements-dev.txt
 	@find $(BASEDIR)/requirements -maxdepth 1 -type f | xargs awk '{print}' > $(BASEDIR)/requirements-jobs.txt
 	@cat $(BASEDIR)/requirements/production.txt  > $(BASEDIR)/requirements.txt
 
+<<<<<<< HEAD
 install: clean info requirements ## Install dependencies and module.
+=======
+install: clean info upgrade-tools requirements ## Install dependencies and module.
+>>>>>>> template/master
 ifneq (${VERBOSE},true)
 	$(eval OUT = > /dev/null)
 endif
@@ -106,11 +143,22 @@ else
 	$(PIP) install -r $(BASEDIR)/requirements-dev.txt  $(PIP_ARGS) $(OUT)
 endif
 
+<<<<<<< HEAD
 	$(call log,INFO,Installing ${PROJECT} (${ENVIRONMENT}))
 ifeq (${ENVIRONMENT},development)
 	$(PYTHON) setup.py develop $(OUT)
 else
 	$(PYTHON) setup.py install $(OUT)
+=======
+# https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html#summary
+# setup.py install is deprecated.
+	$(call log,INFO,Installing ${PROJECT} (${ENVIRONMENT}))
+ifeq (${ENVIRONMENT},development)
+
+	$(PIP) install -e $(BASEDIR) $(OUT)
+else
+	$(PIP) install $(BASEDIR) $(OUT)
+>>>>>>> template/master
 endif
 
 	$(call log,SUCCESS,Installation Successful)
@@ -120,10 +168,17 @@ ifneq (${ENVIRONMENT},test)
 	@clear
 
 	$(call log,INFO,Cleaning Python Cache)
+<<<<<<< HEAD
 	@find $(BASEDIR) | grep -E "__pycache__|\.pyc" | xargs rm -rf
 
 	@rm -rf \
 		$(BASEDIR)/**/*.egg-info \
+=======
+	@find $(BASEDIR) | grep -E "__pycache__|\.pyc|\.egg-info" | xargs rm -rf
+
+	@rm -rf \
+		$(BASEDIR)/*.egg-info \
+>>>>>>> template/master
 		$(BASEDIR)/.pytest_cache \
 		$(BASEDIR)/.tox \
 		$(BASEDIR)/*.coverage \
@@ -132,6 +187,10 @@ ifneq (${ENVIRONMENT},test)
 		$(BASEDIR)/htmlcov \
 		$(BASEDIR)/dist \
 		$(BASEDIR)/build \
+<<<<<<< HEAD
+=======
+		$(BASEDIR)/*.log \
+>>>>>>> template/master
 		~/.config/$(PROJECT)
 
 	$(call log,SUCCESS,Cleaning Successful)
@@ -150,6 +209,13 @@ endif
 
 	$(PYTEST) -s -n $(JOBS) --cov $(PROJDIR) $(IARGS) -vv $(ARGS)
 
+<<<<<<< HEAD
+=======
+ifeq (${ENVIRONMENT},development)
+	$(call browse,file:///${BASEDIR}/htmlcov/index.html)
+endif
+
+>>>>>>> template/master
 doc-coverage: install ## Display documentation coverage.
 	$(DOCSTR_COVERAGE) $(PROJDIR)
 
@@ -162,8 +228,11 @@ ifeq (${ENVIRONMENT},test)
 endif
 
 shell: install ## Launch an IPython shell.
+<<<<<<< HEAD
 	clear
 	
+=======
+>>>>>>> template/master
 	$(call log,INFO,Launching Python Shell)
 	$(IPYTHON) \
 		--no-banner
@@ -185,13 +254,23 @@ ifneq (${VERBOSE},true)
 	$(eval OUT = > /dev/null)
 endif
 
+<<<<<<< HEAD
 	$(call log,INFO,Building Notebooks)
 	@find $(DOCSDIR)/source -type f -name '*.ipynb' -not -path "*/.ipynb_checkpoints/*" | \
+=======
+	
+	$(call log,INFO,Building Notebooks)
+	@find $(DOCSDIR)/source/notebooks -type f -name '*.ipynb' -not -path "*/.ipynb_checkpoints/*" | \
+>>>>>>> template/master
 		xargs $(JUPYTER) nbconvert \
 			--to notebook 		\
 			--inplace 			\
 			--execute 			\
 			--ExecutePreprocessor.timeout=300
+<<<<<<< HEAD
+=======
+	
+>>>>>>> template/master
 
 	$(call log,INFO,Building Documentation)
 	$(SPHINXBUILD) $(DOCSDIR)/source $(DOCSDIR)/build $(OUT)
@@ -202,10 +281,38 @@ ifeq (${launch},true)
 	$(call browse,file:///${DOCSDIR}/build/index.html)
 endif
 
+<<<<<<< HEAD
 docker-build: clean ## Build the Docker Image.
 	$(call log,INFO,Building Docker Image)
 
 	@docker build $(BASEDIR) --tag $(DOCKER_IMAGE) $(DOCKER_BUILD_ARGS)
+=======
+docker-pull: ## Pull Latest Docker Images
+	$(call log,INFO,Pulling latest Docker Image)
+
+	if [[ -d "${BASEDIR}/docker/files" ]]; then \
+		for folder in `ls ${BASEDIR}/docker/files`; do \
+			docker pull $(DOCKER_IMAGE):$$folder || true; \
+		done; \
+	fi
+
+	@docker pull $(DOCKER_IMAGE):latest || true
+
+docker-build: clean docker-pull requirements ## Build the Docker Image.
+	$(call log,INFO,Building Docker Image)
+
+	if [[ -f "${BASEDIR}/docker-compose.yml" ]]; then \
+		$(DOCKER_COMPOSE) build; \
+	fi
+
+	if [[ -d "${BASEDIR}/docker/files" ]]; then \
+		for folder in `ls ${BASEDIR}/docker/files`; do \
+			docker build ${BASEDIR}/docker/files/$$folder --tag $(DOCKER_IMAGE):$$folder $(DOCKER_BUILD_ARGS) ; \
+		done \
+	fi
+
+	@[[ -f "${BASEDIR}/Dockerfile" ]] && docker build $(BASEDIR) --tag $(DOCKER_IMAGE) $(DOCKER_BUILD_ARGS)
+>>>>>>> template/master
 
 docker-test: clean ## Testing within Docker Image.
 	$(call log,INFO,Building Docker Image)
@@ -247,7 +354,15 @@ start: ## Start app.
 
 
 notebooks: ## Launch Notebooks
+<<<<<<< HEAD
 	$(JUPYTER) notebook --notebook-dir $(DOCSDIR) $(ARGS)
+=======
+	$(JUPYTER) notebook --notebook-dir $(NOTEBOOKSDIR) $(ARGS)
+
+
+lint: ## Perform Lint
+	$(PYLINT) $(PROJDIR) --output-format=colorized
+>>>>>>> template/master
 
 help: ## Show help and exit.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)

@@ -1,6 +1,7 @@
 <div align="center">
   <img src=".github/assets/logo.png" height="128">
   <h1>
+<<<<<<< HEAD
     deeply
   </h1>
 </div>
@@ -11,6 +12,19 @@
     </a>
     <a href="https://coveralls.io/github/achillesrasquinha/deeply">
       <img src="https://img.shields.io/coveralls/github/achillesrasquinha/deeply.svg?style=flat-square">
+=======
+      deeply
+  </h1>
+  <h4></h4>
+</div>
+
+<p align="center">
+    <a href='https://github.com//deeply//actions?query=workflow:"Continuous Integration"'>
+      <img src="https://img.shields.io/github/workflow/status//deeply/Continuous Integration?style=flat-square">
+    </a>
+    <a href="https://coveralls.io/github//deeply">
+      <img src="https://img.shields.io/coveralls/github//deeply.svg?style=flat-square">
+>>>>>>> template/master
     </a>
     <a href="https://pypi.org/project/deeply/">
       <img src="https://img.shields.io/pypi/v/deeply.svg?style=flat-square">
@@ -26,6 +40,7 @@
     </a>
 </p>
 
+<<<<<<< HEAD
 🧠 deeply is a simple and elegant Deep Learning library written in Python containing a growing collection of deep learning models, datasets and utilities.
 
 **Behold, the power of deeply**:
@@ -41,6 +56,8 @@
 >>> model.fit(train, validation_data = val, epochs = 10)
 ```
 
+=======
+>>>>>>> template/master
 ### Table of Contents
 * [Features](#features)
 * [Quick Start](#quick-start)
@@ -56,7 +73,11 @@
 $ pip install deeply
 ```
 
+<<<<<<< HEAD
 Check out [installation](docs/source/installation.md) for more details.
+=======
+Check out [installation](docs/source/install.rst) for more details.
+>>>>>>> template/master
 
 ### Usage
 
@@ -73,7 +94,11 @@ Check out [installation](docs/source/installation.md) for more details.
 $ deeply
 Usage: deeply [OPTIONS] COMMAND [ARGS]...
 
+<<<<<<< HEAD
   A Deep Learning library
+=======
+  
+>>>>>>> template/master
 
 Options:
   --version   Show the version and exit.
@@ -85,6 +110,21 @@ Commands:
 ```
 
 
+<<<<<<< HEAD
+=======
+### Docker
+
+Using `deeply's` Docker Image can be done as follows:
+
+```
+$ docker run \
+    --rm \
+    -it \
+    /deeply \
+      --verbose
+```
+
+>>>>>>> template/master
 ### License
 
 This repository has been released under the [MIT License](LICENSE).

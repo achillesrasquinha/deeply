@@ -1,7 +1,17 @@
+<<<<<<< HEAD
 🧠 deeply
 =========
 
 Release v\ |version|. (:ref:`Installation <install>`)
+=======
+deeply
+===
+
+Release v\ |version|. (:ref:`Installation <install:>`)
+
+.. image:: https://img.shields.io/coveralls/github/achillesrasquinha/ccapi.svg?style=flat-square
+    :target: https://coveralls.io/github/achillesrasquinha/ccapi
+>>>>>>> template/master
 
 .. image:: https://img.shields.io/pypi/pyversions/ccapi.svg?style=flat-square
     :target: https://pypi.org/project/ccapi/
@@ -12,6 +22,7 @@ Release v\ |version|. (:ref:`Installation <install>`)
 .. image:: https://img.shields.io/badge/made%20with-boilpy-red.svg?style=flat-square
     :target: https://git.io/boilpy
 
+<<<<<<< HEAD
 .. image:: https://img.shields.io/badge/donate-💵-f44336.svg?style=flat-square
     :target: https://paypal.me/achillesrasquinha
 
@@ -64,3 +75,11 @@ api
 ---------------
 
 If you want to contribute to the project, this part of the documentation is for you.
+=======
+.. image:: https://img.shields.io/badge/Say%20Thanks-🦉-1EAEDB.svg?style=flat-square
+    :target: https://saythanks.io/to/achillesrasquinha
+
+.. image:: https://img.shields.io/badge/donate-💵-f44336.svg?style=flat-square
+    :target: https://paypal.me/achillesrasquinha
+
+>>>>>>> template/master

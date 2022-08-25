@@ -19,7 +19,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+<<<<<<< HEAD
         python-version: [3.7, 3.8, 3.9] # Removed 2.7, 3.5 since NumPy 1.19.1 supports 3.6 to 3.8., Removed 3.6, since TFlow + sklearn supports 3.7 onwards.
+=======
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9]
+>>>>>>> template/master
 
     steps:
       - uses: actions/checkout@v2
@@ -39,7 +43,11 @@ jobs:
           python setup.py develop
       - name: Run Tests
         run: |
+<<<<<<< HEAD
           tox -e py$(echo "${{ matrix.python-version }}" | tr -d '.')
+=======
+          python -m tox -e py$(echo "${{ matrix.python-version }}" | tr -d '.') --parallel all
+>>>>>>> template/master
       - name: Run Coverage
         run: |
           coveralls --service github

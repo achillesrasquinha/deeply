@@ -70,9 +70,17 @@ __name__                    = "deeply"
 __command__                 = "deeply"
 __version__                 = read(osp.join(pardir(__file__), "VERSION"))
 __build__                   = get_revision(pardir(__file__, 2), short = True, raise_err = False)
+<<<<<<< HEAD
 __author__                  = "Achilles Rasquinha"
 __email__                   = "achillesrasquinha@gmail.com"
 __description__             = "A Deep Learning library"
 __keywords__                = ['deep', 'learning']
 __url__                     = "https://github.com/achillesrasquinha/deeply"
+=======
+__author__                  = ""
+__email__                   = ""
+__description__             = ""
+__keywords__                = []
+__url__                     = "https://github.com//deeply"
+>>>>>>> template/master
 __license__                 = "MIT License"
