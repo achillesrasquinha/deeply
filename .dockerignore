@@ -1,0 +1,9 @@
+.git
+.venv
+.vscode
+ci
+docker/deeply
+.env
+.gitignore
+.releasrc
+Makefile
