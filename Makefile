@@ -36,8 +36,10 @@ SPHINXBUILD				= ${VENVBIN}sphinx-build
 SPHINXAUTOBUILD			= ${VENVBIN}sphinx-autobuild
 TWINE					= ${VENVBIN}twine
 
-DOCKER_IMAGE		   ?= ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${PROJECT}
+DOCKER_TAG			   ?= latest
 
+DOCKER_IMAGE		   ?= ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${PROJECT}:${DOCKER_TAG}
+DOCKER_BUILDKIT		   ?= 1
 
 SQLITE				   ?= sqlite
 
@@ -211,7 +213,7 @@ docker-test: clean ## Testing within Docker Image.
 	@docker run --rm -it $(DOCKER_IMAGE) "tox"
 
 docker-push: ## Push Docker Image to Registry.
-	@docker push $(DOCKER_IMAGE)$(DOCKER_IMAGE_TAG)
+	@docker push $(DOCKER_IMAGE) --all-tags
 
 docker-tox: clean ## Test using Docker Tox Image.
 	$(call log,INFO,Running Tests using Docker Tox)

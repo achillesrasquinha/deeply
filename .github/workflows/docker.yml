@@ -27,6 +27,7 @@ jobs:
           echo $GITHUB_TOKEN | docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME --password-stdin
       - name: Build Image
         run: |
+          export DOCKER_TAG=$(echo ${GITHUB_REF#refs/heads/)
           make docker-build
       - name: Push Image
         run: |

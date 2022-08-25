@@ -1,3 +1,5 @@
+
+
 FROM python:3.9
 
 ARG DEVELOPMENT=false
@@ -6,14 +8,16 @@ LABEL maintainer=achillesrasquinha@gmail.com
 
 ENV DEEPLY_PATH=/deeply
 
+# COPY --from 
+
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
-                ffmpeg \
-                libsm6 \
-                libxext6 \
-                bash \
-                git \
-                graphviz \
+            ffmpeg \
+            libsm6 \
+            libxext6 \
+            bash \
+            git \
+            graphviz \
     && mkdir -p $DEEPLY_PATH
 
 COPY . $DEEPLY_PATH
