@@ -1,6 +1,5 @@
 sphinx
 recommonmark
-<<<<<<< HEAD
 ipykernel
 nbsphinx
 matplotlib
@@ -10,9 +9,3 @@ pydot-ng
 graphviz
 sphinx-autobuild
 sphinx-press-theme
-=======
-sphinx-autobuild
-
-ipykernel
-nbsphinx
->>>>>>> template/master

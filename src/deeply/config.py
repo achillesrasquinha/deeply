@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 from __future__ import absolute_import
 
->>>>>>> template/master
 import os.path as osp
 
 from deeply.__attr__ import __name__ as NAME

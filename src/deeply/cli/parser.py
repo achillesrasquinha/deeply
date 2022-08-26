@@ -1,9 +1,5 @@
 # imports - standard imports
 import sys
-<<<<<<< HEAD
-import os
-=======
->>>>>>> template/master
 import argparse
 import multiprocessing as mp
 

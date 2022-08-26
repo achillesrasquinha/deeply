@@ -15,21 +15,13 @@ For instructions on installing python and pip see “The Hitchhiker’s Guide to
 
 #### Building from source
 
-<<<<<<< HEAD
 `deeply` is actively developed on [https://github.com](https://github.com/achillesrasquinha/deeply)
-=======
-`deeply` is actively developed on [https://github.com](https://github.com//deeply)
->>>>>>> template/master
 and is always avaliable.
 
 You can clone the base repository with git as follows:
 
 ```shell
-<<<<<<< HEAD
 $ git clone https://github.com/achillesrasquinha/deeply
-=======
-$ git clone https://github.com//deeply
->>>>>>> template/master
 ```
 
 Optionally, you could download the tarball or zipball as follows:
@@ -37,21 +29,13 @@ Optionally, you could download the tarball or zipball as follows:
 ##### For Linux Users
 
 ```shell
-<<<<<<< HEAD
 $ curl -OL https://github.com/achillesrasquinha/tarball/deeply
-=======
-$ curl -OL https://github.com//tarball/deeply
->>>>>>> template/master
 ```
 
 ##### For Windows Users
 
 ```shell
-<<<<<<< HEAD
 $ curl -OL https://github.com/achillesrasquinha/zipball/deeply
-=======
-$ curl -OL https://github.com//zipball/deeply
->>>>>>> template/master
 ```
 
 Install necessary dependencies

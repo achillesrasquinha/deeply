@@ -13,13 +13,8 @@ env:
   PROJECT: ${{ github.event.repository.name }}
 
 jobs:
-<<<<<<< HEAD
-  build:
-    name: Build
-=======
   build-docker:
     name: Build and Push
->>>>>>> template/master
     runs-on: ubuntu-latest
       
     steps:
@@ -30,15 +25,6 @@ jobs:
       - name: Login to Registry
         run: |
           echo $GITHUB_TOKEN | docker login $DOCKER_REGISTRY -u $DOCKER_USERNAME --password-stdin
-<<<<<<< HEAD
-      - name: Build Image
-        run: |
-          export DOCKER_TAG=$(echo ${GITHUB_REF#refs/heads/)
-          make docker-build
-      - name: Push Image
-        run: |
-          make docker-push
-=======
       - name: Pull latest image
         run: |
           make docker-pull
@@ -48,4 +34,3 @@ jobs:
       - name: Push Image
         run: |
           make docker-push
->>>>>>> template/master

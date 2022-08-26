@@ -173,10 +173,6 @@ dmypy.json
 pyvenv.cfg
 pip-selfcheck.json
 
-<<<<<<< HEAD
 # End of https://www.gitignore.io/api/python
 
 ~/tensorflow_datasets
-=======
-# End of https://www.gitignore.io/api/python
->>>>>>> template/master

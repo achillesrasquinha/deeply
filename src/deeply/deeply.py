@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from __future__ import absolute_import
 
 from deeply.model.factory import ModelFactory
@@ -14,7 +13,3 @@ def hub(name, *args, **kwargs):
     model = ModelFactory.get(name, *args, **kwargs)
 
     return model
-=======
-
-from __future__ import absolute_import
->>>>>>> template/master
