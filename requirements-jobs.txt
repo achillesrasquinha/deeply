@@ -1,0 +1,43 @@
+sphinx
+recommonmark
+ipykernel
+nbsphinx
+matplotlib
+pydot
+pydotplus
+pydot-ng
+graphviz
+sphinx-autobuild
+sphinx-press-theme
+pylint
+autopep8
+pytest
+pytest-cov
+pytest-xdist
+pytest-sugar
+pytest-clarity; python_version >= '3.6'
+tox
+coveralls
+pluggy<1,>=0.12.0
+docstr-coverage
+tensorflow
+tensorflow-datasets
+imgaug
+pillow
+# pydicom
+# pylibjpeg
+# pylibjpeg-libjpeg
+seaborn
+scikit-learn
+bpyutils
+pydot
+pipenv
+jedi<0.18
+ipython
+bumpversion
+vulture
+safety
+pre-commit
+twine
+jupyter
+Flask
