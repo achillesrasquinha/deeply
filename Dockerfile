@@ -6,8 +6,6 @@ LABEL maintainer=achillesrasquinha@gmail.com
 
 ENV DEEPLY_PATH=/deeply
 
-# COPY --from 
-
 RUN apt-get update && \
         apt-get install -y --no-install-recommends \
             ffmpeg \

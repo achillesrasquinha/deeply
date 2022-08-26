@@ -42,7 +42,7 @@ TWINE					= ${VENVBIN}twine
 
 DOCKER_TAG			   ?= latest
 
-DOCKER_IMAGE		   ?= ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${PROJECT}:${DOCKER_TAG}
+DOCKER_IMAGE		   ?= ${DOCKER_REGISTRY}/${DOCKER_USERNAME}/${PROJECT}
 DOCKER_BUILDKIT		   ?= 1
 
 SQLITE				   ?= sqlite
@@ -231,7 +231,7 @@ docker-pull: ## Pull Latest Docker Images
 		done; \
 	fi
 
-	@docker pull $(DOCKER_IMAGE):latest || true
+	@docker pull $(DOCKER_IMAGE):$(DOCKER_TAG) || true
 
 docker-build: clean docker-pull requirements ## Build the Docker Image.
 	$(call log,INFO,Building Docker Image)
@@ -251,7 +251,7 @@ docker-build: clean docker-pull requirements ## Build the Docker Image.
 docker-test: clean ## Testing within Docker Image.
 	$(call log,INFO,Building Docker Image)
 	
-	@docker run --rm -it $(DOCKER_IMAGE) "tox"
+	@docker run --rm -it $(DOCKER_IMAGE):$(DOCKER_TAG) "tox"
 
 docker-push: ## Push Docker Image to Registry.
 	@docker push $(DOCKER_IMAGE) --all-tags
