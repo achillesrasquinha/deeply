@@ -246,7 +246,7 @@ docker-build: clean docker-pull requirements ## Build the Docker Image.
 		done \
 	fi
 
-	@[[ -f "${BASEDIR}/Dockerfile" ]] && docker build $(BASEDIR) --tag $(DOCKER_IMAGE) $(DOCKER_BUILD_ARGS)
+	@[[ -f "${BASEDIR}/Dockerfile" ]] && docker build $(BASEDIR) --tag $(DOCKER_IMAGE):$(DOCKER_TAG) $(DOCKER_BUILD_ARGS)
 
 docker-test: clean ## Testing within Docker Image.
 	$(call log,INFO,Building Docker Image)
