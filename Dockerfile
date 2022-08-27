@@ -23,7 +23,7 @@ WORKDIR $DEEPLY_PATH
 
 SHELL ["/bin/bash", "-c"]
 
-RUN pip install tensorflow-aarch64 -f https://tf.kmtea.eu/whl/stable.html
+RUN pip install tensorflow==2.6.0 -f https://tf.kmtea.eu/whl/stable.html
 
 RUN if [[ "${DEVELOPMENT}" ]]; then \
         pip install -r ./requirements-dev.txt --use-deprecated=legacy-resolver; \
