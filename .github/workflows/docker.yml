@@ -30,7 +30,7 @@ jobs:
           make docker-pull
       - name: Build Image
         run: |
-          export DOCKER_TAG=$(echo ${GITHUB_REF#refs/heads/)
+          export DOCKER_TAG=${GITHUB_REF##*/}
           make docker-build
       - name: Push Image
         run: |
