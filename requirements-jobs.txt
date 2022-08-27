@@ -21,7 +21,6 @@ coveralls
 pluggy<1,>=0.12.0
 docstr-coverage
 protobuf<4
-tensorflow-aarch64
 tensorflow-datasets
 imgaug
 pillow
