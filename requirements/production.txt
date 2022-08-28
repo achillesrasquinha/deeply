@@ -7,5 +7,5 @@ pillow
 # pylibjpeg-libjpeg
 seaborn
 scikit-learn
-git+https://github.com/achillesrasquinha/bpyutils.git@develop#egg=bpyutils
+-e git+https://github.com/achillesrasquinha/bpyutils.git@develop#egg=bpyutils
 pydot
