@@ -1,5 +1,4 @@
 import os.path as osp
-from collections import Mapping
 
 from bpyutils.util.environ import setenv
 from bpyutils.util.string  import get_random_str
@@ -7,6 +6,8 @@ from bpyutils.util.string  import get_random_str
 from deeply.config import PATH
 from deeply.ops.integrations.base import BaseService
 from deeply.exception import OpsError
+
+from bpyutils._compat import Mapping
 
 _PREFIX = "WANDB"
 

@@ -1,5 +1,3 @@
-from collections import Sequence
-
 import numpy as np
 
 from tensorflow.keras.layers import (
@@ -18,6 +16,8 @@ from deeply.util.model      import get_activation
 
 from bpyutils.util._dict    import merge_dict
 from bpyutils.util.imports  import import_handler
+
+from bpyutils._compat import Sequence
 
 def GenerativeModel(
     x                   = None,

@@ -1,10 +1,11 @@
 import re
-from collections import Mapping
 
 from bpyutils.util.imports import import_or_raise
 from bpyutils.util.environ import getenv, getenvvar
 
 from deeply.__attr__ import __name__ as NAME
+
+from bpyutils._compat import Mapping
 
 _PREFIX = NAME.upper()
 

@@ -9,6 +9,7 @@ from sklearn.metrics import confusion_matrix as sk_confusion_matrix
 
 from bpyutils._compat import iterkeys
 from bpyutils.util.array import sequencify, squash
+from bpyutils._compat import Mapping
 
 def _matshow(axes, mat, title = None, axis = False, **kwargs):
     plot_args = kwargs.pop("plot_args", {})
@@ -101,7 +102,7 @@ def imgplot(images, **kwargs):
     return _plot_base(fig, squash(plots), **kwargs)
 
 def history(obj, **kwargs):
-    if isinstance(obj, collections.Mapping):
+    if isinstance(obj, Mapping):
         histories = obj
     else:
         histories = obj.history
