@@ -1,7 +1,7 @@
 import collections
 
 import numpy as np
-import matplotlib.pyplot as pplt
+import matplotlib.pyplot as mplt
 import seaborn as sns
 import tensorflow as tf
 
@@ -34,7 +34,7 @@ def _plot_base(fig, axes, super_title = None, to_file = None, figsize = None, **
     if to_file:
         fig.savefig(to_file)
 
-    pplt.tight_layout()
+    mplt.tight_layout()
 
     return fig, axes
 
@@ -51,7 +51,7 @@ def segplot(image, mask, predict = None, **kwargs):
     show_predict = predict is not None
     n_plots   = 3 if show_predict else 2
 
-    fig, axes = pplt.subplots(1, n_plots, sharex = True, sharey = True)
+    fig, axes = mplt.subplots(1, n_plots, sharex = True, sharey = True)
 
     plot_args = _get_plot_kwargs(**kwargs)
 
@@ -84,7 +84,7 @@ def imgplot(images, **kwargs):
 
     size = max(int(np.sqrt(length)), 1)
 
-    fig, axes = pplt.subplots(size, size, sharex = True, sharey = True)
+    fig, axes = mplt.subplots(size, size, sharex = True, sharey = True)
     plots = axes
 
     if not type(axes) is np.ndarray:
@@ -110,7 +110,7 @@ def history(obj, **kwargs):
     metrics   = [m for m in iterkeys(histories) if not m.startswith("val_")]
     n_plots   = len(metrics)
 
-    fig, axes = pplt.subplots(n_plots, 1, sharex = True)
+    fig, axes = mplt.subplots(n_plots, 1, sharex = True)
 
     for i, type_ in enumerate(metrics):
         values  = histories[type_]

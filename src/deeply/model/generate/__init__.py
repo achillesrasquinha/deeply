@@ -179,7 +179,9 @@ def GenerativeModel(
         x = max(minimum_features_x, x)
         y = max(minimum_features_y, y)
 
-    final_block_args = merge_dict(base_layer_args, { "activation": final_activation })
+    final_block_args = merge_dict(base_layer_args, {
+        "dropout_rate": 0, "activation": None
+    })
 
     if is_convolution:
         m = Flatten()(m)
@@ -195,28 +197,34 @@ def GenerativeModel(
     encoder = BaseModel(inputs = [input_], outputs = m, name = "%s-%s" % (name, encoder_name))
     # encoder.compile(learning_rate = encoder_learning_rate)
 
+    logger.info("Building decoder...")
+
     decoder_input = Input(latent_dim)
     m = decoder_input
 
     # n_units = init_decoder_units // layer_growth_rate
     n_units = init_decoder_units
 
-    layer_args["dropout_rate"] = decoder_dropout_rate
-    layer_args["batch_norm"]   = decoder_batch_norm
+    base_layer_args["dropout_rate"] = decoder_dropout_rate
+    base_layer_args["batch_norm"]   = decoder_batch_norm
+    base_layer_args["use_bias"]     = False
 
+    layer_args["dropout_rate"] = base_layer_args["dropout_rate"]
+    layer_args["batch_norm"]   = base_layer_args["batch_norm"]
+    layer_args["use_bias"]     = base_layer_args["use_bias"]
+    
     if is_convolution:
         x = int(x * output_resolution)
         y = int(y * output_resolution)
 
     if is_convolution:
-        m = DenseBlock(x * y * n_units, **merge_dict(base_layer_args, { "use_bias": False }))(m)
+        m = DenseBlock(x * y * n_units, **base_layer_args)(m)
         m = Reshape((x, y, n_units))(m)
 
         layer_block = Conv2DTransposeBlock
 
     if is_convolution:
-        layer_args = merge_dict(layer_args, { "kernel_size": kernel_size, "width": 1,
-            "use_bias": False })
+        layer_args = merge_dict(layer_args, { "kernel_size": kernel_size, "width": 1 })
 
     for i in range(layer_depth):
         if isinstance(decoder_strides, Sequence):
@@ -226,11 +234,12 @@ def GenerativeModel(
         m = layer_block(n_units, **layer_args)(m)
 
     if is_convolution:
-        layer_args = merge_dict(layer_args, { "activation": None,
-            "strides": final_strides, "kernel_size": (x, y) })
+        layer_args = merge_dict(layer_args, { "activation": final_activation,
+            "strides": final_strides, "kernel_size": (x, y),
+            "batch_norm": False, "dropout_rate": 0 })
 
-    m = layer_block(final_units, **layer_args)(m)
-    output_layer = Activation(activation = final_activation, name = "output")(m)
+    output_layer = layer_block(final_units, **layer_args, name = "output")(m)
+    # output_layer = Activation(activation = final_activation, name = "output")(m)
 
     decoder = BaseModel(inputs = [decoder_input],
         outputs = [output_layer], name = "%s-%s" % (name, decoder_name))

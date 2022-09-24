@@ -1,9 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.optimizers import Adam
-
-
-from tensorflow.python.data.ops.dataset_ops import BatchDataset
+from tensorflow.raw_ops import BatchDataset
 
 from deeply.const import DEFAULT
 from deeply.model.layer import ConvBlock
@@ -68,22 +66,26 @@ class GANModel(AutoEncoder):
         return loss_generator, loss_discriminator
 
     def train_step(self, data):
-        generator     = self.generator
+        generator = self.generator
         discriminator = self.discriminator
 
         with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
             loss_generator, loss_discriminator = self.compute_loss(data)
 
-        generator_gradients     = generator_tape.gradient(loss_generator, self.generator.trainable_variables)
+        generator_gradients = generator_tape.gradient(loss_generator, self.generator.trainable_variables)
         discriminator_gradients = discriminator_tape.gradient(loss_discriminator, self.discriminator.trainable_variables)
         
         self.optimizers["decoder"].apply_gradients(zip(generator_gradients, self.generator.trainable_variables))
         self.optimizers["encoder"].apply_gradients(zip(discriminator_gradients, self.discriminator.trainable_variables))
 
-        return self.compute_metrics()
+        return merge_dict(self.compute_metrics(), {
+            "generator-loss": loss_generator,
+            "discriminator-loss": loss_discriminator,
+            "loss": loss_generator + loss_discriminator
+        })
 
     def compute_metrics(self):
-        generator     = self.generator
+        generator = self.generator
         discriminator = self.discriminator
 
         # TODO: update metrics

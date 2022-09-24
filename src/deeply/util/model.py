@@ -54,7 +54,7 @@ def get_fit_args_kwargs(model, args, kwargs, custom = None):
     # callbacks.append(TqdmCallback(verbose = verbose))
 
     callbacks.append(ModelCheckpoint(
-        filepath            = "%s.hdf5" % get_checkpoint_prefix(model),
+        filepath            = kwargs.pop("checkpoint_path", "%s.hdf5" % get_checkpoint_prefix(model)),
         monitor             = monitor,
         save_best_only      = True,
         save_weights_only   = True,

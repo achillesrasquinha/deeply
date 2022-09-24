@@ -16,9 +16,9 @@ class GANPlotCallback(Callback):
         self._super = super(GANPlotCallback, self)
         self._super.__init__(*args, **kwargs)
 
-        self.n_samples   = n_samples
+        self.n_samples = n_samples
 
-        generator        = model.generator
+        generator = model.generator
         generator_input_shape = generator.input_shape
         _, noise_dim = generator_input_shape
 

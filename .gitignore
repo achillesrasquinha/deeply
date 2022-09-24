@@ -176,3 +176,6 @@ pip-selfcheck.json
 # End of https://www.gitignore.io/api/python
 
 ~/tensorflow_datasets
+**/*.h5d5*
+docs/source/models/*.png
+checkpoint
