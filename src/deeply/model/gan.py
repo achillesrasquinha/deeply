@@ -39,12 +39,12 @@ class GANModel(AutoEncoder):
         return self.encoder
 
     def fit(self, *args, **kwargs):
-        kwargs = update_kwargs(kwargs, {
-            "callbacks": {
-                "default": [],
-                "item": GANPlotCallback(self)
-            }
-        })
+        # kwargs = update_kwargs(kwargs, {
+        #     "callbacks": {
+        #         "default": [],
+        #         "item": GANPlotCallback(self)
+        #     }
+        # })
 
         super_ = super(GANModel, self)
         return super_.fit(*args, **kwargs)
