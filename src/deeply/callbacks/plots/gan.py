@@ -26,9 +26,9 @@ class GANPlotCallback(Callback):
 
     def on_train_batch_end(self, batch, logs = None):
         try:
-            from IPython import display
+            # from IPython import display
 
-            display.clear_output(wait = True)
+            # display.clear_output(wait = True)
 
             generated_images = self.model.generator(self.sample_data, training = False)
 
