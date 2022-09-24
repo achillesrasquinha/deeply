@@ -24,18 +24,18 @@ class GANPlotCallback(Callback):
 
         self.sample_data = tf.random.normal([self.n_samples, noise_dim])
 
-    def on_train_end(self, logs = None):
+    def on_train_batch_end(self, batch, logs = None):
         try:
-            # from IPython import display
+            from IPython import display
 
-            # display.clear_output(wait = True)
+            display.clear_output(wait = True)
 
             generated_images = self.model.generator(self.sample_data, training = False)
 
             if self.model.scaler:
                 generated_images = self.model.scaler.inverse_transform(generated_images)
                 
-            generated_images  = tf.cast(generated_images, tf.uint8)
+            generated_images = tf.cast(generated_images, tf.uint8)
 
             imgplot(generated_images, to_file = "gan.png", cmap = "gray")
         except ImportError:
