@@ -20,6 +20,9 @@ class ModelFactory:
         },
         "dcgan": {
             "model_class": import_handler("deeply.model.gan.DCGAN")
+        },
+        "mlp": {
+             "model_class": import_handler("deeply.model.mlp.MLP")
         }
     }
 
