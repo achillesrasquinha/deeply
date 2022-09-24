@@ -8,7 +8,8 @@ from tensorflow.keras.layers import (
     LeakyReLU
 )
 
-from deeply.const import DEFAULT
+from deeply.__attr__        import __name__ as NAME
+from deeply.const           import DEFAULT
 from deeply.model.base      import BaseModel
 from deeply.model.layer     import DenseBlock, Conv2DTransposeBlock
 from deeply.model.types     import is_layer_type
@@ -18,6 +19,10 @@ from bpyutils.util._dict    import merge_dict
 from bpyutils.util.imports  import import_handler
 
 from bpyutils._compat import Sequence
+
+from bpyutils.log import get_logger
+
+logger = get_logger(NAME)
 
 def GenerativeModel(
     x                   = None,
@@ -188,7 +193,7 @@ def GenerativeModel(
     # z         = Sampling(name = "z")([z_mean, z_log_var])
 
     encoder = BaseModel(inputs = [input_], outputs = m, name = "%s-%s" % (name, encoder_name))
-    encoder.compile(learning_rate = encoder_learning_rate)
+    # encoder.compile(learning_rate = encoder_learning_rate)
 
     decoder_input = Input(latent_dim)
     m = decoder_input
@@ -204,7 +209,7 @@ def GenerativeModel(
         y = int(y * output_resolution)
 
     if is_convolution:
-        m = DenseBlock(x * y * n_units, **base_layer_args)(m)
+        m = DenseBlock(x * y * n_units, **merge_dict(base_layer_args, { "use_bias": False }))(m)
         m = Reshape((x, y, n_units))(m)
 
         layer_block = Conv2DTransposeBlock
@@ -229,13 +234,15 @@ def GenerativeModel(
 
     decoder = BaseModel(inputs = [decoder_input],
         outputs = [output_layer], name = "%s-%s" % (name, decoder_name))
-    decoder.compile(learning_rate = decoder_learning_rate)
+    # decoder.compile(learning_rate = decoder_learning_rate)
 
     model = model_type(encoder, decoder, name = name, **kwargs)
 
     if weights:
         model.load_weights(weights)
 
-    model.compile()
+    logger.info("Compiling model %s..." % model.name)
+    model.compile(encoder_learning_rate = encoder_learning_rate,
+        decoder_learning_rate = decoder_learning_rate)
 
     return model

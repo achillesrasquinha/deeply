@@ -22,7 +22,7 @@ def _matshow(axes, mat, title = None, axis = False, **kwargs):
     if not axis:
         axes.axis("off")
 
-def _plot_base(fig, axes, super_title = None, to_file = None, figsize = None):
+def _plot_base(fig, axes, super_title = None, to_file = None, figsize = None, **kwargs):
     if figsize:
         width, height = figsize
         fig.set_figwidth(width)

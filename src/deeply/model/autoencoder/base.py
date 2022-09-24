@@ -1,15 +1,27 @@
+from tensorflow.keras.optimizers import Adam
+
 from deeply.model.base import BaseModel
+from deeply.const import DEFAULT
 
 class AutoEncoder(BaseModel):
     def __init__(self, encoder, decoder, *args, **kwargs):
         kwargs["inputs"]  = []
         kwargs["outputs"] = []
-
-        self._super  = super(AutoEncoder, self)
-        self._super.__init__(*args, **kwargs)
+        
+        super_ = super(AutoEncoder, self)
+        super_.__init__(*args, **kwargs)
 
         self.encoder = encoder
         self.decoder = decoder
 
-    def fit(self, *args, **kwargs):
-        self._super.fit(*args, **kwargs)
+        self.optimizers = {}
+    
+    def compile(self, *args, **kwargs):
+        encoder_learning_rate = kwargs.pop("encoder_learning_rate", DEFAULT["generative_model_encoder_learning_rate"])
+        decoder_learning_rate = kwargs.pop("decoder_learning_rate", DEFAULT["generative_model_decoder_learning_rate"])
+
+        self.optimizers["encoder"] = Adam(learning_rate = encoder_learning_rate)
+        self.optimizers["decoder"] = Adam(learning_rate = decoder_learning_rate)
+
+        super_ = super(AutoEncoder, self)
+        return super_.compile(*args, **kwargs)

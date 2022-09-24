@@ -14,7 +14,7 @@ import tqdm as tq
 from deeply.model.base     import BaseModel
 from deeply.model.logistic import LogisticRegression
 from bpyutils.util._dict   import merge_dict
-from deeply.util.model     import get_fit_kwargs
+from deeply.util.model     import get_fit_args_kwargs
 
 def get_model_loss(model, data, training = False):
     X, y   = data
@@ -135,7 +135,7 @@ class StackingModel(BaseModel):
             epochs   = meta_epochs
         )
 
-        kwargs      = get_fit_kwargs(self, kwargs, { "callbacks": callbacks })
+        args, kwargs = get_fit_args_kwargs(self, args, kwargs, { "callbacks": callbacks })
 
         return self._super.fit(*args, **kwargs)
 

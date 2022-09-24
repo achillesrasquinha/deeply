@@ -3,14 +3,14 @@ from tensorflow.keras.utils import plot_model
 from tensorflow.keras.optimizers import Adam
 
 from deeply.const import DEFAULT
-from deeply.util.model import get_fit_kwargs
+from deeply.util.model import get_fit_args_kwargs
 
 class BaseModel(Model):
     def __init__(self, *args, **kwargs):
-        self._scaler   = kwargs.pop("scaler", None)
+        self._scaler = kwargs.pop("scaler", None)
 
-        self._super = super(BaseModel, self)
-        self._super.__init__(**kwargs)
+        super_ = super(BaseModel, self)
+        super_.__init__(*args, **kwargs)
 
         self.callbacks = []
 
@@ -26,13 +26,16 @@ class BaseModel(Model):
         self.callbacks.append(callback)
 
     def fit(self, *args, **kwargs):
-        kwargs = get_fit_kwargs(self, kwargs, custom = {
+        args, kwargs = get_fit_args_kwargs(self, args, kwargs, custom = {
             "callbacks": self.callbacks
         })
 
-        return self._super.fit(*args, **kwargs)
+        super_ = super(BaseModel, self)
+        return super_.fit(*args, **kwargs)
 
     def compile(self, *args, **kwargs):
         learning_rate       = kwargs.pop("learning_rate", DEFAULT["base_model_learning_rate"])
         kwargs["optimizer"] = kwargs.get("optimizer", Adam(learning_rate = learning_rate))
-        return self._super.compile(*args, **kwargs)
+        
+        super_ = super(BaseModel, self)
+        return super_.compile(*args, **kwargs)

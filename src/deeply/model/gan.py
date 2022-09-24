@@ -46,33 +46,45 @@ class GANModel(AutoEncoder):
             }
         })
 
-        return self._super.fit(*args, **kwargs)
+        super_ = super(GANModel, self)
+        return super_.fit(*args, **kwargs)
 
-    def train_step(self, data):
+    def compute_loss(self, data):
         generator_input_shape = self.generator.input.shape
         _, noise_dim  = generator_input_shape
 
+        batch_size    = tf.shape(data)[0]
+
+        noise = tf.random.normal(shape = (batch_size, noise_dim))
+
+        generated_output = self.generator(noise, training = True)
+        
+        real_output      = self.discriminator(data, training = True)
+        fake_output      = self.discriminator(generated_output, training = True)
+
+        loss_generator     = generator_loss(fake_output)
+        loss_discriminator = discriminator_loss(real_output, fake_output)
+        
+        return loss_generator, loss_discriminator
+
+    def train_step(self, data):
         generator     = self.generator
         discriminator = self.discriminator
 
-        batch_size    = tf.shape(data)[0]
-
-        noise = tf.random.normal(shape = (batch_size, noise_dim)) # TODO: get batch size from data
-
         with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
-            generated_output = generator(noise, training = True)
+            loss_generator, loss_discriminator = self.compute_loss(data)
 
-            real_output = discriminator(data, training = True)
-            fake_output = discriminator(generated_output, training = True)
-
-            loss_generator      = generator_loss(fake_output)
-            loss_discriminator  = discriminator_loss(real_output, fake_output)
-
-        generator_gradients      = generator_tape.gradient(loss_generator, generator.trainable_variables)
-        discriminator_gradients  = discriminator_tape.gradient(loss_discriminator, discriminator.trainable_variables)
+        generator_gradients     = generator_tape.gradient(loss_generator, self.generator.trainable_variables)
+        discriminator_gradients = discriminator_tape.gradient(loss_discriminator, self.discriminator.trainable_variables)
         
-        generator.optimizer.apply_gradients(zip(generator_gradients, generator.trainable_variables))
-        discriminator.optimizer.apply_gradients(zip(discriminator_gradients, discriminator.trainable_variables))
+        self.optimizers["decoder"].apply_gradients(zip(generator_gradients, self.generator.trainable_variables))
+        self.optimizers["encoder"].apply_gradients(zip(discriminator_gradients, self.discriminator.trainable_variables))
+
+        return self.compute_metrics()
+
+    def compute_metrics(self):
+        generator     = self.generator
+        discriminator = self.discriminator
 
         # TODO: update metrics
         return merge_dict(

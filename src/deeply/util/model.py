@@ -1,10 +1,13 @@
-
 from tensorflow.keras import Input
 from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.data import Dataset
 
 from tqdm.keras import TqdmCallback
 
+from deeply.callbacks.plots.history import PlotHistoryCallback
 from deeply.callbacks.progress_step import ProgressStepCallback
+from deeply.const import DEFAULT
+from deeply.datasets.util import length as dataset_length
 
 from bpyutils.util.array import sequencify
 from bpyutils.util.datetime import get_timestamp_str
@@ -15,15 +18,40 @@ def get_checkpoint_prefix(model):
     prefix = "%s-%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
     return prefix
 
-def get_fit_kwargs(model, kwargs, custom = None):
+def _convert_ds(ds, mapper = None, batch_size = 1, **kwargs):
+    if mapper:
+        ds = ds.map(mapper)
+
+    ds = ds.batch(batch_size)
+
+    return ds
+
+def get_fit_args_kwargs(model, args, kwargs, custom = None):
+    mapper      = kwargs.pop("mapper", None)
+    batch_size  = kwargs.pop("batch_size", DEFAULT["batch_size"])
+
+    _convert_ds_kwargs = dict(mapper = mapper, batch_size = batch_size)
+
+    if args:
+        args = list(args)
+
+        arg  = args[0]
+        if isinstance(arg, Dataset):
+            args[0] = _convert_ds(arg, **_convert_ds_kwargs)
+            
+            kwargs["steps_per_epoch"] = min(1, dataset_length(args[0]) // batch_size)
+        
+        args = tuple(args)
+
     verbose = kwargs.pop("verbose", 1)
     monitor = kwargs.pop("monitor", "loss")
     use_multiprocessing = kwargs.pop("use_multiprocessing", True)
 
     callbacks = sequencify(kwargs.pop("callbacks", []))
 
-    callbacks.append(ProgressStepCallback())
-    callbacks.append(TqdmCallback(verbose = verbose))
+    callbacks.append(PlotHistoryCallback())
+    # callbacks.append(ProgressStepCallback())
+    # callbacks.append(TqdmCallback(verbose = verbose))
 
     callbacks.append(ModelCheckpoint(
         filepath            = "%s.hdf5" % get_checkpoint_prefix(model),
@@ -46,7 +74,7 @@ def get_fit_kwargs(model, kwargs, custom = None):
                 
             kwargs[key] = value
             
-    return kwargs
+    return args, kwargs
 
 def get_input(x, y, channels):
     if not y:
