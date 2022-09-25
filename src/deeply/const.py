@@ -37,6 +37,8 @@ DEFAULT = \
 
     "gan_learning_rate": 1e-4,
     "gan_plot_callback_samples": 16,
+    "gan_discriminator_train_steps_offset": 5,
+    "gan_gradient_penalty_weight": 10,
 
     "base_model_learning_rate": 1e-4,
     

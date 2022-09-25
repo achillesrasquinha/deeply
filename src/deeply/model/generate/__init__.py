@@ -28,6 +28,7 @@ def GenerativeModel(
     x                   = None,
     y                   = None,
     channels            = 1,
+    n_classes           = None,
     input_shape         = None,
     init_encoder_units  = 64,
     init_decoder_units  = 128,
@@ -74,6 +75,11 @@ def GenerativeModel(
     encoder_learning_rate = DEFAULT["generative_model_encoder_learning_rate"],
     decoder_learning_rate = DEFAULT["generative_model_decoder_learning_rate"],
 
+    encoder_loss        = None,
+    decoder_loss        = None,
+
+    grad_weight         = None,
+
     *args, **kwargs
 ):
     """
@@ -82,6 +88,7 @@ def GenerativeModel(
     :param x: Input features length.
     :param y: Input features height.
     :param channels: Number of channels for an input image.
+    :param n_classes: Number of classes.
     :param init_units: Number of neurons in the initial layer.
     :param activation: Activation function after each layer.
     :param activation_args: Arguments for the activation function.
@@ -135,6 +142,17 @@ def GenerativeModel(
             dim = np.prod(shape)
 
             input_shape = (dim,)
+    else:
+        if is_convolution:
+            x, y, channels = input_shape
+        else:
+            x, y = input_shape
+
+    if isinstance(input_shape, Sequence):
+        input_shape = list(input_shape)
+    
+    if n_classes:
+        input_shape[-1] = input_shape[-1] + n_classes
 
     input_  = Input(shape = input_shape)
 
@@ -197,10 +215,14 @@ def GenerativeModel(
     encoder = BaseModel(inputs = [input_], outputs = m, name = "%s-%s" % (name, encoder_name))
     # encoder.compile(learning_rate = encoder_learning_rate)
 
-    logger.info("Building decoder...")
+    if n_classes:
+        latent_dim = latent_dim + n_classes
 
     decoder_input = Input(latent_dim)
     m = decoder_input
+
+    if n_classes:
+        init_decoder_units = latent_dim
 
     # n_units = init_decoder_units // layer_growth_rate
     n_units = init_decoder_units
@@ -245,13 +267,17 @@ def GenerativeModel(
         outputs = [output_layer], name = "%s-%s" % (name, decoder_name))
     # decoder.compile(learning_rate = decoder_learning_rate)
 
-    model = model_type(encoder, decoder, name = name, **kwargs)
+    model = model_type(encoder, decoder, name = name,
+        grad_weight = grad_weight, **kwargs)
 
     if weights:
         model.load_weights(weights)
 
-    logger.info("Compiling model %s..." % model.name)
-    model.compile(encoder_learning_rate = encoder_learning_rate,
-        decoder_learning_rate = decoder_learning_rate)
+    model.compile(
+        encoder_learning_rate = encoder_learning_rate,
+        decoder_learning_rate = decoder_learning_rate,
+        encoder_loss = encoder_loss,
+        decoder_loss = decoder_loss
+    )
 
     return model

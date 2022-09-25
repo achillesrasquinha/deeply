@@ -60,8 +60,9 @@ def get_fit_args_kwargs(model, args, kwargs, custom = None):
         save_weights_only   = True,
     ))
 
-    kwargs["verbose"]   = 0
-    kwargs["callbacks"] = callbacks
+    kwargs["batch_size"] = batch_size
+    kwargs["verbose"]    = 0
+    kwargs["callbacks"]  = callbacks
     kwargs["use_multiprocessing"] = use_multiprocessing
 
     if custom:
