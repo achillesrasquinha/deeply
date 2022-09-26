@@ -13,7 +13,7 @@ PROJDIR					= ${BASEDIR}/src/deeply
 TESTDIR					= ${BASEDIR}/tests
 DOCSDIR					= ${BASEDIR}/docs
 
-NOTEBOOKSDIR			= ${DOCSDIR}/source/notebooks
+NOTEBOOKSDIR		   ?= ${DOCSDIR}/source/notebooks
 
 
 PYTHONPATH		 	   ?= python
