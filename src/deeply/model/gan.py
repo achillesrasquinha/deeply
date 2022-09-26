@@ -115,32 +115,31 @@ class GANModel(AutoEncoder):
 
         batch_size = tf.shape(data)[0]
 
-        # for _ in range(self.disc_steps):
+        for _ in range(self.disc_steps):
+            with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
+                noise = self.get_random_latent_vector(n_samples = batch_size)
 
-        with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
-            noise = self.get_random_latent_vector(n_samples = batch_size)
+                generated_output = self.generator(noise, training = True)
+            
+                real_output = self.discriminator(data, training = True)
+                fake_output = self.discriminator(generated_output, training = True)
 
-            generated_output = self.generator(noise, training = True)
-        
-            real_output = self.discriminator(data, training = True)
-            fake_output = self.discriminator(generated_output, training = True)
+                # loss_generator = gen_loss(fake_output)
+                loss_discriminator = disc_loss(real_output, fake_output)
 
-            loss_generator = gen_loss(fake_output)
-            loss_discriminator = disc_loss(real_output, fake_output)
-
-            if self.grad_weight:
-                loss_discriminator = loss_discriminator + self._compute_gradient_penalty(data, generated_output) * self.grad_weight
+                if self.grad_weight:
+                    loss_discriminator = loss_discriminator + self._compute_gradient_penalty(data, generated_output) * self.grad_weight
 
         discriminator_gradients = discriminator_tape.gradient(loss_discriminator, self.discriminator.trainable_variables)
         self.optimizers["encoder"].apply_gradients(zip(discriminator_gradients, self.discriminator.trainable_variables))
 
-        # noise = self.get_random_latent_vector(n_samples = batch_size)
-        # with tf.GradientTape() as generator_tape:
-        #     generated_output = self.generator(noise, training = True)
+        noise = self.get_random_latent_vector(n_samples = batch_size)
+        with tf.GradientTape() as generator_tape:
+            generated_output = self.generator(noise, training = True)
 
-        #     fake_output = self.discriminator(generated_output, training = True)
+            fake_output = self.discriminator(generated_output, training = True)
 
-        #     loss_generator = gen_loss(fake_output)
+            loss_generator = gen_loss(fake_output)
 
         generator_gradients = generator_tape.gradient(loss_generator, self.generator.trainable_variables)
         self.optimizers["decoder"].apply_gradients(zip(generator_gradients, self.generator.trainable_variables))
@@ -215,7 +214,7 @@ WGANGP = create_model_fn(
     >>> model = deeply.hub("wcgan-gp")
     """,
     args = {
-        "name": "wcgan-gp",
+        "name": "wgan-gp",
         "grad_weight": DEFAULT["gan_gradient_penalty_weight"]
     }
 )
@@ -255,23 +254,23 @@ def save_img_samples(model, *args, **kwargs):
         imgs = scaler.inverse_transform(imgs)
 
     imgs = tf.cast(imgs, tf.uint8)
+    imgplt(imgs, to_file = to_file, *args, **kwargs)
 
-    if to_file:
-        with make_temp_file(fname = "model.png") as tmp_file:
-            imgplt(imgs, to_file = tmp_file, *args, **kwargs)
+    # if to_file:
+    #     with make_temp_file(fname = "model.png") as tmp_file:
 
-            frames = []
+    #         frames = []
 
-            if osp.exists(to_file):
-                with Image.open(to_file) as gif_img:
-                    n_frames = gif_img.n_frames
-                    for i in range(n_frames - 1, -1, -1):
-                        gif_img.seek(i)
-                        frames.append(gif_img.copy())
+    #         if osp.exists(to_file):
+    #             with Image.open(to_file) as gif_img:
+    #                 n_frames = gif_img.n_frames
+    #                 for i in range(n_frames - 1, -1, -1):
+    #                     gif_img.seek(i)
+    #                     frames.append(gif_img.copy())
 
-            image = Image.open(tmp_file)
-            image.save(fp = to_file, format = "GIF", append_images = frames, 
-                save_all = True, duration = 100, loop = 0)
+    #         image = Image.open(tmp_file)
+    #         image.save(fp = to_file, format = "GIF", append_images = frames, 
+    #             save_all = True, duration = 100, loop = 0)
 
     if show_plot:
         mplt.show()
