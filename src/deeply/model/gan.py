@@ -38,7 +38,7 @@ def discriminator_loss(real_output, fake_output):
 class GANModel(AutoEncoder):
     def __init__(self, *args, **kwargs):
         disc_steps  = kwargs.pop("disc_steps",  DEFAULT["gan_discriminator_train_steps_offset"])
-        grad_weight = kwargs.pop("grad_weight", 0)
+        grad_weight = kwargs.pop("grad_weight")
         
         super_ = super(GANModel, self)
         super_.__init__(*args, **kwargs)
@@ -110,22 +110,20 @@ class GANModel(AutoEncoder):
         return gradient_penalty
 
     def train_step(self, data):
-        generator = self.generator
-        discriminator = self.discriminator
-
         disc_loss = self.loss_fn["encoder"]
         gen_loss  = self.loss_fn["decoder"]
 
         batch_size = tf.shape(data)[0]
 
         # for _ in range(self.disc_steps):
-        noise = self.get_random_latent_vector(n_samples = batch_size)
 
         with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
-            generated_output = generator(noise, training = True)
+            noise = self.get_random_latent_vector(n_samples = batch_size)
+
+            generated_output = self.generator(noise, training = True)
         
-            real_output = discriminator(data, training = True)
-            fake_output = discriminator(generated_output, training = True)
+            real_output = self.discriminator(data, training = True)
+            fake_output = self.discriminator(generated_output, training = True)
 
             loss_generator = gen_loss(fake_output)
             loss_discriminator = disc_loss(real_output, fake_output)
@@ -133,7 +131,7 @@ class GANModel(AutoEncoder):
             if self.grad_weight:
                 loss_discriminator = loss_discriminator + self._compute_gradient_penalty(data, generated_output) * self.grad_weight
 
-        discriminator_gradients = discriminator_tape.gradient(loss_discriminator, discriminator.trainable_variables)
+        discriminator_gradients = discriminator_tape.gradient(loss_discriminator, self.discriminator.trainable_variables)
         self.optimizers["encoder"].apply_gradients(zip(discriminator_gradients, self.discriminator.trainable_variables))
 
         # noise = self.get_random_latent_vector(n_samples = batch_size)
@@ -144,7 +142,7 @@ class GANModel(AutoEncoder):
 
         #     loss_generator = gen_loss(fake_output)
 
-        generator_gradients = generator_tape.gradient(loss_generator, generator.trainable_variables)
+        generator_gradients = generator_tape.gradient(loss_generator, self.generator.trainable_variables)
         self.optimizers["decoder"].apply_gradients(zip(generator_gradients, self.generator.trainable_variables))
         
         return merge_dict(self.compute_metrics(), {
