@@ -7,7 +7,7 @@ pillow
 # pylibjpeg-libjpeg
 seaborn
 scikit-learn
-git+https://github.com/achillesrasquinha/bpyutils.git@develop#egg=bpyutils
+git+https://github.com/achillesrasquinha/bpyutils@develop#egg=bpyutils
 pydot
 dask
 dask-ml
