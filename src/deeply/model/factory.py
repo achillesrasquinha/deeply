@@ -27,6 +27,11 @@ class ModelFactory:
         "wdcgan-gp": {
             "model_class": import_handler("deeply.model.gan.WDCGANGP")
         },
+
+        "linreg": {
+            "model_class": import_handler("deeply.model.linear.LinearRegression")
+        },
+
         "mlp": {
              "model_class": import_handler("deeply.model.mlp.MLP")
         }

@@ -31,6 +31,8 @@ seaborn
 scikit-learn
 git+https://github.com/achillesrasquinha/bpyutils.git@develop#egg=bpyutils
 pydot
+dask
+dask-ml
 pipenv
 jedi<0.18
 ipython
