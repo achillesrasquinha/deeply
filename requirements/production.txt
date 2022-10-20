@@ -1,4 +1,4 @@
-tensorflow-aarch64
+tensorflow
 tensorflow-datasets
 imgaug
 pillow
@@ -9,3 +9,5 @@ seaborn
 scikit-learn
 bpyutils
 pydot
+dask
+dask-ml

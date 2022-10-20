@@ -41,6 +41,9 @@ DEFAULT = \
     "gan_gradient_penalty_weight": 10,
 
     "base_model_learning_rate": 1e-4,
+
+    "generative_model_encoder_loss": "binary_crossentropy",
+    "generative_model_decoder_loss": "binary_crossentropy",
     
     "generative_model_encoder_learning_rate": 1e-4,
     "generative_model_decoder_learning_rate": 1e-4,
