@@ -4,6 +4,19 @@ from   tensorflow.math import (
     reduce_mean
 )
 import tensorflow.keras.backend as K
+from tensorflow_addons.metrics import (
+    RSquare
+)
+from sklearn.metrics import (
+    r2_score as sk_r2_score
+)
+
+from bpyutils import log
+
+from deeply.__attr__ import __name__ as NAME
+
+logger   = log.get_logger(NAME)
+_rsquare = RSquare()
 
 def y_cast(y_true, y_pred, dtype = K.floatx()):
     y_true = K.cast(y_true, dtype)
@@ -51,3 +64,43 @@ def focal_tversky_index(*args, **kwargs):
     gamma   = kwargs.get("gamma", 4/3)
 
     return K.pow(1 - tversky, gamma)
+
+def r2_score(y_true, y_pred, *args, **kwargs):
+    clip = kwargs.get("clip", False)
+
+    y_true, y_pred = y_cast(y_true, y_pred)
+
+    _rsquare.update_state(y_true, y_pred)
+
+    result = _rsquare.result()
+
+    if clip:
+        result = K.clip(result, 0, 1)
+
+    return result
+
+def regression_report(model, X_test, Y_test):
+    y_pred  = model.predict(X_test)
+    metrics = [{
+        "name": "mean-squared-error",
+        "func": lambda y_true, y_pred: K.mean(tf.keras.metrics.mean_squared_error(y_true, y_pred)).numpy()
+    }, {
+        "name": "mean-absolute-error",
+        "func": lambda y_true, y_pred: K.mean(tf.keras.metrics.mean_absolute_error(y_true, y_pred)).numpy()
+    }, {
+        "name": "mean-absolute-percent-error",
+        "func": lambda y_true, y_pred: K.mean(tf.keras.metrics.mean_absolute_percentage_error(y_true, y_pred)).numpy()
+    },{
+        "name": "r2-score",
+        "func": lambda y_true, y_pred: r2_score(y_true, y_pred).numpy()
+    }]
+
+    report = {}
+
+    logger.info("Regression Report:")
+
+    for metric in metrics:
+        report[metric["name"]] = metric["func"](Y_test, y_pred)
+        logger.info("\t%s: %s" % (metric["name"], report[metric["name"]]))
+
+    return report

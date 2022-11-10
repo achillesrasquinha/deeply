@@ -1,4 +1,4 @@
-from tensorflow.keras import Model
+from tensorflow.keras import Model, Input
 from tensorflow.keras.utils import plot_model
 from tensorflow.keras.optimizers import Adam
 
@@ -13,6 +13,7 @@ class BaseModel(Model):
         super_.__init__(*args, **kwargs)
 
         self.callbacks = []
+        self._deep = {}
 
     @property
     def scaler(self):
@@ -20,7 +21,7 @@ class BaseModel(Model):
 
     def plot(self, *args, **kwargs):
         kwargs["show_shapes"] = kwargs.get("show_shapes", True)
-        return plot_model(self, *args, **kwargs)
+        return plot_model(self._build_model(), *args, **kwargs)
 
     def add_callback(self, callback, *args, **kwargs):
         self.callbacks.append(callback)
@@ -29,6 +30,8 @@ class BaseModel(Model):
         args, kwargs = get_fit_args_kwargs(self, args, kwargs, custom = {
             "callbacks": self.callbacks
         })
+
+        self._deep["batch_size"] = kwargs.get("batch_size", None)
 
         super_ = super(BaseModel, self)
         return super_.fit(*args, **kwargs)
@@ -39,3 +42,7 @@ class BaseModel(Model):
         
         super_ = super(BaseModel, self)
         return super_.compile(*args, **kwargs)
+
+    def _build_model(self, *args, **kwargs):
+        input_ = Input(shape = self.input_shape)
+        return Model(inputs = [input_], outputs = self.call(input_))

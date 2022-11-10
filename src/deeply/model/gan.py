@@ -70,28 +70,13 @@ class GANModel(AutoEncoder):
             generator_input_shape = self.generator.input.shape
             noise_dim = generator_input_shape[1]
 
-        # if not hasattr(data, "shape"):
-        #     data = squash(data)
-            
-        #     if len(data) == 2:
-        #         data, y = data
-        #     else:
-        #         data = data[0]
-
-        # data_shape = data.shape
-
-        # if len(data_shape) == 4:
-        #     batch_size = data_shape[0]
-        # else:
-        #     batch_size = 1
-
         return distribution(shape = (n_samples, noise_dim))
 
     def _compute_gradient_penalty(self, real_output, fake_output):
         """
             Compute the gradient penalty.
         """
-        batch_size = tf.shape(real_output)[0]
+        batch_size = self._deep.get("batch_size") or tf.shape(real_output)[0]
 
         alpha = tf.random.normal([batch_size, 1, 1, 1], 0.0, 1.0)
         diff  = fake_output - real_output
@@ -123,7 +108,6 @@ class GANModel(AutoEncoder):
 
     def train_step(self, data):
         generator = self.generator
-        discriminator = self.discriminator
 
         disc_loss = self.loss_fn["encoder"]
         gen_loss  = self.loss_fn["decoder"]
@@ -134,26 +118,35 @@ class GANModel(AutoEncoder):
         else:
             y = None
 
-        data_shape = tf.shape(data)
-        batch_size = data_shape[0]
+        data_shape = data.shape
+
+        batch_size = data_shape[0] or self._deep["batch_size"]
 
         noise_dim = None
+        generator_shape = generator.input.shape
 
         if y != None:
-            X_shape  = data_shape[1:-1]
-            n_rows, n_cols = X_shape[0], X_shape[1]
+            if len(data_shape) == 2:
+                n_rows, n_cols = data_shape[-1], 1
+            else:
+                X_shape = data_shape[1:-1]
+                n_rows, n_cols = X_shape[0], X_shape[1]
 
             n_labels = y.shape[-1]
 
             X_y = y[:,:,None,None]
-            X_y = tf.repeat(X_y, repeats = [n_rows * n_cols])
-            X_y = tf.reshape(X_y, (-1, n_rows, n_cols, n_labels))
+            X_y = tf.repeat(X_y, repeats = [n_rows * n_cols]) # (batch_size * n_rows * n_cols,)
+
+            if len(data_shape) == 2:
+                reshape_shape = (batch_size * n_rows * n_cols, n_labels)
+            else:
+                reshape_shape = (-1, n_rows, n_cols, n_labels)
+                
+            X_y = tf.reshape(X_y, reshape_shape)
+
+            noise_dim = generator_shape[1] - n_labels
 
         for _ in range(self.disc_steps):
-            if y != None:
-                generator_shape = generator.input.shape
-                noise_dim = generator_shape[1] - n_labels
-
             noise = self._get_random_noise(shape = (batch_size, noise_dim), y = y)
 
             with tf.GradientTape() as generator_tape, tf.GradientTape() as discriminator_tape:
@@ -193,9 +186,9 @@ class GANModel(AutoEncoder):
                 generated_output = self._get_fake_generated_output(generated_output, X_y)
 
             fake_output = self.discriminator(generated_output, training = True)
-
+            
             labels = tf.ones_like(fake_output)
-
+            
             if y != None:
                 labels = tf.zeros((batch_size, 1))
 

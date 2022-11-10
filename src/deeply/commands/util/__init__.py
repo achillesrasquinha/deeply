@@ -5,30 +5,6 @@ from bpyutils.util.imports import import_handler
 from deeply.cli.parser import get_args
 from deeply import cli
 
-def group_commands(group, commands):
-    """
-    Add command-paths to a click.Group
-    """
-    commands = sequencify(commands, type_ = tuple)
-
-    for command in commands:
-        head, tail = command.rsplit(".", 1)
-        tails      = ("", tail, "command")
-
-        for i, tail in enumerate(tails):
-            try:
-                path    = "%s.%s" % (command, tail)
-                command = import_handler(path)
-
-                break
-            except:
-                if i == len(tails) - 1:
-                    raise
-        
-        group.add_command(command)
-    
-    return group
-
 def cli_format(string, type_):
     args = get_args(as_dict = False)
     

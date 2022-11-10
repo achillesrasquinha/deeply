@@ -41,3 +41,6 @@ def load(*names, **kwargs):
         results.append(result)
     
     return squash(results)
+
+def to_numpy(dataset):
+    return tfds.as_numpy(dataset)

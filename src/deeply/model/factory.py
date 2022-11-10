@@ -31,9 +31,11 @@ class ModelFactory:
         "linreg": {
             "model_class": import_handler("deeply.model.linear.LinearRegression")
         },
-
         "mlp": {
              "model_class": import_handler("deeply.model.mlp.MLP")
+        },
+        "mlpreg": {
+            "model_class": import_handler("deeply.model.mlp.MLPRegressor")
         }
     }
 

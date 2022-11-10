@@ -1,5 +1,5 @@
 from tensorflow.keras import Input
-from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 from tensorflow.data import Dataset
 
 from tqdm.keras import TqdmCallback
@@ -13,6 +13,12 @@ from bpyutils.util.array import sequencify
 from bpyutils.util.datetime import get_timestamp_str
 from bpyutils._compat import iteritems
 from bpyutils.util._dict import merge_dict
+from bpyutils.log import get_logger
+
+import numpy as np
+import pandas as pd
+
+logger = get_logger()
 
 def get_checkpoint_prefix(model):
     prefix = "%s-%s" % (model.name or "model", get_timestamp_str(format_ = '%Y%m%d%H%M%S'))
@@ -44,14 +50,19 @@ def get_fit_args_kwargs(model, args, kwargs, custom = None):
         args = tuple(args)
 
     verbose = kwargs.pop("verbose", 1)
-    monitor = kwargs.pop("monitor", "loss")
+    monitor = kwargs.pop("monitor", "val_loss")
+    logger.info("Monitoring %s..." % monitor)
     use_multiprocessing = kwargs.pop("use_multiprocessing", True)
 
     callbacks = sequencify(kwargs.pop("callbacks", []))
 
-    callbacks.append(PlotHistoryCallback())
+    # callbacks.append(PlotHistoryCallback())
     # callbacks.append(ProgressStepCallback())
-    # callbacks.append(TqdmCallback(verbose = verbose))
+    callbacks.append(TqdmCallback()) # verbose = verbose
+
+    early_stopping = kwargs.pop("early_stopping", None)
+    if early_stopping:
+        callbacks.append(EarlyStopping(**early_stopping))
 
     callbacks.append(ModelCheckpoint(
         filepath            = kwargs.pop("checkpoint_path", "%s.hdf5" % get_checkpoint_prefix(model)),
